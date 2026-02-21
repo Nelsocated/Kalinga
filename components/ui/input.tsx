@@ -17,6 +17,7 @@ type InputProps = {
   hint?: string;
   className?: string;
   inputClassName?: string;
+  search?: string;
 
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -36,6 +37,7 @@ export default function Input({
   hint,
   className = "",
   inputClassName = "",
+  search,
   onChange,
   onBlur,
 }: InputProps) {
@@ -68,12 +70,12 @@ export default function Input({
         aria-describedby={hint || error ? `${id}-desc` : undefined}
         className={[
           "block w-full rounded-lg border px-3 py-2 text-sm outline-none transition",
-          "bg-white text-gray-900 placeholder:text-gray-400",
-          "focus:ring-2 focus:ring-black",
+          "bg-white text-gray-900 placeholder:text-gray-600",
+          "focus:ring-2 focus:ring-[#f3be0f]",
           disabled ? "opacity-60 cursor-not-allowed" : "",
           error
             ? "border-red-500 focus:ring-red-500"
-            : "border-gray-300 focus:border-gray-900",
+            : "border-[#f3be0f] focus:border-[#f3be0f]",
           inputClassName,
         ].join(" ")}
       />

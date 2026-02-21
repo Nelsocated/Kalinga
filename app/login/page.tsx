@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/Button";
+import kalinga_logo from "@/public/kalinga_logo.svg";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,22 +46,27 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="max-w-7xl px-4 py-4 flex shadow-m justify-end">
-        <Link href="/about" className="text-m text-black hover:underline">
-          About Us
-        </Link>
-      </header>
+    <div className="min-h-screen bg-[#ffdd6f] flex items-center justify-center">
+      <div className="bg-[#f6f3ee] w-[180svh] h-[85svh] rounded-2xl shadow-lg flex items-center justify-center">
+        <div className="fixed top-20 right-30">
+          <Button onClick={() => router.push("/aboutus")}>About Us</Button>
+        </div>
 
-      <main className="flex-1 flex items-center justify-center px-4">
-        <div className="flex w-full max-w-5xl items-center gap-10">
-          <div className="md:flex flex-1 justify-center">
-            <h1 className="flex text-2xl font-bold text-black text-3xl justify-center">
+        <main className="flex w-full max-w-5xl items-center gap-20">
+          <div className="md:flex flex-1 flex-col pb-5 items-center justify-center">
+            <Image
+              src={kalinga_logo}
+              alt="kalinga-logo"
+              width={300}
+              height={300}
+              priority
+            ></Image>
+            <h1 className="flex text-3xl text-black font-semibold justify-center">
               Will you help us find <br /> our fur-ever homes?
             </h1>
           </div>
 
-          <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-[#ffdd6f]">
+          <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-white border-2 border-[#f3be0f]">
             <form onSubmit={onSubmit} className="mt-6 space-y-4 shadow-m">
               <Input
                 label="Email"
@@ -104,8 +111,8 @@ export default function LoginPage() {
               </a>
             </p>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

@@ -32,10 +32,10 @@ export default function Button({
         rounded-lg
         font-medium
         transition
-        outline-1
-        shadow-xl
+        border-1
+        border-[#f3be0f]
         bg-yellow text-black
-        hover:bg-yellow-400
+        hover:bg-[#f3be0f]
         disabled:opacity-50
         disabled:cursor-not-allowed
         ${className}
