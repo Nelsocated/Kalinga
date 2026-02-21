@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/Button";
+import kalinga_logo from "@/public/kalinga_logo.svg";
+import Image from "next/image";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -45,74 +47,90 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4">
-      <div className="flex w-full max-w-5xl items-center gap-10">
-        <div className="md:flex flex-1 justify-center">
-          <h1 className="flex text-2xl font-bold text-black text-3xl justify-center">
-            KALINGA
-          </h1>
-        </div>
+    <div className="min-h-screen bg-[#ffdd6f] flex items-center justify-center">
+      <div className="bg-[#f6f3ee] w-[180svh] h-[85svh] rounded-2xl shadow-lg flex items-center justify-center">
+        <main className="flex w-full max-w-5xl items-center gap-20">
+          <div className="md:flex flex-1 flex-col items-center justify-center">
+            <Image
+              src={kalinga_logo}
+              alt="kalinga-logo"
+              width={300}
+              height={300}
+              priority
+            ></Image>
+            <h1 className="flex text-3xl text-black font-semibold text-center">
+              Will you help us find our
+              <br />
+              fur-ever homes?
+            </h1>
+          </div>
 
-        <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-[#ffdd6f]">
-          <h1 className="flex text-2xl font-semibold text-black justify-center">
-            Create Account
-          </h1>
-          <p className="mt-1 text-xl text-black">Get started on Kalinga!</p>
+          <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-white border-2 border-[#f3be0f]">
+            <h1 className="flex text-3xl font-bold text-black justify-center">
+              Create an Account
+            </h1>
+            <p className="mt-1 text-center text-xl text-black">
+              Get started on Kalinga!
+            </p>
 
-          <form onSubmit={onSubmit} className="mt-6 space-y-4 shadow-m">
-            <Input
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@email.com"
-              autoComplete="email"
-              required
-            />
+            <form onSubmit={onSubmit} className="mt-6 space-y-4 shadow-m">
+              <Input
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@email.com"
+                autoComplete="email"
+                required
+              />
 
-            <Input
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
-              autoComplete="new-password"
-              required
-            />
+              <Input
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 6 characters"
+                autoComplete="new-password"
+                required
+              />
 
-            <Input
-              label="Fullname"
-              value={fullName}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Fullname"
-              required
-            />
+              <Input
+                label="Fullname"
+                value={fullName}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Fullname"
+                required
+              />
 
-            <Input
-              label="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="nelson"
-              required
-            />
+              <Input
+                label="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
+                required
+              />
 
-            {formError ? (
-              <p className="text-sm text-red-600">{formError}</p>
-            ) : null}
+              {formError ? (
+                <p className="text-sm text-red-600">{formError}</p>
+              ) : null}
 
-            <Button type="submit" loading={loading}>
-              Submit
-            </Button>
-          </form>
+              <Button type="submit" loading={loading}>
+                Submit
+              </Button>
+            </form>
 
-          <p className="mt-4 text-sm text-gray-600">
-            Already have an account?{" "}
-            <a className="font-medium text-black hover:underline" href="/login">
-              Log in
-            </a>
-          </p>
-        </div>
+            <p className="mt-4 text-sm text-black-600">
+              Already have an account?{" "}
+              <a
+                className="font-medium text-black hover:underline"
+                href="/login"
+              >
+                Log in
+              </a>
+            </p>
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
   );
 }
