@@ -1,8 +1,16 @@
-import Button from "@/components/ui/Button";
-import Input from "../ui/input";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+
+import Button from "@/components/ui/Button";
+import Input from "../ui/input";
 import kalinga_logo from "@/public/kalinga_logo.svg";
+import search_icon from "@/public/icons/search.svg";
+import fyp_icon from "@/public/icons/play-circle.svg";
+import explore_icon from "@/public/icons/Explore.svg";
+import shelter_icon from "@/public/icons/Home.svg";
+import profile_icon from "@/public/icons/user.svg";
+import notif_icon from "@/public/icons/notifications.svg";
+import more_icon from "@/public/icons/More horizontal.svg";
 
 export default function Navbar() {
   const router = useRouter();
@@ -20,48 +28,65 @@ export default function Navbar() {
       </div>
 
       <nav className="mt-1 text-xl space-y-2 text-black">
-        <Input type="search" placeholder="Search"></Input>
+        <div className="relative w-full max-w-md">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2">
+            <Image src={search_icon} alt="search-icon" />
+          </span>
+          <Input
+            type="search"
+            placeholder="Search"
+            className="rounded-full"
+            icon={<Image src={search_icon} alt="search-icon" />}
+            iconPosition="left"
+          ></Input>
+        </div>
         <Button
           type="button"
-          className="flex border-none justify-start"
+          className="flex border-none justify-start gap-3"
           onClick={() => router.push("/home")}
         >
-          For You
+          <Image src={fyp_icon} alt="fyp-icon" />
+          <span> For You</span>
         </Button>
         <Button
           type="button"
-          className="flex border-none justify-start"
+          className="flex border-none justify-start gap-3"
           onClick={() => router.push("/explore")}
         >
-          Explore
+          <Image src={explore_icon} alt="explore-icon" />
+          <span> Explore</span>
         </Button>
         <Button
           type="button"
-          className="flex border-none justify-start"
+          className="flex border-none justify-start gap-3"
           onClick={() => router.push("/shelter")}
         >
-          Shelter
+          <Image src={shelter_icon} alt="shelter-icon" />
+          <span> Shelter</span>
         </Button>
         <Button
           type="button"
-          className="flex border-none justify-start"
+          className="flex border-none justify-start gap-3"
           onClick={() => router.push("/profile")}
         >
-          Profile
+          <Image src={profile_icon} alt="profile-icon" />
+          <span> Profile</span>
         </Button>
         <Button
           type="button"
-          className="flex border-none justify-start"
+          className="flex border-none justify-start gap-3"
           onClick={() => router.push("/notification")}
         >
-          Notification
+          <Image src={notif_icon} alt="notif-icon" />
+          <span> Notification</span>
         </Button>
         <Button
           type="button"
-          className="flex border-none justify-start"
+          className="flex border-none justify-start gap-3"
           onClick={() => router.push("/more")}
         >
-          More
+          <Image src={more_icon} alt="more-icon" />
+          <span> More</span>
         </Button>
       </nav>
     </aside>

@@ -17,7 +17,8 @@ type InputProps = {
   hint?: string;
   className?: string;
   inputClassName?: string;
-  search?: string;
+  icon?: React.ReactNode;
+  iconPosition?: "left" | "right";
 
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -35,9 +36,10 @@ export default function Input({
   required = false,
   error,
   hint,
+  icon,
+  iconPosition = "left",
   className = "",
   inputClassName = "",
-  search,
   onChange,
   onBlur,
 }: InputProps) {
@@ -46,13 +48,12 @@ export default function Input({
   const isControlled = value !== undefined;
 
   return (
-    <div className={`space-y-1 ${className}`}>
-      {label ? (
-        <label htmlFor={id} className="block text-sm font-medium text-gray-900">
-          {label}
-          {required ? <span className="text-red-600"> </span> : null}
-        </label>
-      ) : null}
+    <div className="relative">
+      {icon && iconPosition === "left" && (
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          {icon}
+        </div>
+      )}
 
       <input
         id={id}
@@ -72,6 +73,8 @@ export default function Input({
           "block w-full rounded-lg border px-3 py-2 text-sm outline-none transition",
           "bg-white text-gray-900 placeholder:text-gray-600",
           "focus:ring-2 focus:ring-[#f3be0f]",
+          icon && iconPosition === "left" ? "pl-10" : "",
+          icon && iconPosition === "right" ? "pr-10" : "",
           disabled ? "opacity-60 cursor-not-allowed" : "",
           error
             ? "border-red-500 focus:ring-red-500"
@@ -80,15 +83,11 @@ export default function Input({
         ].join(" ")}
       />
 
-      {error ? (
-        <p id={`${id}-desc`} className="text-xs text-red-600">
-          {error}
-        </p>
-      ) : hint ? (
-        <p id={`${id}-desc`} className="text-xs text-gray-500">
-          {hint}
-        </p>
-      ) : null}
+      {icon && iconPosition === "right" && (
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+          {icon}
+        </div>
+      )}
     </div>
   );
 }
