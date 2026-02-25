@@ -3,7 +3,6 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/Button";
 import kalinga_logo from "@/public/kalinga_logo.svg";
@@ -37,7 +36,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/home");
+      router.push("/site/home");
     } catch {
       setFormError("Network error. Try again.");
     } finally {
@@ -49,7 +48,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#ffdd6f] flex items-center justify-center">
       <div className="bg-[#f6f3ee] w-[180svh] h-[85svh] rounded-2xl shadow-lg flex items-center justify-center">
         <div className="fixed top-20 right-30">
-          <Button onClick={() => router.push("/aboutus")}>About Us</Button>
+          <Button onClick={() => router.push("/site/aboutus")}>About Us</Button>
         </div>
 
         <main className="flex w-full max-w-5xl items-center gap-20">
@@ -99,13 +98,13 @@ export default function LoginPage() {
 
             <hr className="w-full mx-auto m-3" />
 
-            <Button onClick={() => router.push("/signup")}>Sign up</Button>
+            <Button onClick={() => router.push("/site/signup")}>Sign up</Button>
 
             <p className="mt-4 text-sm text-black-600">
               Do you own a shelter?{" "}
               <a
                 className="font-medium text-black hover:underline"
-                href="/shelterCreation"
+                href="/site/shelterCreation"
               >
                 Create a Page
               </a>
