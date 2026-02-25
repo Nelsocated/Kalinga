@@ -16,6 +16,8 @@ type FeedNav = {
   total: number;
 };
 
+export const dynamic = "force-dynamics";
+
 export default function HomePage() {
   const [nav, setNav] = useState<FeedNav | null>(null);
   const [active, setActive] = useState<{
