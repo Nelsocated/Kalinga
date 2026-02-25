@@ -1,9 +1,11 @@
+// app/page.tsx
 "use client";
 
-import { useState } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Feed from "@/components/feed/Feed";
 import NavBar from "@/components/layout/NavBar";
+import RightBar, { ShelterMini } from "@/components/layout/RightBar";
+import { LikeTargetType } from "@/lib/services/likes";
 
 type FeedNav = {
   next: () => void;
@@ -16,10 +18,13 @@ type FeedNav = {
 
 export default function HomePage() {
   const [nav, setNav] = useState<FeedNav | null>(null);
+  const [active, setActive] = useState<{
+    pet_id: string;
+    shelter: ShelterMini | null;
+  } | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
-
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -30,32 +35,21 @@ export default function HomePage() {
       <NavBar />
 
       <main className="flex flex-1 items-center justify-center">
-        <Feed onNavReady={setNav} />
-      </main>
+        <div className="flex items-center gap-3">
+          <Feed onNavReady={setNav} onActiveChange={setActive} />
 
-      <aside className="w-24 shrink-0 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <button className="h-12 w-12 rounded-full bg-[#d4a42a]" />
-          <button className="h-12 w-12 rounded-full bg-[#d4a42a]" />
-          <button className="h-12 w-12 rounded-full bg-[#d4a42a]" />
-
-          <button
-            disabled={!nav?.hasPrev}
-            onClick={() => nav?.prev()}
-            className="h-11 w-11 rounded-full bg-[#d4a42a] disabled:opacity-40"
-          >
-            ↑
-          </button>
-
-          <button
-            disabled={!nav?.hasNext}
-            onClick={() => nav?.next()}
-            className="h-11 w-11 rounded-full bg-[#d4a42a] disabled:opacity-40"
-          >
-            ↓
-          </button>
+          {active ? (
+            <RightBar
+              nav={nav}
+              type={"pet" as LikeTargetType}
+              pet_id={active.pet_id}
+              shelter={active.shelter}
+            />
+          ) : (
+            <div className="w-40 text-xs text-black/40 text-center">Loading…</div>
+          )}
         </div>
-      </aside>
+      </main>
     </div>
   );
 }
