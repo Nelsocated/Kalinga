@@ -54,6 +54,7 @@ export default function Navbar() {
           <Input
             type="search"
             placeholder="Search"
+            icon={<Image src={search_icon} alt="search-icon" />}
             className="rounded-full pl-10"
           />
         </div>
