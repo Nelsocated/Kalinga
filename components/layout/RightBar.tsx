@@ -86,7 +86,7 @@ export default function RightBar({ type, pet_id, shelter, nav }: Props) {
         <button
           type="button"
           onClick={copyLink}
-          className="w-15 h-15 p-0 rounded-full overflow-hidden  border-1 border-[#f3be0f] hover:bg-[#f3be0f] flex items-center justify-center"
+          className="w-13 h-13 p-0 rounded-full overflow-hidden bg-[#f3be0f] flex items-center justify-center"
         >
           {copied ? (
             "Copied!"

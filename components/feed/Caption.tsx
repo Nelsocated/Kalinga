@@ -27,7 +27,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
         className={`relative z-10 w-full rounded-2xl overflow-hidden ${open ? "bg-[#795f08]" : ""
           }`}
       >
-        <div className="px-4 py-5">
+        <div className="px-3 py-3">
           <p className="font-bold text-xl leading-tight">{shelter_name}</p>
 
           {hasCaption && (
@@ -40,7 +40,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.2 }}
-                    className="mt-1 pb-4 text-sm text-white whitespace-pre-wrap break-words"
+                    className="mt-1 pb-2 text-sm text-white whitespace-pre-wrap break-words"
                   >
                     {caption}
                   </motion.p>
@@ -59,7 +59,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
           <button
             type="button"
             className="text-l font-bold text-white hover:underline absolute bottom-3 right-13"
-            onClick={() => router.push(`/profile/${id}`)}
+            onClick={() => router.push(`/site/profiles/pets/${id}`)}
           >
             Meet {name}!
           </button>
