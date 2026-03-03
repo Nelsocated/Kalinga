@@ -9,6 +9,7 @@ export type FeedItem = {
   name: string;
   created_at: string;
   pet_media: {
+    id: string;
     type: "video" | "photo";
     url: string;
     caption: string | null;
@@ -34,7 +35,11 @@ export default function Feed({
   onActiveChange,
 }: {
   onNavReady?: (nav: FeedNav) => void;
-  onActiveChange?: (active: { pet_id: string; shelter: FeedItem["shelter"] }) => void;
+  onActiveChange?: (active: {
+    pet_id: string;
+    media_id: string | null;
+    shelter: FeedItem["shelter"];
+  }) => void;
 }) {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [index, setIndex] = useState(0);
@@ -69,14 +74,22 @@ export default function Feed({
     if (!items.length) return;
     if (!initialPet) return;
 
-    const idx = items.findIndex(p => p.id === initialPet);
+    const idx = items.findIndex((p) => p.id === initialPet);
     if (idx !== -1) setIndex(idx);
   }, [items, initialPet]);
 
   useEffect(() => {
     const current = items[index];
     if (!current) return;
-    onActiveChange?.({ pet_id: current.id, shelter: current.shelter });
+
+    const firstVideo =
+      current.pet_media.find((m) => m.type === "video") ?? null;
+
+    onActiveChange?.({
+      pet_id: current.id,
+      media_id: firstVideo?.id ?? null,
+      shelter: current.shelter,
+    });
   }, [items, index, onActiveChange]);
 
   useEffect(() => {
@@ -89,7 +102,9 @@ export default function Feed({
 
         if (!res.ok) {
           const text = await res.text();
-          throw new Error(`Failed to load feed (${res.status}): ${text.slice(0, 120)}`);
+          throw new Error(
+            `Failed to load feed (${res.status}): ${text.slice(0, 120)}`,
+          );
         }
 
         const json = await res.json();
@@ -108,7 +123,8 @@ export default function Feed({
 
   if (loading) return <div className="p-6">Loading...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
-  if (items.length === 0) return <div className="p-6 text-gray-600">No pets yet.</div>;
+  if (items.length === 0)
+    return <div className="p-6 text-gray-600">No pets yet.</div>;
 
   const current = items[index];
 

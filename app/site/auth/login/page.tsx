@@ -98,7 +98,7 @@ export default function LoginPage() {
 
             <hr className="w-full mx-auto m-3" />
 
-            <Button onClick={() => router.push("/site/signup")}>Sign up</Button>
+            <Button onClick={() => router.push("/site/auth/signup")}>Sign up</Button>
 
             <p className="mt-4 text-sm text-black-600">
               Do you own a shelter?{" "}

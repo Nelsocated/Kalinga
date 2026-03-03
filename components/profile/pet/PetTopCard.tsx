@@ -1,16 +1,14 @@
-// components/profile/TopCard.tsx
 "use client";
 
 import React from "react";
-import ProfileHeader from "./ProfileHeader";
-import Image from "next/image";
+import PetProfileHeader from "./PetProfileHeader";
 
-export type TopCardProps = {
+export type PetTopCardProps = {
     title: string;
     subtitle?: string | null;
     location?: string | null;
     imageUrl?: string | null;
-    variant?: "user" | "shelter" | "pet";
+    sex?: React.ReactNode;
 
     leftSlot?: React.ReactNode;
     rightSlot?: React.ReactNode;
@@ -20,38 +18,36 @@ export type TopCardProps = {
     className?: string;
 };
 
-export default function TopCard({
+export default function PetTopCard({
     title,
     subtitle,
     location = "",
     imageUrl,
-    variant = "user",
+    sex,
     leftSlot,
     rightSlot,
     actions,
     meta,
     belowHeader,
     className = "",
-}: TopCardProps) {
-    const headerPadding = variant === "shelter" ? "pt-6 pb-3" : "pt-6 pb-2";
-
+}: PetTopCardProps) {
     return (
         <div className={`rounded-3xl border border-black/10 bg-white p-5 ${className}`}>
-            <div className={`relative ${headerPadding}`}>
-                {leftSlot ? (
-                    <div className="absolute -left-3 top-6">{leftSlot}</div>
-                ) : null}
+            <div className="relative pt-6 pb-2">
+                {leftSlot ? <div className="absolute -left-3 top-6">{leftSlot}</div> : null}
 
-                <ProfileHeader
+                <PetProfileHeader
                     title={title}
                     subtitle={subtitle}
-                    location={location ?? ""}
+                    location={location}
                     imageUrl={imageUrl}
                     likeButton={actions ?? <div />}
                     meta={meta}
                     actions={rightSlot}
+                    sex={sex}
                 />
             </div>
+
             {belowHeader ? <div className="mt-4">{belowHeader}</div> : null}
         </div>
     );

@@ -2,141 +2,269 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import likedIcon from "@/public/buttons/Liked.svg";
+
+import at_play from "@/public/tabs/at_play.svg";
+import at_home from "@/public/tabs/at_home.svg";
+import at_pet from "@/public/tabs/at_pet.svg";
+import play from "@/public/tabs/play.svg";
+import home from "@/public/tabs/home.svg";
+import pet from "@/public/tabs/pet.svg";
+
+import {
+  fetchLikedStuff,
+  LikedMiniItem,
+  LikedKind,
+} from "@/lib/services/liked_stuff";
+
+import VideoCard from "@/components/cards/VideoCard";
+import PetCard from "@/components/cards/PetCard";
+import ShelterCard from "@/components/cards/ShelterCard";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 
-export type TabsKey = "shelters" | "pets" | "liked";
+export type TabsKey = "videos" | "pets" | "shelters";
 
-export type MiniItem = {
-    id: string;
-    title: string;
-    subtitle?: string | null;
-    imageUrl?: string | null;
-
-    rating?: number | null;      // 0-5
-    distanceKm?: number | null;  // number
-    likedCount?: number | null;  // number
+const TAB_META: Record<
+  TabsKey,
+  { label: string; icon: any; iconActive: any; alt: string; altActive: string }
+> = {
+  videos: {
+    label: "Videos",
+    icon: play,
+    iconActive: at_play,
+    alt: "play",
+    altActive: "at-play",
+  },
+  shelters: {
+    label: "Shelters",
+    icon: home,
+    iconActive: at_home,
+    alt: "home",
+    altActive: "at-home",
+  },
+  pets: {
+    label: "Pets",
+    icon: pet,
+    iconActive: at_pet,
+    alt: "pet",
+    altActive: "at-pet",
+  },
 };
 
+type Props = {
+  defaultTab?: TabsKey;
+  tabs?: TabsKey[];
+  initialLiked?: LikedMiniItem[];
+};
+
+const ITEMS_PER_BATCH = 10;
+
 export default function ProfileTabsCard({
-    defaultTab = "shelters",
-    tabs = ["shelters", "pets", "liked"],
-    shelters = [],
-    pets = [],
-    liked = [],
-    onOpen,
-}: {
-    defaultTab?: TabsKey;
-    tabs?: TabsKey[];
-    shelters?: MiniItem[];
-    pets?: MiniItem[];
-    liked?: MiniItem[];
-    onOpen?: (tab: TabsKey, id: string) => void;
-}) {
-    const [tab, setTab] = useState<TabsKey>(defaultTab);
+  defaultTab = "videos",
+  tabs = ["videos", "pets", "shelters"],
+  initialLiked = [],
+}: Props) {
+  const [tab, setTab] = useState<TabsKey>(defaultTab);
 
-    const items = useMemo(() => {
-        if (tab === "pets") return pets;
-        if (tab === "liked") return liked;
-        return shelters;
-    }, [tab, shelters, pets, liked]);
+  const [likedItems, setLikedItems] = useState<LikedMiniItem[]>(initialLiked);
+  const [likedLoading, setLikedLoading] = useState(false);
+  const [loadedOnce, setLoadedOnce] = useState(false);
 
-    return (
-        <div className="h-full p-6">
-            <div className="h-full rounded-2xl bg-[#f6f3ee]">
-                {/* Tabs row */}
-                <div className="flex items-center gap-2">
-                    {tabs.includes("shelters") && (
-                        <TabButton active={tab === "shelters"} onClick={() => setTab("shelters")}>
-                            Shelters
-                        </TabButton>
-                    )}
-                    {tabs.includes("pets") && (
-                        <TabButton active={tab === "pets"} onClick={() => setTab("pets")}>
-                            Pets
-                        </TabButton>
-                    )}
-                    {tabs.includes("liked") && (
-                        <TabButton active={tab === "liked"} onClick={() => setTab("liked")}>
-                            Liked
-                        </TabButton>
-                    )}
-                </div>
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_BATCH);
 
-                {/* List */}
-                <div className="mt-3 max-h-[72svh] space-y-3 overflow-auto pr-1">
-                    {items.map((x) => (
-                        <button
-                            key={x.id}
-                            onClick={() => onOpen?.(tab, x.id)}
-                            className="w-full rounded-2xl border border-black/10 bg-white p-3 text-left shadow-sm hover:bg-black/5 transition"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-black/10 bg-black/5">
-                                    <Image
-                                        src={(x.imageUrl ?? "").trim() || DEFAULT_AVATAR_URL}
-                                        alt={x.title}
-                                        width={64}
-                                        height={64}
-                                        className="h-full w-full object-cover"
-                                    />
-                                </div>
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-                                <div className="min-w-0 flex-1">
-                                    <div className="truncate text-sm font-semibold">{x.title}</div>
-                                    {x.subtitle ? (
-                                        <div className="truncate text-xs opacity-70">{x.subtitle}</div>
-                                    ) : null}
+  useEffect(() => {
+    let alive = true;
 
-                                    <div className="mt-2 flex flex-wrap gap-2">
-                                        <Pill>{x.rating != null ? `${x.rating}/5` : "—/5"}</Pill>
-                                        <Pill>{x.distanceKm != null ? `${x.distanceKm} km` : "— km"}</Pill>
-                                        <Pill>{x.likedCount != null ? `${x.likedCount} liked` : "— liked"}</Pill>
-                                    </div>
-                                </div>
-                            </div>
-                        </button>
-                    ))}
+    (async () => {
+      if (loadedOnce) return;
+      setLikedLoading(true);
+      try {
+        const res = await fetchLikedStuff();
+        if (!alive) return;
+        setLikedItems(res ?? []);
+        setLoadedOnce(true);
+      } catch (e) {
+        console.error(e);
+        if (!alive) return;
+        setLikedItems([]);
+        setLoadedOnce(true);
+      } finally {
+        if (alive) setLikedLoading(false);
+      }
+    })();
 
-                    {!items.length ? (
-                        <div className="rounded-2xl border border-black/10 bg-white p-6 text-center text-sm opacity-60">
-                            No items yet.
-                        </div>
-                    ) : null}
-                </div>
-            </div>
-        </div>
+    return () => {
+      alive = false;
+    };
+  }, [loadedOnce]);
+
+  useEffect(() => {
+    setVisibleCount(ITEMS_PER_BATCH);
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [tab]);
+
+  const filtered = useMemo(() => {
+    const kind: LikedKind =
+      tab === "videos" ? "video" : tab === "pets" ? "pet" : "shelter";
+
+    return (likedItems ?? []).filter((x) => x.kind === kind);
+  }, [tab, likedItems]);
+
+  const hasMore = visibleCount < filtered.length;
+
+  const visibleItems = useMemo(() => {
+    return filtered.slice(0, visibleCount);
+  }, [filtered, visibleCount]);
+
+  const loadMore = () => {
+    setVisibleCount((c) => Math.min(c + ITEMS_PER_BATCH, filtered.length));
+  };
+
+  useEffect(() => {
+    if (!hasMore) return;
+    if (!scrollRef.current || !loadMoreRef.current) return;
+
+    const rootEl = scrollRef.current;
+    const sentinel = loadMoreRef.current;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting) loadMore();
+      },
+      {
+        root: rootEl,
+        rootMargin: "200px",
+        threshold: 0,
+      },
     );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [hasMore, filtered.length]);
+
+  return (
+    <div className="h-full pr-7">
+      <div className="h-full rounded-2xl bg-[#f6f3ee]">
+        <div className="flex flex-col items-center gap-3 p-4">
+          <div className="flex items-center gap-2">
+            <Image src={likedIcon} alt="liked" />
+          </div>
+
+          <div className="flex items-center gap-20">
+            {tabs.map((key) => {
+              const active = tab === key;
+              const meta = TAB_META[key];
+
+              return (
+                <TabButton
+                  key={key}
+                  active={active}
+                  onClick={() => setTab(key)}
+                >
+                  <Image
+                    src={active ? meta.iconActive : meta.icon}
+                    alt={active ? meta.altActive : meta.alt}
+                  />
+                </TabButton>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="px-4">
+          <hr className="border-black/10" />
+        </div>
+
+        <div
+          ref={scrollRef}
+          className="mt-3 max-h-[72svh] space-y-3 overflow-auto px-4 pb-4 pr-1"
+        >
+          {likedLoading ? (
+            <div className="rounded-2xl border border-black/10 bg-white p-6 text-center text-sm opacity-60">
+              Loading likes...
+            </div>
+          ) : null}
+
+          {/* Cards */}
+          {visibleItems.map((x: any) => {
+            if (x.kind === "video") {
+              return (
+                <VideoCard
+                  key={`video-${x.id}`}
+                  href={x.href ?? `/site/videos/${x.id}`}
+                  thumbnailUrl={x.thumbnailUrl ?? x.imageUrl}
+                  subtitle={x.subtitle ?? x.caption ?? "Unknown Shelter"}
+                  petName={x.petName ?? x.title ?? "Unknown Pet"}
+                />
+              );
+            }
+
+            if (x.kind === "pet") {
+              return (
+                <PetCard
+                  key={`pet-${x.id}`}
+                  href={x.href ?? `/site/profiles/pets/${x.id}`}
+                  imageUrl={x.imageUrl}
+                  petName={x.petName ?? x.title ?? "Unknown Pet"}
+                  gender={x.gender ?? "unknown"}
+                  shelterName={x.shelterName ?? "Unknown Shelter"}
+                  shelterLogo={x.shelterLogo ?? DEFAULT_AVATAR_URL}
+                />
+              );
+            }
+
+            return (
+              <ShelterCard
+                key={`shelter-${x.id}`}
+                href={x.href ?? `/site/profiles/shelter/${x.id}`}
+                imageUrl={x.imageUrl}
+                name={x.shelterName ?? x.title ?? "Unknown Shelter"}
+                location={x.location ?? x.subtitle ?? "Unknown location"}
+                rating={x.rating ?? null}
+                petsAvailable={x.petsAvailable ?? x.totalAvailable ?? null}
+                petsAdopted={x.petsAdopted ?? x.totalAdopted ?? null}
+              />
+            );
+          })}
+
+          {hasMore ? (
+            <div
+              ref={loadMoreRef}
+              className="rounded-2xl border border-black/10 bg-white p-4 text-center text-xs opacity-60"
+            >
+              Loading more...
+            </div>
+          ) : null}
+          {!likedLoading && filtered.length === 0 ? (
+            <div className="rounded-2xl border border-black/10 bg-white p-6 text-center text-sm opacity-60">
+              No items yet.
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function TabButton({
-    active,
-    onClick,
-    children,
+  active,
+  onClick,
+  children,
 }: {
-    active: boolean;
-    onClick: () => void;
-    children: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
 }) {
-    return (
-        <button
-            onClick={onClick}
-            className={[
-                "rounded-full px-4 py-2 text-sm font-semibold transition",
-                active
-                    ? "bg-black text-white shadow-sm"
-                    : "border border-black/10 bg-white hover:bg-black/5",
-            ].join(" ")}
-        >
-            {children}
-        </button>
-    );
-}
-
-function Pill({ children }: { children: React.ReactNode }) {
-    return (
-        <span className="rounded-full border border-black/10 bg-white px-3 py-1 text-[11px]">
-            {children}
-        </span>
-    );
+  return (
+    <button type="button" onClick={onClick} className={active ? "" : ""}>
+      {children}
+    </button>
+  );
 }
