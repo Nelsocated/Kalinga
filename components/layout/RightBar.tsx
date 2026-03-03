@@ -2,12 +2,12 @@
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import ShareButton from "../ui/ShareButton";
 
 import Button from "../ui/Button";
 import LikeButton from "../ui/LikeButton";
 import up_button from "@/public/buttons/Up.svg";
 import down_button from "@/public/buttons/Down.svg";
-import copy_button from "@/public/buttons/Copy.svg"
 
 import { LikeTargetType } from "@/lib/services/likes";
 
@@ -29,42 +29,25 @@ export type ShelterMini = {
 type Props = {
   type: LikeTargetType;
   pet_id: string;
+  media_id?: string;
   shelter?: ShelterMini | null;
   nav?: FeedNav | null;
 };
 
-export default function RightBar({ type, pet_id, shelter, nav }: Props) {
+export default function RightBar({ pet_id, media_id, shelter, nav }: Props) {
   const router = useRouter();
   const pathname = usePathname();
-  const [fullUrl, setFullUrl] = useState("");
-  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    setFullUrl(window.location.origin + pathname);
-  }, [pathname]);
+  useEffect(() => {}, [pathname]);
 
   const goToShelter = () => {
     if (!shelter?.id) return;
-    router.push(`/profile/${shelter.id}`);
-  };
-
-  const copyLink = async () => {
-    try {
-      const u = new URL(window.location.href);
-      u.searchParams.set("pet", pet_id);
-      await navigator.clipboard.writeText(u.toString());
-
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1200);
-    } catch (err) {
-      console.error("copy failed", err);
-    }
+    router.push(`/site/profiles/shelter/${shelter.id}`);
   };
 
   return (
     <div className="relative h-full w-40 flex items-center justify-center">
       <div className="absolute right-8 flex flex-col items-center gap-6">
-
         <button
           type="button"
           onClick={goToShelter}
@@ -80,30 +63,22 @@ export default function RightBar({ type, pet_id, shelter, nav }: Props) {
         </button>
 
         <div className="scale-95">
-          <LikeButton targetType={type} targetId={pet_id} />
+          {media_id ? (
+            <LikeButton targetType="video" targetId={media_id} />
+          ) : null}
         </div>
 
-        <button
-          type="button"
-          onClick={copyLink}
-          className="w-13 h-13 p-0 rounded-full overflow-hidden bg-[#f3be0f] flex items-center justify-center"
-        >
-          {copied ? (
-            "Copied!"
-          ) : (
-            <>
-              <Image src={copy_button} alt="copy-button" width={30} height={30} />
-            </>
-          )}
-        </button>
-
+        {media_id ? (
+          <ShareButton id={media_id} type="video" petId={pet_id} />
+        ) : null}
       </div>
-
       <div className="absolute right-[-150px] top-1/2 -translate-y-1/2 flex flex-col gap-3">
         <Button
           type="button"
           onClick={() => nav?.prev()}
-          className={`border-none hover:bg-transparent hover:shadow-none hover:scale-100 ${nav?.hasPrev ? "" : "opacity-50 pointer-events-none"}`}
+          className={`border-none hover:bg-transparent hover:shadow-none hover:scale-100 ${
+            nav?.hasPrev ? "" : "opacity-50 pointer-events-none"
+          }`}
         >
           <Image src={up_button} alt="up-button" />
         </Button>
@@ -111,7 +86,9 @@ export default function RightBar({ type, pet_id, shelter, nav }: Props) {
         <Button
           type="button"
           onClick={() => nav?.next()}
-          className={`border-none hover:bg-transparent hover:shadow-none hover:scale-100 ${nav?.hasNext ? "" : "opacity-50 pointer-events-none"}`}
+          className={`border-none hover:bg-transparent hover:shadow-none hover:scale-100 ${
+            nav?.hasNext ? "" : "opacity-50 pointer-events-none"
+          }`}
         >
           <Image src={down_button} alt="down-button" />
         </Button>

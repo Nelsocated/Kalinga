@@ -48,7 +48,7 @@ export async function getShelterProfile(shelterId: string) {
   const supabase = await supabaseServer();
 
   const { data, error } = await supabase
-    .from("shelters")
+    .from("shelter")
     .select(
       `
         id,
@@ -56,16 +56,15 @@ export async function getShelterProfile(shelterId: string) {
         logo_url,
         location,
         about,
-        rating,
         contact_email,
         contact_phone,
         created_at,
         pets (
           id,
           name,
-          description,
-          created_at,
-          status
+          sex,
+          photo_url,
+          created_at
         )
       `,
     )
@@ -105,12 +104,27 @@ export async function getUserProfileShelterOnly(userId: string) {
   }
 
   const { data, error } = await supabase
-    .from("user")
+    .from("users")
     .select(
       "id, username, full_name, photo_url, bio, contact_email, contact_phone, created_at",
     )
     .eq("id", userId)
     .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getUserProfileById(userId: string) {
+  const supabase = await supabaseServer();
+
+  const { data, error } = await supabase
+    .from("users")
+    .select(
+      "id, username, full_name, photo_url, bio, contact_email, contact_phone, created_at",
+    )
+    .eq("id", userId)
+    .maybeSingle();
 
   if (error) throw error;
   return data;

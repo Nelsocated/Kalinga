@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import ProfileShell from "@/components/profile/PetProfileTemplate";
-import ProfileHeader from "@/components/profile/ProfileHeader";
+import ProfileShell from "@/components/profile/pet/PetProfileTemplate";
+import ProfileHeader from "@/components/profile/pet/PetProfileHeader";
 import ProfileSection from "@/components/profile/ProfileSection";
 import CharacteristicChip, { CharacteristicItem } from "@/components/profile/CharacteristicChip";
 import LikeButton from "@/components/ui/LikeButton";
 import Male_Icon from "@/public/icons/male-icon.svg"
 import Female_Icon from "@/public/icons/female-icon.svg"
 import Image from "next/image";
-import Button from "@/components/ui/Button";;
 import Back from "@/public/buttons/Back.svg"
 import { useRouter } from "next/navigation";
 import { apiGet } from "@/app/api/profiles/apiGet";
@@ -49,13 +48,13 @@ type PetProfile = {
 function getSexIcon(sex?: string | null) {
     if (sex === "male") {
         return (
-            <Image src={Male_Icon} alt="male-icon" width={26} height={26} />
+            <Image src={Male_Icon} alt="male-icon" width={40} height={40} />
         );
     }
 
     if (sex === "female") {
         return (
-            <Image src={Female_Icon} alt="female-icon" width={26} height={26} />
+            <Image src={Female_Icon} alt="female-icon" width={40} height={40} />
         );
     }
 

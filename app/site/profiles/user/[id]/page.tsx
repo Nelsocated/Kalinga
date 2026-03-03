@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
 import UserProfilePage from "./UserProfilePage";
-import { getUserProfileShelterOnly } from "@/lib/db/profiles";
+import { getUserProfileById } from "@/lib/db/profiles";
 
 export default async function Page(
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await params;   // ← unwrap like your pet page
+    const { id } = await params;
 
-    const data = await getUserProfileShelterOnly(id).catch(() => null);
+    const data = await getUserProfileById(id).catch(() => null);
     if (!data) return notFound();
 
     const user = {

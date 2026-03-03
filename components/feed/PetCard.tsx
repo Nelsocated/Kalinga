@@ -5,20 +5,7 @@ import { useState } from "react";
 import { useRef } from "react";
 import Caption from "./Caption";
 import play_icon from "@/public/icons/Play-icon.svg";
-
-type FeedItem = {
-  id: string;
-  name: string;
-  pet_media: {
-    type: "video" | "photo";
-    url: string;
-    caption: string | null;
-  }[];
-  shelter: null | {
-    shelter_name?: string | null;
-    logo_url?: string | null;
-  };
-};
+import { FeedItem } from "./Feed";
 
 export default function PetCard({ item }: { item: FeedItem }) {
   const videoMedia = item.pet_media.find((m) => m.type === "video");
@@ -50,7 +37,6 @@ export default function PetCard({ item }: { item: FeedItem }) {
           ref={videoRef}
           src={videoUrl}
           className="h-full w-full object-cover"
-          muted
           playsInline
           loop
           autoPlay
@@ -65,7 +51,12 @@ export default function PetCard({ item }: { item: FeedItem }) {
           <Image src={play_icon} alt="play-icon" />
         </div>
       )}
-      <Caption id={item.id} name={item.name} shelter_name={shelterName} caption={caption} />
+      <Caption
+        id={item.id}
+        name={item.name}
+        shelter_name={shelterName}
+        caption={caption}
+      />
     </div>
   );
 }

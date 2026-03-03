@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Navbar from "../layout/NavBar";
+import Navbar from "@/components/layout/NavBar";
 
 export default function ProfileShell({
     main,

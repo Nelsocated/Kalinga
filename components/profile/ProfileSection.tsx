@@ -1,16 +1,18 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 export default function ProfileSection({
-    title,
-    children,
+  title,
+  children,
 }: {
-    title: string;
-    children: React.ReactNode;
+  title: string;
+  children: ReactNode;
 }) {
-    return (
-        <section className="mb-6 mt-3">
-            <div className="mb-2 text-l font-bold">{title}</div>
-            <div className="text-justify pr-10">{children}</div>
-        </section>
-    );
+  return (
+    <section className="mt-3">
+      <div className="mb-3 text-lg font-bold">{title}</div>
+      <div className="pr-10 text-justify">{children}</div>
+    </section>
+  );
 }
