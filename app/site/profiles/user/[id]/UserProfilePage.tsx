@@ -2,7 +2,7 @@
 
 import TopCard from "@/components/profile/user/UserShelterTopCard";
 import ProfileSection from "@/components/profile/ProfileSection";
-import ProfileTabsCard from "@/components/profile/ProfileTabsCard";
+import ProfileTabsCard from "@/components/profile/card/ProfileTabsCard";
 import ProfileShell from "@/components/profile/user/UserProfileTemplate";
 
 type UserUI = {
@@ -23,7 +23,7 @@ export default function UserProfilePage({ user }: { user: UserUI }) {
         <>
           <ProfileSection title="Bio">{user.bio ?? "—"}</ProfileSection>
           <ProfileSection title="Contact">{user.contact ?? "—"}</ProfileSection>
-          <ProfileTabsCard defaultTab="videos" />
+          <ProfileTabsCard role="user" />
         </>
       }
       main={

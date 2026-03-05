@@ -1,10 +1,8 @@
-// components/profile/ProfileTabsCard.tsx
+// components/profile/ProfileTabsCardUser.tsx
 "use client";
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-import likedIcon from "@/public/buttons/Liked.svg";
 
 import at_play from "@/public/tabs/at_play.svg";
 import at_home from "@/public/tabs/at_home.svg";
@@ -26,82 +24,55 @@ import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 
 export type TabsKey = "videos" | "pets" | "shelters";
 
-const TAB_META: Record<
-  TabsKey,
-  { label: string; icon: any; iconActive: any; alt: string; altActive: string }
-> = {
+const TAB_META = {
   videos: {
-    label: "Videos",
     icon: play,
     iconActive: at_play,
     alt: "play",
     altActive: "at-play",
   },
   shelters: {
-    label: "Shelters",
     icon: home,
     iconActive: at_home,
     alt: "home",
     altActive: "at-home",
   },
-  pets: {
-    label: "Pets",
-    icon: pet,
-    iconActive: at_pet,
-    alt: "pet",
-    altActive: "at-pet",
-  },
-};
-
-type Props = {
-  defaultTab?: TabsKey;
-  tabs?: TabsKey[];
-  initialLiked?: LikedMiniItem[];
-};
+  pets: { icon: pet, iconActive: at_pet, alt: "pet", altActive: "at-pet" },
+} satisfies Record<TabsKey, any>;
 
 const ITEMS_PER_BATCH = 10;
 
-export default function ProfileTabsCard({
-  defaultTab = "videos",
-  tabs = ["videos", "pets", "shelters"],
-  initialLiked = [],
-}: Props) {
-  const [tab, setTab] = useState<TabsKey>(defaultTab);
+export default function ProfileTabsCardUser() {
+  const tabs: TabsKey[] = ["videos", "pets", "shelters"];
+  const [tab, setTab] = useState<TabsKey>("videos");
 
-  const [likedItems, setLikedItems] = useState<LikedMiniItem[]>(initialLiked);
-  const [likedLoading, setLikedLoading] = useState(false);
-  const [loadedOnce, setLoadedOnce] = useState(false);
+  const [likedItems, setLikedItems] = useState<LikedMiniItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_BATCH);
-
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let alive = true;
-
     (async () => {
-      if (loadedOnce) return;
-      setLikedLoading(true);
+      setLoading(true);
       try {
         const res = await fetchLikedStuff();
         if (!alive) return;
         setLikedItems(res ?? []);
-        setLoadedOnce(true);
       } catch (e) {
         console.error(e);
         if (!alive) return;
         setLikedItems([]);
-        setLoadedOnce(true);
       } finally {
-        if (alive) setLikedLoading(false);
+        if (alive) setLoading(false);
       }
     })();
-
     return () => {
       alive = false;
     };
-  }, [loadedOnce]);
+  }, []);
 
   useEffect(() => {
     setVisibleCount(ITEMS_PER_BATCH);
@@ -111,57 +82,40 @@ export default function ProfileTabsCard({
   const filtered = useMemo(() => {
     const kind: LikedKind =
       tab === "videos" ? "video" : tab === "pets" ? "pet" : "shelter";
-
     return (likedItems ?? []).filter((x) => x.kind === kind);
   }, [tab, likedItems]);
 
   const hasMore = visibleCount < filtered.length;
+  const visibleItems = useMemo(
+    () => filtered.slice(0, visibleCount),
+    [filtered, visibleCount],
+  );
 
-  const visibleItems = useMemo(() => {
-    return filtered.slice(0, visibleCount);
-  }, [filtered, visibleCount]);
-
-  const loadMore = () => {
+  const loadMore = () =>
     setVisibleCount((c) => Math.min(c + ITEMS_PER_BATCH, filtered.length));
-  };
 
   useEffect(() => {
     if (!hasMore) return;
     if (!scrollRef.current || !loadMoreRef.current) return;
 
-    const rootEl = scrollRef.current;
-    const sentinel = loadMoreRef.current;
-
     const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry?.isIntersecting) loadMore();
-      },
-      {
-        root: rootEl,
-        rootMargin: "200px",
-        threshold: 0,
-      },
+      (entries) => entries[0]?.isIntersecting && loadMore(),
+      { root: scrollRef.current, rootMargin: "200px", threshold: 0 },
     );
 
-    observer.observe(sentinel);
-
+    observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
   }, [hasMore, filtered.length]);
 
   return (
     <div className="h-full pr-7">
       <div className="h-full rounded-2xl bg-[#f6f3ee]">
+        {/* Tabs */}
         <div className="flex flex-col items-center gap-3 p-4">
-          <div className="flex items-center gap-2">
-            <Image src={likedIcon} alt="liked" />
-          </div>
-
           <div className="flex items-center gap-20">
             {tabs.map((key) => {
               const active = tab === key;
               const meta = TAB_META[key];
-
               return (
                 <TabButton
                   key={key}
@@ -182,17 +136,17 @@ export default function ProfileTabsCard({
           <hr className="border-black/10" />
         </div>
 
+        {/* List */}
         <div
           ref={scrollRef}
           className="mt-3 max-h-[72svh] space-y-3 overflow-auto px-4 pb-4 pr-1"
         >
-          {likedLoading ? (
+          {loading ? (
             <div className="rounded-2xl border border-black/10 bg-white p-6 text-center text-sm opacity-60">
-              Loading likes...
+              Loading...
             </div>
           ) : null}
 
-          {/* Cards */}
           {visibleItems.map((x: any) => {
             if (x.kind === "video") {
               return (
@@ -227,7 +181,7 @@ export default function ProfileTabsCard({
                 imageUrl={x.imageUrl}
                 name={x.shelterName ?? x.title ?? "Unknown Shelter"}
                 location={x.location ?? x.subtitle ?? "Unknown location"}
-                rating={x.rating ?? null}
+                id={x.id}
                 petsAvailable={x.petsAvailable ?? x.totalAvailable ?? null}
                 petsAdopted={x.petsAdopted ?? x.totalAdopted ?? null}
               />
@@ -242,7 +196,8 @@ export default function ProfileTabsCard({
               Loading more...
             </div>
           ) : null}
-          {!likedLoading && filtered.length === 0 ? (
+
+          {!loading && filtered.length === 0 ? (
             <div className="rounded-2xl border border-black/10 bg-white p-6 text-center text-sm opacity-60">
               No items yet.
             </div>
@@ -263,7 +218,12 @@ function TabButton({
   children: React.ReactNode;
 }) {
   return (
-    <button type="button" onClick={onClick} className={active ? "" : ""}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={active ? "" : ""}
+      aria-pressed={active}
+    >
       {children}
     </button>
   );

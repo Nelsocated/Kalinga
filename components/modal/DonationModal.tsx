@@ -44,12 +44,11 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
       <button
         onClick={() => setIsOpen(true)}
         className={[
-          "text-white font-semibold flex flex-col items-center",
+          "text-white font-semibold flex flex-col items-center leading-none",
           buttonClassName,
         ].join(" ")}
       >
-        <Image src={Donate} alt="donate-icon" width={45} height={45} />
-        Donate
+        <Image src={Donate} alt="donate-icon" width={42} height={42} />
       </button>
 
       {/* Modal */}
