@@ -62,14 +62,23 @@ export default function RightBar({ pet_id, media_id, shelter, nav }: Props) {
           />
         </button>
 
-        <div className="scale-95">
+        <div>
           {media_id ? (
-            <LikeButton targetType="video" targetId={media_id} />
+            <LikeButton
+              targetType="video"
+              targetId={media_id}
+              className="text-[#f3be0f] h-15"
+            />
           ) : null}
         </div>
 
         {media_id ? (
-          <ShareButton id={media_id} type="video" petId={pet_id} />
+          <ShareButton
+            id={media_id}
+            type="video"
+            petId={pet_id}
+            className="w-15 h-15"
+          />
         ) : null}
       </div>
       <div className="absolute right-[-150px] top-1/2 -translate-y-1/2 flex flex-col gap-3">

@@ -50,17 +50,14 @@ export default function Share({ id, type, petId, className }: Props) {
       type="button"
       onClick={copyLink}
       className={[
-        "w-13 h-13 overflow-hidden bg-[#f3be0f] flex items-center justify-center transition",
+        "h-10 rounded-full overflow-hidden bg-[#f3be0f] flex flex-col items-center justify-center transition",
         className,
       ].join(" ")}
     >
       {copied ? (
         <span className="text-xs font-semibold">Copied</span>
       ) : (
-        <div className="flex flex-col items-center">
-          <Image src={copy_button} alt="copy-link" width={30} height={30} />{" "}
-          <span className="text-white font-semibold">Share</span>
-        </div>
+        <Image src={copy_button} alt="copy-link" width={43} height={43} />
       )}
     </button>
   );

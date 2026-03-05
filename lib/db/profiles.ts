@@ -75,46 +75,6 @@ export async function getShelterProfile(shelterId: string) {
   return data;
 }
 
-export async function getUserProfileShelterOnly(userId: string) {
-  const supabase = await supabaseServer();
-  const {
-    data: { user },
-    error: authErr,
-  } = await supabase.auth.getUser();
-
-  if (authErr) throw authErr;
-  if (!user) {
-    const e: any = new Error("Unauthorized");
-    e.status = 401;
-    throw e;
-  }
-
-  const { data: shelterRow, error: shelterErr } = await supabase
-    .from("shelters")
-    .select("id")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-
-  if (shelterErr) throw shelterErr;
-  if (!shelterRow) {
-    const e: any = new Error("Forbidden: shelter only");
-    e.status = 403;
-    throw e;
-  }
-
-  const { data, error } = await supabase
-    .from("users")
-    .select(
-      "id, username, full_name, photo_url, bio, contact_email, contact_phone, created_at",
-    )
-    .eq("id", userId)
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
 export async function getUserProfileById(userId: string) {
   const supabase = await supabaseServer();
 

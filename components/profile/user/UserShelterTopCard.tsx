@@ -12,7 +12,6 @@ export type UserShelterTopCardProps = {
   leftSlot?: React.ReactNode;
   rightSlot?: React.ReactNode;
   actions?: React.ReactNode;
-  meta?: React.ReactNode;
   belowHeader?: React.ReactNode;
   className?: string;
 };
@@ -25,7 +24,6 @@ export default function UserShelterTopCard({
   leftSlot,
   rightSlot,
   actions,
-  meta,
   belowHeader,
   className = "",
 }: UserShelterTopCardProps) {
@@ -38,7 +36,6 @@ export default function UserShelterTopCard({
         subtitle={subtitle}
         location={location}
         imageUrl={imageUrl}
-        meta={meta}
         actions={actions}
         rightSlot={rightSlot}
         titleClassName="text-4xl md:text-5xl font-bold"

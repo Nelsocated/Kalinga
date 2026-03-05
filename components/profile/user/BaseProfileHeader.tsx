@@ -9,7 +9,6 @@ export type BaseProfileHeaderProps = {
   subtitle?: string | null;
   location?: string | null;
   imageUrl?: string | null;
-  meta?: ReactNode;
   actions?: ReactNode;
   titleClassName?: string;
   avatarClassName?: string;
@@ -20,7 +19,6 @@ export default function BaseProfileHeader({
   title,
   subtitle,
   imageUrl,
-  meta,
   actions,
   titleClassName = "text-4xl font-bold",
   avatarClassName = "rounded-full",
@@ -30,26 +28,22 @@ export default function BaseProfileHeader({
 
   return (
     <div className="relative flex flex-col">
-      <div className="flex flex-row items-center gap-2">
+      <div className="flex flex-row items-center">
         <div className={`w-30 h-30 overflow-hidden ${avatarClassName}`}>
           <Image
             src={src}
             alt={title}
-            width={40}
-            height={40}
+            width={30}
+            height={30}
             className="h-full w-full object-cover"
           />
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col pl-2">
           <div className={`${titleClassName} font-bold`}>{title}</div>
           <div className="text-lg">{subtitle}</div>
+          {actions ? <div>{actions}</div> : null}
         </div>
-      </div>
-
-      <div className="flex flex-row p-5">
-        {meta ? <div className="">{meta}</div> : null}
-        {actions ? <div className="">{actions}</div> : null}
       </div>
       {rightSlot ? <div>{rightSlot}</div> : null}
     </div>

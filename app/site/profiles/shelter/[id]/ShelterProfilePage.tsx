@@ -2,7 +2,7 @@
 
 import TopCard from "@/components/profile/user/UserShelterTopCard";
 import ProfileSection from "@/components/profile/ProfileSection";
-import ProfileTabsCard from "@/components/profile/ProfileTabsCard";
+import ProfileTabsCard from "@/components/profile/card/ProfileTabsCard";
 import ProfileShell from "@/components/profile/user/UserProfileTemplate";
 
 import ShareButton from "@/components/ui/ShareButton";
@@ -41,7 +41,7 @@ export default function ShelterProfilePage({
           <ProfileSection title="Contact">
             {shelter.contact ?? "—"}
           </ProfileSection>
-          <ProfileTabsCard defaultTab="videos" />
+          <ProfileTabsCard role="shelter" shelterId={shelter.id} />
         </>
       }
       main={
@@ -51,20 +51,25 @@ export default function ShelterProfilePage({
             subtitle={shelter.location ?? ""}
             imageUrl={shelter.logo_url}
             actions={
-              <>
-                <DonationModal shelterId={shelter.id} />
-                <ShareButton id={shelter.id} type="shelter" />
-                <div className="scale-75 text-white font-semibold">
-                  <LikeButton targetId={shelter.id} targetType="shelter" />
-                  Like
+              <div className="relative inline-flex w-fit items-center">
+                <div className="flex flex-col items-center text-white font-semibold leading-none">
+                  <DonationModal shelterId={shelter.id} />
+                  <span className="mb-1 text-xs">Donate</span>
                 </div>
-              </>
-            }
-            rightSlot={
-              <div className="flex items-center gap-2">
-                <button className="rounded-full border px-3 py-1 text-sm">
-                  Edit
-                </button>
+
+                <div className="flex flex-col items-center text-white font-semibold leading-none">
+                  <ShareButton id={shelter.id} type="shelter" />
+                  <span className="m-1 text-xs">Share</span>
+                </div>
+
+                <div className="flex flex-col items-center text-white font-semibold leading-none">
+                  <LikeButton
+                    targetId={shelter.id}
+                    targetType="shelter"
+                    className="h-10 text-white"
+                  />
+                  <span className="text-xs">Like</span>
+                </div>
               </div>
             }
           />
