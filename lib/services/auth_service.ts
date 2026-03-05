@@ -5,7 +5,7 @@ const SignupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   username: z.string().min(3),
-  fullName: z.string().min(4),
+  full_name: z.string().min(4),
 });
 
 const LoginSchema = z.object({
@@ -39,7 +39,7 @@ export async function signup(
     options: {
       data: {
         username: parsed.data.username,
-        fullName: parsed.data.fullName,
+        full_name: parsed.data.full_name,
       },
     },
   });
