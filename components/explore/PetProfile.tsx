@@ -11,7 +11,88 @@ type PetProfileProps = {
   onClose?: () => void;
 };
 
-const characteristicTags = ["Vaccinated", "Neutered", "Friendly", "Playful", "Healthy", "Adoptable"];
+const CHARACTERISTIC_POOL = [
+  "Vaccinated",
+  "Neutered",
+  "Friendly",
+  "Playful",
+  "Healthy",
+  "Adoptable",
+  "Litter Trained",
+  "Leash Trained",
+  "Kid Friendly",
+  "Indoor Ready",
+  "Social",
+  "Affectionate",
+];
+
+const LOCATION_POOL = [
+  "Iloilo City",
+  "Jaro, Iloilo",
+  "La Paz, Iloilo",
+  "Molo, Iloilo",
+  "Mandurriao, Iloilo",
+  "Arevalo, Iloilo",
+  "Pavia, Iloilo",
+  "Leganes, Iloilo",
+  "Oton, Iloilo",
+  "Sta. Barbara, Iloilo",
+  "San Miguel, Iloilo",
+  "Guimbal, Iloilo",
+];
+
+const STORY_OPENINGS = [
+  "{name} arrived at {shelter} after being spotted roaming near a busy road, exhausted and visibly underweight.",
+  "Rescuers brought {name} to {shelter} after neighbors reported that this gentle animal had been searching for food alone.",
+  "When {name} first entered {shelter}, caregivers focused on restoring strength, hydration, and confidence through a calm routine.",
+  "Before settling into care, {name} had spent days outdoors in difficult conditions and needed immediate support from {shelter}.",
+];
+
+const STORY_PROGRESS = [
+  "Over the next few weeks, appetite improved, sleep became more regular, and overall energy returned in a healthy and steady way.",
+  "Daily feeding, wellness checks, and patient handling helped stabilize health markers and improve physical recovery.",
+  "Consistent care plans made a clear difference, with weight gain, improved coat condition, and calmer responses during checkups.",
+  "With proper nutrition and structured rest, {name} gradually rebuilt strength and began engaging more confidently with caregivers.",
+];
+
+const STORY_PERSONALITY = [
+  "In the shelter environment, {name} shows a balanced temperament: affectionate with familiar people and curious during supervised play sessions.",
+  "Caregivers describe {name} as socially responsive, gentle with handling, and increasingly comfortable with positive reinforcement.",
+  "During enrichment time, {name} enjoys interactive toys, short walks, and quiet moments near trusted staff.",
+  "As trust has grown, {name} now greets visitors calmly and adapts well to predictable schedules and household-style routines.",
+];
+
+const STORY_ADOPTION = [
+  "Currently based in {location}, {name} is preparing for adoption and would thrive with a family that can continue patient, consistent care.",
+  "From the team in {location}, the recommendation is a forever home that offers structure, gentle guidance, and regular bonding time.",
+  "Shelter staff believe {name} is ready for a permanent home where routines, affection, and responsible care remain a daily priority.",
+  "The next step for {name} is placement with adopters who value long-term commitment, routine vet care, and a nurturing environment.",
+];
+
+const hashSeed = (seed: string) => {
+  return Array.from(seed).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+};
+
+const pickBySeed = (seed: string, pool: string[], salt: string) => {
+  const score = hashSeed(`${seed}:${salt}`);
+  return pool[score % pool.length];
+};
+
+const pickCharacteristics = (seed: string, count = 6) => {
+  const base = hashSeed(seed || "pet");
+  return [...CHARACTERISTIC_POOL]
+    .sort((a, b) => {
+      const aScore = (hashSeed(`${seed}:${a}`) + base) % 997;
+      const bScore = (hashSeed(`${seed}:${b}`) + base) % 997;
+      return aScore - bScore;
+    })
+    .slice(0, count);
+};
+
+const pickLocation = (seed: string) => {
+  const score = hashSeed(seed || "pet");
+  return LOCATION_POOL[score % LOCATION_POOL.length];
+};
 
 const pickDisplayPhoto = (item: ExplorePet) => {
   const firstPhoto = item.pet_media.find((media) => media.type === "photo" && media.url);
@@ -19,12 +100,23 @@ const pickDisplayPhoto = (item: ExplorePet) => {
 };
 
 const getStory = (item: ExplorePet) => {
+  const seed = item.id ?? item.name ?? "pet";
+  const petName = item.name ?? "This pet";
+  const shelterName = item.shelter?.shelter_name ?? "the shelter";
+  const location = pickLocation(seed);
   const caption = item.pet_media.find((media) => media.caption?.trim())?.caption;
-  if (caption && caption.trim().length > 0) {
-    return caption.trim();
-  }
+  const opening = pickBySeed(seed, STORY_OPENINGS, "opening")
+    .replaceAll("{name}", petName)
+    .replaceAll("{shelter}", shelterName);
+  const progress = pickBySeed(seed, STORY_PROGRESS, "progress").replaceAll("{name}", petName);
+  const personality = pickBySeed(seed, STORY_PERSONALITY, "personality").replaceAll("{name}", petName);
+  const adoption = pickBySeed(seed, STORY_ADOPTION, "adoption")
+    .replaceAll("{name}", petName)
+    .replaceAll("{location}", location);
 
-  return "This pet is ready for a loving forever home. Reach out to the shelter to learn more about personality, care needs, and the adoption process.";
+  const captionLead = caption?.trim() ? `${caption.trim()} ` : "";
+
+  return `${captionLead}${opening} ${progress} ${personality} ${adoption}`;
 };
 
 const pickPhotos = (item: ExplorePet) => {
@@ -43,6 +135,8 @@ export default function PetProfile({ item, mode = "page", onClose }: PetProfileP
   const photos = pickPhotos(item);
   const thumbnails = photos.slice(0, 3);
   const story = getStory(item);
+  const characteristicTags = pickCharacteristics(item.id);
+  const location = pickLocation(item.id);
 
   return (
     <div
@@ -121,7 +215,7 @@ export default function PetProfile({ item, mode = "page", onClose }: PetProfileP
               <div className="h-8 w-8 rounded-full bg-gray-300" />
               <div className="text-sm">
                 <p className="font-medium text-black">{shelterName}</p>
-                <p className="text-gray-500">Location</p>
+                <p className="text-gray-500">{location}</p>
               </div>
             </div>
 

@@ -126,6 +126,19 @@ export default function AdoptionApplicationForm({
               </div>
             </section>
 
+            <section className="space-y-2">
+              <label className="block text-sm font-medium md:text-base">Why do you want to adopt this animal?</label>
+              <textarea
+                name="reason"
+                placeholder="Tell us about your motivation, daily routine, and readiness to care for this pet."
+                value={form.reason}
+                onChange={handleChange}
+                required
+                rows={4}
+                className="w-full rounded-md border border-yellow-400 px-3 py-2 text-sm md:text-base"
+              />
+            </section>
+
             <section className="space-y-3 pt-2">
               <h2 className="text-base font-semibold text-black md:text-lg">Pet Care Checklist</h2>
 

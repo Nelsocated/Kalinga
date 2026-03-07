@@ -1,8 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ExplorePet } from "@/components/explore/types";
+
+const STORY_BADGE_TEMPLATES = [
+  "Brave Recovery Journey",
+  "Second Chance Star",
+  "From Rescue to Ready",
+  "Gentle Soul in Foster",
+  "Playful Heart, Big Hope",
+  "Ready for a Forever Home",
+];
+
+const pickStoryBadge = (story: ExplorePet) => {
+  const key = story.id ?? story.name ?? "story";
+  const hash = Array.from(key).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const template = STORY_BADGE_TEMPLATES[hash % STORY_BADGE_TEMPLATES.length];
+  return `\"${story.name ?? "This pet"} - ${template}\"`;
+};
 
 const pickDisplayPhoto = (story: ExplorePet) => {
   const photoUrls = story.pet_media
@@ -18,8 +34,6 @@ const pickDisplayPhoto = (story: ExplorePet) => {
 };
 
 export default function FosterStory({ items }: { items: ExplorePet[] }) {
-  const [pageStart, setPageStart] = useState(0);
-
   const randomPhotoByStoryId = useMemo(() => {
     const entries = items.map((story) => {
       return [story.id, pickDisplayPhoto(story)] as const;
@@ -28,72 +42,58 @@ export default function FosterStory({ items }: { items: ExplorePet[] }) {
     return Object.fromEntries(entries) as Record<string, string | null>;
   }, [items]);
 
-  const storiesPerPage = 4;
-  const canCycle = items.length > storiesPerPage;
-  const visibleStories = useMemo(() => {
-    if (items.length <= storiesPerPage) {
-      return items;
-    }
-
-    const firstChunk = items.slice(pageStart, pageStart + storiesPerPage);
-    if (firstChunk.length === storiesPerPage) {
-      return firstChunk;
-    }
-
-    const remaining = storiesPerPage - firstChunk.length;
-    return [...firstChunk, ...items.slice(0, remaining)];
-  }, [items, pageStart]);
-
-  const showNextStories = () => {
-    if (!canCycle) {
-      return;
-    }
-
-    setPageStart((current) => (current + storiesPerPage) % items.length);
-  };
+  const visibleStories = items.slice(0, 4);
 
   return (
     <div>
       <div className="mb-5 flex items-center justify-between">
         <h2 className="text-3xl font-bold text-black">Foster&apos;s story</h2>
-        <button
-          type="button"
-          onClick={showNextStories}
-          disabled={!canCycle}
-          aria-label="Show other pets"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-[#f3be0f] bg-white text-xl font-bold text-black disabled:cursor-not-allowed disabled:opacity-40"
+        <Link
+          href="/site/foster"
+          aria-label="Open foster story page"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e8bf42] bg-white text-xl font-bold text-black"
         >
           &gt;
-        </button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {visibleStories.map((story) => {
           const selectedPhoto = randomPhotoByStoryId[story.id];
-          const firstCaption = story.pet_media.find((media) => media.caption)?.caption;
+          const shelter = story.shelter?.shelter_name ?? "Available for adoption";
+          const storyBadge = pickStoryBadge(story);
 
           return (
           <article
             key={story.id}
-            className="rounded-2xl border border-[#f3be0f] bg-[#f3be0f] p-3"
+            className="rounded-2xl border border-[#e8bf42] bg-[#f6cf55] p-3"
           >
-            {selectedPhoto ? (
-              <img
-                src={selectedPhoto}
-                alt={story.name ?? "Foster story"}
-                className="h-40 w-full rounded-xl bg-white object-cover"
-              />
-            ) : (
-              <div className="h-40 rounded-xl bg-white" />
-            )}
-            <h3 className="mt-3 text-2xl font-bold text-black">{story.name ?? "Unnamed"}</h3>
-            <p className="text-sm text-black/70 line-clamp-2">{firstCaption ?? "No story yet."}</p>
-            <Link
-              href={`/site/pet/${story.id}`}
-              className="mt-3 rounded-full border border-white px-4 py-1 text-sm font-semibold text-black"
-            >
-              more info
-            </Link>
+            <div className="relative">
+              <div className="absolute -top-5 left-1/2 z-10 min-w-55 -translate-x-1/2 rounded-full border-2 border-[#f3be0f] bg-white px-5 py-1 text-center text-xs font-semibold text-[#f3be0f] shadow">
+                {storyBadge}
+              </div>
+              {selectedPhoto ? (
+                <img
+                  src={selectedPhoto}
+                  alt={story.name ?? "Foster story"}
+                  className="h-40 w-full rounded-xl bg-white object-cover"
+                />
+              ) : (
+                <div className="h-40 rounded-xl bg-white" />
+              )}
+            </div>
+            <div className="mt-3 flex w-full items-center justify-between gap-3">
+              <div className="flex flex-col">
+                <h3 className="text-2xl font-bold text-black">{story.name ?? "Unnamed"}</h3>
+                <p className="mt-1 text-sm text-black/70">{shelter}</p>
+              </div>
+              <Link
+                href={`/site/pet/${story.id}`}
+                className="rounded-full border border-white bg-[#f3be0f] px-4 py-1 text-sm font-semibold text-white hover:bg-[#dfa90d]"
+              >
+                More Info
+              </Link>
+            </div>
           </article>
           );
         })}

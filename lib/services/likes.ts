@@ -9,6 +9,19 @@ type Args = {
   targetId: string;
 };
 
+function isAuthSessionMissingError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const maybeError = error as { name?: string; message?: string };
+  return (
+    maybeError.name === "AuthSessionMissingError"
+    || maybeError.message?.includes("Auth session missing")
+    || false
+  );
+}
+
 function tableFor(type: LikeTargetType) {
   return type === "pet" ? "pet_like" : "shelter_like";
 }
@@ -21,7 +34,13 @@ export async function getInitialLiked({ targetType, targetId }: Args) {
   const supabase = createClient();
 
   const { data: authData, error: authErr } = await supabase.auth.getUser();
-  if (authErr) throw authErr;
+  if (authErr) {
+    if (isAuthSessionMissingError(authErr)) {
+      return false;
+    }
+
+    throw authErr;
+  }
   if (!authData.user) return false;
 
   const table = tableFor(targetType);
@@ -46,7 +65,13 @@ export async function setLiked(
   const supabase = createClient();
 
   const { data: authData, error: authErr } = await supabase.auth.getUser();
-  if (authErr) throw authErr;
+  if (authErr) {
+    if (isAuthSessionMissingError(authErr)) {
+      throw new Error("You must be logged in to like.");
+    }
+
+    throw authErr;
+  }
 
   const user = authData.user;
   if (!user) throw new Error("You must be logged in to like.");

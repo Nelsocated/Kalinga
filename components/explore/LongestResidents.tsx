@@ -3,6 +3,22 @@
 import { useRouter } from "next/navigation";
 import { ExplorePet } from "@/components/explore/types";
 
+const RESIDENT_BADGE_TEMPLATES = [
+  "Long-Stay Hero",
+  "Waiting Patiently",
+  "Ready for Adoption",
+  "Calm and Loving",
+  "Shelter Favorite",
+  "Forever Home Ready",
+];
+
+const pickResidentBadge = (resident: ExplorePet) => {
+  const key = resident.id ?? resident.name ?? "resident";
+  const hash = Array.from(key).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const template = RESIDENT_BADGE_TEMPLATES[hash % RESIDENT_BADGE_TEMPLATES.length];
+  return `\"${resident.name ?? "This pet"} - ${template}\"`;
+};
+
 type LongestResidentsProps = {
   items: ExplorePet[];
   showAdoptionPosts: boolean;
@@ -41,6 +57,7 @@ export default function LongestResidents({
             const firstPhoto = resident.pet_media.find((media) => media.type === "photo");
             const shelter = resident.shelter?.shelter_name ?? "Available for adoption";
             const caption = resident.pet_media.find((media) => media.caption?.trim())?.caption;
+            const residentBadge = pickResidentBadge(resident);
 
             return (
               <article
@@ -48,15 +65,20 @@ export default function LongestResidents({
                 className="aspect-square rounded-2xl border border-[#e8bf42] bg-[#f6cf55] p-4"
               >
                 <div className="flex h-full flex-col gap-3">
-                  {firstPhoto ? (
-                    <img
-                      src={firstPhoto.url}
-                      alt={resident.name ?? "Resident pet"}
-                      className="h-1/2 w-full rounded-xl bg-white object-cover"
-                    />
-                  ) : (
-                    <div className="h-1/2 w-full rounded-xl bg-white" />
-                  )}
+                  <div className="relative h-1/2 w-full">
+                    <div className="absolute -top-5 left-1/2 z-10 min-w-55 -translate-x-1/2 rounded-full border-2 border-[#f3be0f] bg-white px-5 py-1 text-center text-xs font-semibold text-[#f3be0f] shadow">
+                      {residentBadge}
+                    </div>
+                    {firstPhoto ? (
+                      <img
+                        src={firstPhoto.url}
+                        alt={resident.name ?? "Resident pet"}
+                        className="h-full w-full rounded-xl bg-white object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full rounded-xl bg-white" />
+                    )}
+                  </div>
                   <div className="flex flex-1 flex-col">
                     <div className="flex w-full items-center justify-between gap-3">
                       <div className="flex flex-col">
@@ -85,21 +107,27 @@ export default function LongestResidents({
           {featuredResidents.map((resident) => {
             const firstPhoto = resident.pet_media.find((media) => media.type === "photo");
             const fallbackSubtitle = resident.shelter?.shelter_name ?? "Available for adoption";
+            const residentBadge = pickResidentBadge(resident);
 
             return (
               <article
                 key={resident.id}
                 className="rounded-2xl border border-[#e8bf42] bg-[#f6cf55] p-3"
               >
-                {firstPhoto ? (
-                  <img
-                    src={firstPhoto.url}
-                    alt={resident.name ?? "Resident pet"}
-                    className="h-40 w-full rounded-xl bg-white object-cover"
-                  />
-                ) : (
-                  <div className="h-40 rounded-xl bg-white" />
-                )}
+                <div className="relative">
+                  <div className="absolute -top-5 left-1/2 z-10 min-w-55 -translate-x-1/2 rounded-full border-2 border-[#f3be0f] bg-white px-5 py-1 text-center text-xs font-semibold text-[#f3be0f] shadow">
+                    {residentBadge}
+                  </div>
+                  {firstPhoto ? (
+                    <img
+                      src={firstPhoto.url}
+                      alt={resident.name ?? "Resident pet"}
+                      className="h-40 w-full rounded-xl bg-white object-cover"
+                    />
+                  ) : (
+                    <div className="h-40 rounded-xl bg-white" />
+                  )}
+                </div>
                 <div className="mt-3 flex w-full items-center justify-between gap-3">
                   <div className="flex flex-col">
                     <h3 className="text-2xl font-bold text-black">{resident.name ?? "Unnamed"}</h3>
