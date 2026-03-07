@@ -58,17 +58,19 @@ export default function LongestResidents({
                     <div className="h-1/2 w-full rounded-xl bg-white" />
                   )}
                   <div className="flex flex-1 flex-col">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-xl font-bold text-black">{resident.name ?? "Unnamed"}</h3>
+                    <div className="flex w-full items-center justify-between gap-3">
+                      <div className="flex flex-col">
+                        <h3 className="text-xl font-bold text-black">{resident.name ?? "Unnamed"}</h3>
+                        <p className="mt-1 text-sm text-black/70">{shelter}</p>
+                      </div>
                       <button
                         type="button"
                         onClick={() => openResidentProfile(resident.id)}
-                        className="rounded-full border border-orange-500 bg-orange-500 px-4 py-1 text-sm font-semibold text-white hover:bg-orange-600"
+                        className="rounded-full border border-white bg-[#f3be0f] px-4 py-1 text-sm font-semibold text-white hover:bg-[#dfa90d]"
                       >
                         More Info
                       </button>
                     </div>
-                    <p className="mt-1 text-sm text-black/70">{shelter}</p>
                     <p className="mt-2 line-clamp-3 text-sm text-black/80">
                       {caption ?? "Looking for a loving home. Open for adoption inquiries."}
                     </p>
@@ -98,17 +100,19 @@ export default function LongestResidents({
                 ) : (
                   <div className="h-40 rounded-xl bg-white" />
                 )}
-                <div className="mt-3 flex items-start justify-between gap-3">
-                  <h3 className="text-2xl font-bold text-black">{resident.name ?? "Unnamed"}</h3>
+                <div className="mt-3 flex w-full items-center justify-between gap-3">
+                  <div className="flex flex-col">
+                    <h3 className="text-2xl font-bold text-black">{resident.name ?? "Unnamed"}</h3>
+                    <p className="mt-1 text-sm text-black/70">{fallbackSubtitle}</p>
+                  </div>
                   <button
                     type="button"
                     onClick={() => openResidentProfile(resident.id)}
-                    className="rounded-full border border-orange-500 bg-orange-500 px-4 py-1 text-sm font-semibold text-white hover:bg-orange-600"
+                    className="rounded-full border border-white bg-[#f3be0f] px-4 py-1 text-sm font-semibold text-white hover:bg-[#dfa90d]"
                   >
                     More Info
                   </button>
                 </div>
-                <p className="text-sm text-black/70">{fallbackSubtitle}</p>
               </article>
             );
           })}

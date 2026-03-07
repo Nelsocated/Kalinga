@@ -43,7 +43,6 @@ export default function PetProfile({ item, mode = "page", onClose }: PetProfileP
   const photos = pickPhotos(item);
   const thumbnails = photos.slice(0, 3);
   const story = getStory(item);
-  const adoptHref = `/site/adoption/${item.id}`;
 
   return (
     <div
@@ -89,12 +88,7 @@ export default function PetProfile({ item, mode = "page", onClose }: PetProfileP
             <button
               type="button"
               onClick={() => {
-                if (isModal) {
-                  setShowAdoptionForm(true);
-                  return;
-                }
-
-                router.push(adoptHref);
+                setShowAdoptionForm(true);
               }}
               className="mt-4 inline-flex rounded-md bg-[#d69d00] px-8 py-2 font-semibold text-white hover:bg-[#b88600]"
             >
@@ -158,11 +152,9 @@ export default function PetProfile({ item, mode = "page", onClose }: PetProfileP
           aria-label="Adoption application"
           onClick={() => setShowAdoptionForm(false)}
         >
-          <div className="max-h-[92vh] w-full max-w-5xl overflow-y-auto" onClick={(event) => event.stopPropagation()}>
+          <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto" onClick={(event) => event.stopPropagation()}>
             <AdoptionApplicationForm
               petId={item.id}
-              petName={petName}
-              shelterName={shelterName}
               mode="modal"
               onClose={() => setShowAdoptionForm(false)}
             />

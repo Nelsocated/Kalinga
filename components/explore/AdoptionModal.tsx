@@ -49,46 +49,46 @@ export default function AdoptionModal({
             onClick={handleClose}
           />
 
-          <div className="relative flex w-full" style={{ width: "459px", height: "241px", maxWidth: "100%" }}>
+          <div className="relative flex w-full" style={{ width: "390px", height: "214px", maxWidth: "100%" }}>
             <div
               className="absolute bg-[#f3be0f]"
-              style={{ left: "11px", top: "-1px", width: "445px", height: "85px", borderRadius: "11.24px" }}
+              style={{ left: "10px", top: "0px", width: "370px", height: "72px", borderRadius: "10px" }}
               aria-hidden="true"
             />
 
             <div
               className="absolute flex flex-col border bg-white"
               style={{
-                left: "11px",
-                top: "57px",
-                width: "445px",
-                height: "183px",
-                borderRadius: "7.78px",
+                left: "10px",
+                top: "49px",
+                width: "370px",
+                height: "158px",
+                borderRadius: "7px",
                 borderColor: "#d9d9d9",
                 borderWidth: "0.97px",
-                gap: "24px",
+                gap: "18px",
               }}
             >
               <div
                 className="relative flex flex-col items-start"
-                style={{ marginLeft: "23.3px", marginTop: "23.3px", width: "398.78px", height: "73.78px", gap: "7.78px" }}
+                style={{ marginLeft: "18px", marginTop: "16px", width: "334px", height: "74px", gap: "6px" }}
               >
-                <p id="dialog-description" className="text-[#1e1e1e]" style={{ margin: 0, fontSize: "15.6px", lineHeight: "21.8px" }}>
+                <p id="dialog-description" className="text-[#1e1e1e]" style={{ margin: 0, fontSize: "13.5px", lineHeight: "18px" }}>
                   Thank you for submitting your adoption application!
                 </p>
-                <p className="text-[#757575]" style={{ margin: 0, fontSize: "15.6px", lineHeight: "21.8px" }}>
+                <p className="text-[#757575]" style={{ margin: 0, fontSize: "13.5px", lineHeight: "18px" }}>
                   {message}
                   {referenceId ? ` Reference ID: ${referenceId}` : ""}
                 </p>
               </div>
 
-              <div className="relative flex items-center bg-white" style={{ marginLeft: "23.3px", width: "398.78px", height: "39.07px", gap: "15.56px" }}>
+              <div className="relative flex items-center bg-white" style={{ marginLeft: "18px", width: "334px", height: "34px", gap: "12px" }}>
                 <button
                   type="button"
                   onClick={handleClose}
                   aria-label="Close dialog"
                   className="relative flex-1 cursor-pointer overflow-hidden bg-[#f3be0f] text-neutral-100 transition-opacity hover:opacity-90"
-                  style={{ borderRadius: "7.78px", padding: "11.67px", fontSize: "15.6px", lineHeight: "15.6px", fontWeight: 400 }}
+                  style={{ borderRadius: "7px", padding: "8px", fontSize: "13px", lineHeight: "13px", fontWeight: 500 }}
                 >
                   {closeLabel}
                 </button>
@@ -98,7 +98,7 @@ export default function AdoptionModal({
             <h2
               id="dialog-title"
               className="absolute font-bold text-white"
-              style={{ top: "9px", left: "42px", letterSpacing: "1.97px", fontSize: "32px", lineHeight: "normal" }}
+              style={{ top: "8px", left: "34px", letterSpacing: "1px", fontSize: "24px", lineHeight: "normal" }}
             >
               {title}
             </h2>
