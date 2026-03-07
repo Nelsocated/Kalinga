@@ -34,6 +34,18 @@ const TAB_META = {
 
 const ITEMS_PER_BATCH = 10;
 
+function buildVideoHref(
+  videoId: string | number,
+  petId?: string | number | null,
+) {
+  const params = new URLSearchParams();
+  if (petId != null && String(petId).trim() !== "") {
+    params.set("pet", String(petId));
+  }
+  params.set("media", String(videoId));
+  return `/?${params.toString()}`;
+}
+
 export default function ProfileTabsCardShelter({
   shelterId,
 }: {
@@ -111,8 +123,8 @@ export default function ProfileTabsCardShelter({
   }, [hasMore, list.length]);
 
   return (
-    <div className="h-full pr-7">
-      <div className="h-full rounded-2xl bg-[#f6f3ee]">
+    <div className="h-full min-h-0 pr-7">
+      <div className="flex h-full min-h-0 flex-col rounded-2xl bg-[#f6f3ee]">
         {/* Tabs */}
         <div className="flex flex-col items-center gap-3 p-4">
           <div className="flex items-center gap-20">
@@ -142,7 +154,7 @@ export default function ProfileTabsCardShelter({
         {/* List */}
         <div
           ref={scrollRef}
-          className="mt-3 max-h-[72svh] space-y-3 overflow-auto px-4 pb-4 pr-1"
+          className="mt-3 min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 pb-6 pr-1"
         >
           {loading ? (
             <div className="rounded-2xl border border-black/10 bg-white p-6 text-center text-sm opacity-60">
@@ -150,36 +162,40 @@ export default function ProfileTabsCardShelter({
             </div>
           ) : null}
 
-          {visibleItems.map((x: any) => {
-            if (tab === "videos") {
-              return (
-                <VideoCard
-                  key={`posted-video-${x.id}`}
-                  href={x.href ?? `/site/videos/${x.id}`}
-                  thumbnailUrl={x.thumbnailUrl ?? x.imageUrl}
-                  subtitle={x.subtitle ?? x.caption ?? "Your shelter"}
-                  petName={x.petName ?? x.title ?? "Untitled"}
-                />
-              );
-            }
+          {visibleItems.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 place-items-center gap-6">
+              {visibleItems.map((x: any) => {
+                if (tab === "videos") {
+                  return (
+                    <VideoCard
+                      key={`posted-video-${x.id}`}
+                      href={buildVideoHref(x.id, x.petId ?? x.pet?.id)}
+                      thumbnailUrl={x.thumbnailUrl ?? x.imageUrl}
+                      subtitle={x.subtitle ?? x.caption ?? "Your shelter"}
+                      petName={x.petName ?? x.title ?? "Untitled"}
+                    />
+                  );
+                }
 
-            return (
-              <PetCard
-                key={`posted-pet-${x.id}`}
-                href={x.href ?? `/site/profiles/pets/${x.id}`}
-                imageUrl={x.imageUrl}
-                petName={x.petName ?? x.name ?? "Unnamed Pet"}
-                gender={x.gender ?? "unknown"}
-                shelterName={x.shelterName ?? "Your shelter"}
-                shelterLogo={x.shelterLogo ?? DEFAULT_AVATAR_URL}
-              />
-            );
-          })}
+                return (
+                  <PetCard
+                    key={`posted-pet-${x.id}`}
+                    href={x.href ?? `/site/profiles/pets/${x.id}`}
+                    imageUrl={x.imageUrl}
+                    petName={x.petName ?? x.name ?? "Unnamed Pet"}
+                    sex={x.sex ?? "unknown"}
+                    shelterName={x.shelterName ?? "Your shelter"}
+                    shelterLogo={x.shelterLogo ?? DEFAULT_AVATAR_URL}
+                  />
+                );
+              })}
+            </div>
+          ) : null}
 
           {hasMore ? (
             <div
               ref={loadMoreRef}
-              className="rounded-2xl border border-black/10 bg-white p-4 text-center text-xs opacity-60"
+              className="mt-4 rounded-2xl border border-black/10 bg-white p-4 text-center text-xs opacity-60"
             >
               Loading more...
             </div>

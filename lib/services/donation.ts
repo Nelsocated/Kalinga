@@ -4,11 +4,10 @@ export async function getShelterDonations(shelterId: string) {
   const supabase = await supabaseServer();
 
   const { data, error } = await supabase
-    .from("shelter_donations")
+    .from("donation")
     .select("*")
     .eq("shelter_id", shelterId)
-    .eq("is_active", true)
-    .order("priority", { ascending: false });
+    .eq("is_active", true);
 
   if (error) throw error;
 
@@ -23,13 +22,14 @@ type ShelterDonationInsert = {
   account_name?: string;
   account_number?: string;
   qr_url?: string;
+  instruction_note?: string;
 };
 
 export async function createShelterDonation(payload: ShelterDonationInsert) {
   const supabase = await supabaseServer();
 
   const { data, error } = await supabase
-    .from("shelter_donations")
+    .from("donation")
     .insert(payload)
     .select()
     .single();

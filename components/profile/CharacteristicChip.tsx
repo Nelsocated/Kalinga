@@ -1,33 +1,35 @@
 "use client";
 
 export type CharacteristicItem = {
-    label: string;
-    value: string | boolean | null | undefined;
-    type?: "boolean";
+  label: string;
+  value: string | boolean | null | undefined;
+  type?: "boolean";
 };
 
 export default function CharacteristicChip({
-    label,
-    value,
-    type,
+  label,
+  value,
+  type,
 }: {
-    label: string;
-    value: string | boolean;
-    type?: "boolean";
+  label: string;
+  value: string | boolean;
+  type?: "boolean";
 }) {
-    let displayValue: string = String(value);
-    let classes = "bg-[#f3be0f] text-black";
+  let displayValue: string = String(value);
+  let classes = "bg-primary text-black";
 
-    if (type === "boolean") {
-        const bool = Boolean(value);
-        displayValue = bool ? "Yes" : "No";
-        classes = bool ? "bg-green-500/90 text-white" : "bg-red-500/90 text-white";
-    }
+  if (type === "boolean") {
+    const bool = Boolean(value);
+    displayValue = bool ? "Yes" : "No";
+    classes = bool ? "bg-green-500/90 text-white" : "bg-red-500/90 text-white";
+  }
 
-    return (
-        <div className={`flex items-center gap-2 px-3 py-1 rounded-xl text-sm font-medium ${classes}`}>
-            <span className="opacity-70">{label}:</span>
-            <span className="font-semibold">{displayValue}</span>
-        </div>
-    );
+  return (
+    <div
+      className={`flex items-center gap-3 px-3 py-1 rounded-xl text-sm font-medium ${classes}`}
+    >
+      <span className="opacity-70">{label}:</span>
+      <span className="font-semibold">{displayValue}</span>
+    </div>
+  );
 }

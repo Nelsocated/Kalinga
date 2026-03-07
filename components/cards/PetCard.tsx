@@ -12,18 +12,18 @@ export type PetCardProps = {
   href: string; // link to pet profile
   imageUrl?: string | null; // main pic
   petName: string;
-  gender?: PetGender;
+  sex?: PetGender;
   shelterName: string;
   shelterLogo: string;
   className?: string;
 };
 
-function getSexIcon(gender?: string | null) {
-  if (gender === "male") {
+function getSexIcon(sex?: string | null) {
+  if (sex === "male") {
     return <Image src={Male_Icon} alt="male-icon" width={20} height={20} />;
   }
 
-  if (gender === "female") {
+  if (sex === "female") {
     return <Image src={Female_Icon} alt="female-icon" width={20} height={20} />;
   }
 
@@ -34,7 +34,7 @@ export default function PetCard({
   href,
   imageUrl,
   petName,
-  gender,
+  sex,
   shelterName,
   shelterLogo,
   className = "",
@@ -45,7 +45,7 @@ export default function PetCard({
     <Link
       href={href}
       className={[
-        "block overflow-hidden w-60 border-8 border-[#f3be0f] bg-[#f3be0f] rounded-3xl",
+        "block overflow-hidden w-55 border-8 border-primary bg-primary rounded-3xl",
         className,
       ].join(" ")}
     >
@@ -59,10 +59,10 @@ export default function PetCard({
         />
       </div>
 
-      <div className="pl-3 pb-5 relative bg-[#f3be0f]">
+      <div className="pl-3 pb-5 relative bg-primary">
         <div className="flex flex-row">
           <div className="text-lg font-bold">{petName}</div>
-          {getSexIcon(gender)}
+          {getSexIcon(sex)}
         </div>
 
         <div className="absolute top-5 left-1 text-base flex flex-row">

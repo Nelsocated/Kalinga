@@ -67,7 +67,7 @@ export default function RightBar({ pet_id, media_id, shelter, nav }: Props) {
             <LikeButton
               targetType="video"
               targetId={media_id}
-              className="text-[#f3be0f] h-15"
+              className="text-primary h-15"
             />
           ) : null}
         </div>
@@ -81,7 +81,7 @@ export default function RightBar({ pet_id, media_id, shelter, nav }: Props) {
           />
         ) : null}
       </div>
-      <div className="absolute right-[-150px] top-1/2 -translate-y-1/2 flex flex-col gap-3">
+      <div className="absolute -right-37.5 top-1/2 -translate-y-1/2 flex flex-col gap-3">
         <Button
           type="button"
           onClick={() => nav?.prev()}

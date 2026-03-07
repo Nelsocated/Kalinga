@@ -39,7 +39,8 @@ export async function getShelterPostedVideos(
         pets:pet_id (
           id,
           name,
-          shelter_id
+          shelter_id,
+          photo_url
         )
       `,
     )
@@ -52,12 +53,9 @@ export async function getShelterPostedVideos(
   return (data ?? []).map((row: any) => ({
     id: row.id,
     href: `/site/home/${row.id}`, // adjust if your route uses a different id
-    imageUrl: row.url ?? null, // fallback if you don't have thumbnails
-    thumbnailUrl: null,
+    imageUrl: row.pets.photo_url ?? null,
     caption: row.caption ?? null,
-    title: null,
     petName: row.pets?.name ?? null,
-    subtitle: null,
   }));
 }
 
@@ -73,9 +71,7 @@ export async function getShelterPostedPets(
         id,
         name,
         sex,
-        gender,
         photo_url,
-        image_url,
         created_at,
         shelter_id,
         shelters:shelter_id (
@@ -93,7 +89,7 @@ export async function getShelterPostedPets(
   return (data ?? []).map((p: any) => ({
     id: p.id,
     href: `/site/profiles/pets/${p.id}`,
-    imageUrl: p.photo_url ?? p.image_url ?? null,
+    imageUrl: p.photo_url ?? null,
     name: p.name ?? null,
     petName: p.name ?? null,
     gender: p.gender ?? p.sex ?? "unknown",

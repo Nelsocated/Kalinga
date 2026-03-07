@@ -45,8 +45,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#ffdd6f] flex items-center justify-center">
-      <div className="bg-[#f6f3ee] w-[180svh] h-[85svh] rounded-2xl shadow-lg flex items-center justify-center">
+    <div className="min-h-screen bg-primary flex items-center justify-center">
+      <div className="bg-background w-[180svh] h-[85svh] rounded-2xl shadow-lg flex items-center justify-center">
         <div className="fixed top-20 right-30">
           <Button onClick={() => router.push("/site/aboutus")}>About Us</Button>
         </div>
@@ -65,7 +65,7 @@ export default function LoginPage() {
             </h1>
           </div>
 
-          <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-white border-2 border-[#f3be0f]">
+          <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-white border-2 border-primary">
             <form onSubmit={onSubmit} className="mt-6 space-y-4 shadow-m">
               <Input
                 label="Email"
@@ -98,7 +98,9 @@ export default function LoginPage() {
 
             <hr className="w-full mx-auto m-3" />
 
-            <Button onClick={() => router.push("/site/auth/signup")}>Sign up</Button>
+            <Button onClick={() => router.push("/site/auth/signup")}>
+              Sign up
+            </Button>
 
             <p className="mt-4 text-sm text-black-600">
               Do you own a shelter?{" "}

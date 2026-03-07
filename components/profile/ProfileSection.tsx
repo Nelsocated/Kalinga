@@ -11,8 +11,8 @@ export default function ProfileSection({
 }) {
   return (
     <section className="mt-3">
-      <div className="mb-3 text-lg font-bold">{title}</div>
-      <div className="pr-10 text-justify">{children}</div>
+      <div className="text-lg font-bold">{title}</div>
+      <div className="pr-10">{children}</div>
     </section>
   );
 }
