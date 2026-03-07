@@ -52,9 +52,9 @@ export default function ShelterProfilePage({
             imageUrl={shelter.logo_url}
             actions={
               <div className="relative inline-flex w-fit items-center">
-                <div className="flex flex-col items-center text-white font-semibold leading-none">
+                <div className="flex flex-col items-center font-semibold leading-none">
                   <DonationModal shelterId={shelter.id} />
-                  <span className="mb-1 text-xs">Donate</span>
+                  <span className="mb-1 text-xs text-white">Donate</span>
                 </div>
 
                 <div className="flex flex-col items-center text-white font-semibold leading-none">

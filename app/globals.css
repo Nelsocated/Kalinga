@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
 body {
+  background: var(--color-background);
   margin: 0;
+}
+
+@theme {
+  --color-primary: #f3be0f;
+  --color-background: #f6f3ee;
+  --color-text: black;
+
+  --font-sans: var(--font-outfit);
 }

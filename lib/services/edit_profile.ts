@@ -1,25 +1,24 @@
 import { createClient } from "../supabase/client";
 
 // Update this if your table/bucket names differ
-const PROFILES_TABLE = "profiles";
-const AVATAR_BUCKET = "avatars";
+const PROFILES_TABLE = "users";
+const AVATAR_BUCKET = "user_photos";
 
 export type ProfileRow = {
   id: string;
   full_name: string | null;
   username: string | null;
   bio: string | null;
-  contact: string | null;
-  avatar_url: string | null;
-  updated_at?: string | null;
+  contact_email: string | null;
+  photo_url: string | null;
 };
 
 export type ProfileUpdatePayload = {
   full_name?: string | null;
   username?: string | null;
   bio?: string | null;
-  contact?: string | null;
-  avatar_url?: string | null;
+  contact_email?: string | null;
+  photo_url?: string | null;
 };
 
 function supabase() {
@@ -77,7 +76,6 @@ export async function updateMyProfile(payload: ProfileUpdatePayload) {
     .from(PROFILES_TABLE)
     .update({
       ...payload,
-      updated_at: new Date().toISOString(),
     })
     .eq("id", userId);
 
@@ -110,7 +108,7 @@ export async function uploadMyAvatar(file: File): Promise<string> {
   if (!data?.publicUrl) throw new Error("Failed to get public URL.");
 
   // Save into profile row too
-  await updateMyProfile({ avatar_url: data.publicUrl });
+  await updateMyProfile({ photo_url: data.publicUrl });
 
   return data.publicUrl;
 }

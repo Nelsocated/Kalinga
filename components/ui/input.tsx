@@ -38,7 +38,6 @@ export default function Input({
   hint,
   icon,
   iconPosition = "left",
-  className = "",
   inputClassName = "",
   onChange,
   onBlur,
@@ -55,6 +54,7 @@ export default function Input({
         </div>
       )}
 
+      <label className="leading-7">{label}</label>
       <input
         id={id}
         name={name}
@@ -72,13 +72,13 @@ export default function Input({
         className={[
           "block w-full rounded-lg border px-3 py-2 text-sm outline-none transition",
           "bg-white text-gray-900 placeholder:text-gray-600",
-          "focus:ring-2 focus:ring-[#f3be0f]",
+          "focus:ring-2 focus:ring-primary",
           icon && iconPosition === "left" ? "pl-10" : "",
           icon && iconPosition === "right" ? "pr-10" : "",
           disabled ? "opacity-60 cursor-not-allowed" : "",
           error
             ? "border-red-500 focus:ring-red-500"
-            : "border-[#f3be0f] focus:border-[#f3be0f]",
+            : "border-primary focus:border-primary",
           inputClassName,
         ].join(" ")}
       />

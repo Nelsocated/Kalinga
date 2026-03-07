@@ -52,8 +52,8 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#ffdd6f] flex items-center justify-center">
-      <div className="bg-[#f6f3ee] w-[180svh] h-[85svh] rounded-2xl shadow-lg flex items-center justify-center">
+    <div className="min-h-screen bg-primary flex items-center justify-center">
+      <div className="bg-background w-[180svh] h-[85svh] rounded-2xl shadow-lg flex items-center justify-center">
         <main className="flex w-full max-w-5xl items-center gap-20">
           <div className="md:flex flex-1 flex-col items-center justify-center">
             <Image
@@ -70,7 +70,7 @@ export default function SignupPage() {
             </h1>
           </div>
 
-          <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-white border-2 border-[#f3be0f]">
+          <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-white border-2 border-primary">
             <h1 className="flex text-3xl font-bold text-black justify-center">
               Create an Account
             </h1>

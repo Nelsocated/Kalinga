@@ -31,7 +31,7 @@ export default function HomeClient() {
   }, []);
 
   return (
-    <div className="min-h-[100svh] bg-[#f6f3ee] flex px-10">
+    <div className="min-h-svh bg-background flex px-10">
       <NavBar />
 
       <main className="flex flex-1 items-center justify-center">
