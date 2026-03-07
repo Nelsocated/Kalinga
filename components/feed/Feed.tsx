@@ -129,7 +129,7 @@ export default function Feed({
   const current = items[index];
 
   return (
-    <div className="h-[95svh] aspect-[9/16] w-full max-w-[55svh] rounded-2xl border-2 border-[#ffdd6f] overflow-hidden bg-black">
+    <div className="h-[95svh] aspect-9/16 w-full max-w-[55svh] rounded-2xl border-2 border-primary overflow-hidden bg-black">
       <PetCard key={current.id} item={current} />
     </div>
   );

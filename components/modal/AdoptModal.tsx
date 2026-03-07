@@ -241,10 +241,6 @@ export default function AdoptModal({ petId }: Props) {
                     </div>
                   ) : null}
 
-                  {errorMsg ? (
-                    <div className="text-sm text-red-600">{errorMsg}</div>
-                  ) : null}
-
                   <form onSubmit={handleSubmit} className="space-y-2">
                     <Input
                       label="Name"
@@ -377,7 +373,12 @@ export default function AdoptModal({ petId }: Props) {
                       </div>
                     </div>
 
-                    <div className="pt-2">
+                    {errorMsg ? (
+                      <div className="text-sm text-red-600 text-center">
+                        {errorMsg}
+                      </div>
+                    ) : null}
+                    <div>
                       <Button type="submit" disabled={loading}>
                         {loading ? "Submitting..." : "Submit"}
                       </Button>

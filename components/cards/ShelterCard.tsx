@@ -24,7 +24,7 @@ function Stat({
   value: number | null | undefined;
 }) {
   return (
-    <div className="rounded-xl bg-[#f3be0f] px-7 py-1 flex justify-center items-center gap-6">
+    <div className="rounded-xl bg-primary px-7 py-1 flex justify-center items-center gap-6">
       <div className="text-2xl font-semibold">{value ?? "-"}</div>
       <div className="text-lg">{label}</div>
     </div>
@@ -47,7 +47,7 @@ export default function ShelterCard({
     <Link
       href={href}
       className={[
-        "block w-full rounded-2xl bg-[#f2f0ef] p-3 shadow-sm transition hover:bg-black/5",
+        "block w-full rounded-2xl bg-background p-3 shadow-sm transition  hover:bg-black/5",
         className,
       ].join(" ")}
     >
@@ -62,10 +62,8 @@ export default function ShelterCard({
           />
         </div>
 
-        <div className="min-w-0 flex-1 pb-5">
-          <div className="flex items-center">
-            <div className="text-4xl font-bold">{name}</div>
-          </div>
+        <div className="min-w-0 flex-1 flex flex-col justify-center">
+          <div className="text-4xl font-bold">{name}</div>
 
           {location ? (
             <div className="text-2xl truncate">{location}</div>
@@ -74,15 +72,16 @@ export default function ShelterCard({
           )}
         </div>
 
-        <div className="flex flex-wrap justify-center gap-5">
+        <div className="flex flex-wrap items-center gap-5">
           <Stat label="Pets Available" value={petsAvailable} />
           <Stat label="Pets Adopted" value={petsAdopted} />
         </div>
-        <div className="pr-5">
+
+        <div className="pr-5 flex items-center">
           <LikeButton
             targetType="shelter"
             targetId={id}
-            className="h-12 text-[#f3be0f]"
+            className="h-12 text-primary"
           />
         </div>
       </div>

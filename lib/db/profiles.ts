@@ -1,4 +1,3 @@
-// lib/db/profiles.ts
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function getPetProfile(petId: string) {
@@ -64,6 +63,7 @@ export async function getShelterProfile(shelterId: string) {
           name,
           sex,
           photo_url,
+          status,
           created_at
         )
       `,
@@ -72,7 +72,9 @@ export async function getShelterProfile(shelterId: string) {
     .single();
 
   if (error) throw error;
-  return data;
+  return {
+    ...data,
+  };
 }
 
 export async function getUserProfileById(userId: string) {

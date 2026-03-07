@@ -54,7 +54,14 @@ export default function Navbar() {
           <Input
             type="search"
             placeholder="Search"
-            icon={<Image src={search_icon} alt="search-icon" />}
+            icon={
+              <Image
+                src={search_icon}
+                alt="search-icon"
+                width={25}
+                height={25}
+              />
+            }
             className="rounded-full pl-10"
           />
         </div>
@@ -64,7 +71,7 @@ export default function Navbar() {
           className="flex border-none justify-start gap-3"
           onClick={() => router.push("/site/home")}
         >
-          <Image src={fyp_icon} alt="fyp-icon" />
+          <Image src={fyp_icon} alt="fyp-icon" width={25} height={25} />
           <span>For You</span>
         </Button>
 
@@ -73,17 +80,17 @@ export default function Navbar() {
           className="flex border-none justify-start gap-3"
           onClick={() => router.push("/site/explore")}
         >
-          <Image src={explore_icon} alt="explore-icon" />
+          <Image src={explore_icon} alt="explore-icon" width={25} height={25} />
           <span>Explore</span>
         </Button>
 
         <Button
           type="button"
           className="flex border-none justify-start gap-3"
-          onClick={() => router.push("/site/shelter")}
+          onClick={() => router.push("/site/shelters")}
         >
-          <Image src={shelter_icon} alt="shelter-icon" />
-          <span>Shelter</span>
+          <Image src={shelter_icon} alt="shelter-icon" width={25} height={25} />
+          <span>Shelters</span>
         </Button>
 
         <Button
@@ -95,7 +102,7 @@ export default function Navbar() {
             }
           }}
         >
-          <Image src={profile_icon} alt="profile-icon" />
+          <Image src={profile_icon} alt="profile-icon" width={25} height={25} />
           <span>Profile</span>
         </Button>
 
@@ -104,7 +111,7 @@ export default function Navbar() {
           className="flex border-none justify-start gap-3"
           onClick={() => router.push("/site/notification")}
         >
-          <Image src={notif_icon} alt="notif-icon" />
+          <Image src={notif_icon} alt="notif-icon" width={25} height={25} />
           <span>Notification</span>
         </Button>
 
@@ -113,7 +120,7 @@ export default function Navbar() {
           className="flex border-none justify-start gap-3"
           onClick={() => router.push("/site/more")}
         >
-          <Image src={more_icon} alt="more-icon" />
+          <Image src={more_icon} alt="more-icon" width={25} height={25} />
           <span>More</span>
         </Button>
       </nav>

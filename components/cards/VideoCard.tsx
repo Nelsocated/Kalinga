@@ -25,7 +25,7 @@ export default function VideoCard({
     <Link
       href={href}
       className={[
-        "block overflow-hidden rounded-2xl w-[192px] h-[308px]",
+        "block overflow-hidden rounded-2xl w-48 h-77",
         className,
       ].join(" ")}
     >
@@ -38,7 +38,7 @@ export default function VideoCard({
         />
 
         {/* Dark Gradient */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-black/60 to-transparent" />
 
         {/* Text */}
         <div className="absolute bottom-2 left-2 right-2 flex flex-col">

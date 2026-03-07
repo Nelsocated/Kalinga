@@ -124,7 +124,7 @@ export default function ProfileTabsCardShelter({
 
   return (
     <div className="h-full min-h-0 pr-7">
-      <div className="flex h-full min-h-0 flex-col rounded-2xl bg-[#f6f3ee]">
+      <div className="flex h-full min-h-0 flex-col rounded-2xl bg-background">
         {/* Tabs */}
         <div className="flex flex-col items-center gap-3 p-4">
           <div className="flex items-center gap-20">
