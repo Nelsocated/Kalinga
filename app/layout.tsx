@@ -1,3 +1,4 @@
+import NavBarGate from "../components/layout/NavBarGate";
 import "./globals.css";
 
 export default function RootLayout({
@@ -7,7 +8,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="min-h-screen flex bg-gray-100">
+        <NavBarGate />
+        <main className="flex-1 p-8">
+          {children}
+        </main>
+      </body>
     </html>
   );
 }

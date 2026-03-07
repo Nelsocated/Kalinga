@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -16,7 +18,7 @@ export default function Navbar() {
   const router = useRouter();
 
   return (
-    <aside className="w-56 shrink-0 pt-10">
+    <aside className="ml-6 lg:ml-8 w-56 shrink-0 pt-10">
       <div className="flex justify-center gap-3">
         <Image
           src={kalinga_logo}
@@ -43,7 +45,7 @@ export default function Navbar() {
         <Button
           type="button"
           className="flex border-none justify-start gap-3"
-          onClick={() => router.push("/home")}
+          onClick={() => router.push("/site/home")}
         >
           <Image src={fyp_icon} alt="fyp-icon" />
           <span> For You</span>
@@ -51,7 +53,7 @@ export default function Navbar() {
         <Button
           type="button"
           className="flex border-none justify-start gap-3"
-          onClick={() => router.push("/explore")}
+          onClick={() => router.push("/site/explore")}
         >
           <Image src={explore_icon} alt="explore-icon" />
           <span> Explore</span>
@@ -59,7 +61,7 @@ export default function Navbar() {
         <Button
           type="button"
           className="flex border-none justify-start gap-3"
-          onClick={() => router.push("/shelter")}
+          onClick={() => router.push("/site/shelter")}
         >
           <Image src={shelter_icon} alt="shelter-icon" />
           <span> Shelter</span>
@@ -67,7 +69,7 @@ export default function Navbar() {
         <Button
           type="button"
           className="flex border-none justify-start gap-3"
-          onClick={() => router.push("/profile")}
+          onClick={() => router.push("/site/profile")}
         >
           <Image src={profile_icon} alt="profile-icon" />
           <span> Profile</span>
@@ -75,7 +77,7 @@ export default function Navbar() {
         <Button
           type="button"
           className="flex border-none justify-start gap-3"
-          onClick={() => router.push("/notification")}
+          onClick={() => router.push("/site/notification")}
         >
           <Image src={notif_icon} alt="notif-icon" />
           <span> Notification</span>
@@ -83,7 +85,7 @@ export default function Navbar() {
         <Button
           type="button"
           className="flex border-none justify-start gap-3"
-          onClick={() => router.push("/more")}
+          onClick={() => router.push("/site/more")}
         >
           <Image src={more_icon} alt="more-icon" />
           <span> More</span>

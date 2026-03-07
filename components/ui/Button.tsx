@@ -32,7 +32,7 @@ export default function Button({
         rounded-lg
         font-medium
         transition
-        border-1
+        border
         border-[#f3be0f]
         bg-yellow text-black
         hover:bg-[#f3be0f]

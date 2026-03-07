@@ -40,7 +40,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.2 }}
-                    className="mt-1 pb-4 text-sm text-white whitespace-pre-wrap break-words"
+                    className="mt-1 pb-4 text-sm text-white whitespace-pre-wrap wrap-break-word"
                   >
                     {caption}
                   </motion.p>
@@ -59,7 +59,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
           <button
             type="button"
             className="text-l font-bold text-white hover:underline absolute bottom-3 right-13"
-            onClick={() => router.push(`/profile/${id}`)}
+            onClick={() => router.push(`/site/pet/${id}`)}
           >
             Meet {name}!
           </button>

@@ -38,7 +38,7 @@ export default function SignupPage() {
         return;
       }
 
-      router.push("/home");
+      router.push("/site/home");
     } catch {
       setFormError("Network error. Try again.");
     } finally {
@@ -123,7 +123,7 @@ export default function SignupPage() {
               Already have an account?{" "}
               <a
                 className="font-medium text-black hover:underline"
-                href="/login"
+                  href="/site/login"
               >
                 Log in
               </a>

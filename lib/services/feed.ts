@@ -1,13 +1,19 @@
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function getFeed(limit = 10) {
-  const supabase = await supabaseServer();
+  try {
+    const supabase = await supabaseServer();
 
-  const { data, error } = await supabase.rpc("get_random_feed", {
-    limit_count: limit,
-  });
+    const { data, error } = await supabase.rpc("get_random_feed", {
+      limit_count: limit,
+    });
 
-  if (error) throw error;
+    if (error) {
+      return [];
+    }
 
-  return (data ?? []) as any[];
+    return (data ?? []) as any[];
+  } catch {
+    return [];
+  }
 }
