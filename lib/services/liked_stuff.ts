@@ -14,6 +14,14 @@ export type LikedMiniItem = {
   subtitle?: string | null;
   imageUrl?: string | null;
 
+  // optional fields used by cards
+  gender?: string | null;
+  shelterName?: string | null;
+  shelterLogo?: string | null;
+
+  petsAvailable?: number;
+  petsAdopted?: number;
+
   rating?: number | null;
   distanceKm?: number | null;
   likedCount?: number | null;
@@ -70,7 +78,17 @@ export async function fetchLikedStuff(): Promise<LikedMiniItem[]> {
   const sheltersRes = shelterIds.length
     ? await supabase
         .from("shelter")
-        .select("id,shelter_name,location,logo_url")
+        .select(
+          `
+            id,
+            shelter_name,
+            location,
+            logo_url,
+            pets (
+              status
+            )
+          `,
+        )
         .in("id", shelterIds)
     : { data: [], error: null };
 
@@ -91,10 +109,7 @@ export async function fetchLikedStuff(): Promise<LikedMiniItem[]> {
     .filter(Boolean) as string[];
 
   const videoPetsRes = videoPetIds.length
-    ? await supabase
-        .from("pets")
-        .select("id,name,photo_url")
-        .in("id", videoPetIds)
+    ? await supabase.from("pets").select("id,name,photo_url").in("id", videoPetIds)
     : { data: [], error: null };
 
   if (videoPetsRes.error) throw videoPetsRes.error;
@@ -107,21 +122,27 @@ export async function fetchLikedStuff(): Promise<LikedMiniItem[]> {
     kind: "pet",
     title: p.name ?? "Pet",
     subtitle: p.breed ?? null,
-    gender: p.sex,
+    gender: p.sex ?? null,
     imageUrl: (p.photo_url ?? "").trim() || DEFAULT_AVATAR_URL,
-    shelterName: p.shelter.shelter_name,
-    shelterLogo: p.shelter.logo_url,
+    shelterName: p.shelter?.shelter_name ?? null,
+    shelterLogo: p.shelter?.logo_url ?? DEFAULT_AVATAR_URL,
   }));
 
-  const shelterItems: LikedMiniItem[] = (sheltersRes.data ?? []).map(
-    (s: any) => ({
+  const shelterItems: LikedMiniItem[] = (sheltersRes.data ?? []).map((s: any) => {
+    const pets = s.pets ?? [];
+    const petsAvailable = pets.filter((p: any) => p?.status === "available").length;
+    const petsAdopted = pets.filter((p: any) => p?.status === "adopted").length;
+
+    return {
       id: s.id,
       kind: "shelter",
       title: s.shelter_name ?? "Shelter",
       subtitle: s.location ?? null,
       imageUrl: (s.logo_url ?? "").trim() || DEFAULT_AVATAR_URL,
-    }),
-  );
+      petsAvailable,
+      petsAdopted,
+    };
+  });
 
   const videoItems: LikedMiniItem[] = (videosRes.data ?? []).map((v: any) => {
     const p = v.pet_id ? petById.get(v.pet_id) : null;

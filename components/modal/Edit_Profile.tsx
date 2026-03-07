@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Button from "../ui/Button";
 import Edit from "@/public/buttons/Edit.svg";
 import Back from "@/public/buttons/Back.svg";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import Input from "@/components/ui/input";
 import {
@@ -18,6 +18,7 @@ import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 
 export default function Edit_Profile() {
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
 
   const [open, setOpen] = useState(false);
 
@@ -99,14 +100,15 @@ export default function Edit_Profile() {
     const payload: ProfileUpdatePayload = {
       full_name: fullName.trim(),
       username: username.trim(),
-      bio: bio.trim(),
-      contact_email: contact.trim(),
+      bio: bio.trim() || null, // send null if empty
+      contact_email: contact.trim() || null,
       photo_url: avatarUrl === DEFAULT_AVATAR_URL ? null : avatarUrl,
     };
 
     try {
       setSaving(true);
       await updateMyProfile(payload);
+      router.refresh(); // refresh route data so profile UI updates automatically
       setSuccessMsg("Profile saved!");
     } catch (e: any) {
       setErrorMsg(e?.message ?? "Failed to save profile.");

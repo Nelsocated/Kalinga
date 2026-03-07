@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import ProfileShell from "@/components/profile/pet/PetProfileTemplate";
 import ProfileHeader from "@/components/profile/pet/PetProfileHeader";
 import ProfileSection from "@/components/profile/ProfileSection";
@@ -13,8 +13,6 @@ import Female_Icon from "@/public/icons/female-icon.svg";
 import Image from "next/image";
 import Back_Button from "@/components/ui/Back";
 import AdoptModal from "@/components/modal/AdoptModal";
-import { useRouter } from "next/navigation";
-import { apiGet } from "@/app/api/profiles/apiGet";
 
 type Media = {
   id: string;
@@ -60,21 +58,15 @@ function getSexIcon(sex?: string | null) {
   return null;
 }
 
-export default function PetProfileClient({ id }: { id: string }) {
-  const [pet, setPet] = useState<PetProfile | null>(null);
-  const [err, setErr] = useState<string | null>(null);
-  const router = useRouter();
-
+export default function PetProfileClient({
+  id,
+  initialPet,
+}: {
+  id: string;
+  initialPet: PetProfile;
+}) {
+  const [pet] = useState<PetProfile>(initialPet);
   const [start, setStart] = useState(0);
-
-  useEffect(() => {
-    apiGet<PetProfile>(`/api/profiles/pets/${id}`)
-      .then((data) => {
-        setPet(data);
-        setStart(0);
-      })
-      .catch((e) => setErr(e.message));
-  }, [id]);
 
   const extraPhotos = useMemo(() => {
     const media = pet?.pet_media ?? [];
@@ -103,7 +95,6 @@ export default function PetProfileClient({ id }: { id: string }) {
   };
 
   const characteristics: CharacteristicItem[] = useMemo(() => {
-    if (!pet) return [];
     return [
       { label: "Species", value: pet.species },
       { label: "Breed", value: pet.breed },
@@ -113,9 +104,6 @@ export default function PetProfileClient({ id }: { id: string }) {
       { label: "Spayed/Neutered", value: pet.spayed_neutered, type: "boolean" },
     ];
   }, [pet]);
-
-  if (err) return <div className="p-6">{err}</div>;
-  if (!pet) return <div className="p-6">Loading…</div>;
 
   return (
     <ProfileShell
@@ -132,7 +120,7 @@ export default function PetProfileClient({ id }: { id: string }) {
           />
 
           <ProfileSection title="Characteristics">
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {characteristics
                 .filter(
                   (item) =>
@@ -163,6 +151,7 @@ export default function PetProfileClient({ id }: { id: string }) {
           <div className="absolute top-11 left-96">
             <Back_Button />
           </div>
+
           <div className="mb-4 mt-5 overflow-hidden rounded-2xl bg-black/5">
             {pet.photo_url ? (
               <img
@@ -185,7 +174,7 @@ export default function PetProfileClient({ id }: { id: string }) {
                     key={p.id}
                     src={p.url}
                     alt={p.caption ?? "Pet photo"}
-                    className="w-full aspect-5/7 rounded-xl object-cover shadow-sm"
+                    className="aspect-5/7 w-full rounded-xl object-cover shadow-sm"
                   />
                 ))}
               </div>
@@ -193,10 +182,7 @@ export default function PetProfileClient({ id }: { id: string }) {
               {canSlide && (
                 <button
                   onClick={prev}
-                  className="absolute -left-6 top-1/2 -translate-y-1/2
-                                       h-8 w-8 flex items-center justify-center
-                                       rounded-full bg-white shadow-md
-                                       hover:shadow-lg hover:bg-black/5 transition"
+                  className="absolute -left-6 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-black/5 hover:shadow-lg"
                 >
                   ‹
                 </button>
@@ -205,10 +191,7 @@ export default function PetProfileClient({ id }: { id: string }) {
               {canSlide && (
                 <button
                   onClick={next}
-                  className="absolute -right-6 top-1/2 -translate-y-1/2
-                                       h-8 w-8 flex items-center justify-center
-                                       rounded-full bg-white shadow-md
-                                       hover:shadow-lg hover:bg-black/5 transition"
+                  className="absolute -right-6 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-black/5 hover:shadow-lg"
                 >
                   ›
                 </button>
@@ -217,6 +200,7 @@ export default function PetProfileClient({ id }: { id: string }) {
           ) : (
             <div className="text-sm opacity-70">No photos yet.</div>
           )}
+
           <div className="mt-5 flex justify-center">
             <AdoptModal petId={id} />
           </div>

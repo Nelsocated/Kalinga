@@ -121,7 +121,7 @@ export default function ProfileTabsCardUser() {
 
   return (
     <div className="h-full min-h-0 pr-7">
-      <div className="flex h-full min-h-0 flex-col rounded-2xl bg-[#f6f3ee]">
+      <div className="flex h-full min-h-0 flex-col rounded-2xl bg-white">
         {/* Tabs */}
         <div className="flex flex-col items-center gap-3 p-4">
           <div className="flex items-center gap-20">
@@ -195,8 +195,8 @@ export default function ProfileTabsCardUser() {
                   name={x.shelterName ?? x.title ?? "Unknown Shelter"}
                   location={x.location ?? x.subtitle ?? "Unknown location"}
                   id={x.id}
-                  petsAvailable={x.petsAvailable ?? x.totalAvailable ?? null}
-                  petsAdopted={x.petsAdopted ?? x.totalAdopted ?? null}
+                  petsAvailable={x.petsAvailable}
+                  petsAdopted={x.petsAdopted}
                 />
               ))}
             </div>
