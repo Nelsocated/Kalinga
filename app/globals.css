@@ -9,6 +9,8 @@ body {
   --color-primary: #f3be0f;
   --color-background: #f6f3ee;
   --color-text: black;
+  --color-male: #6495ed;
+  --color-female: #f8c8dc;
 
   --font-sans: var(--font-outfit);
 }

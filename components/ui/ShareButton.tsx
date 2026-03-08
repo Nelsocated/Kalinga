@@ -50,7 +50,7 @@ export default function Share({ id, type, petId, className }: Props) {
       type="button"
       onClick={copyLink}
       className={[
-        "h-10 rounded-full overflow-hidden bg-[#f3be0f] flex flex-col items-center justify-center transition",
+        "h-10 rounded-full overflow-hidden bg-primary flex flex-col items-center justify-center transition",
         className,
       ].join(" ")}
     >

@@ -36,7 +36,7 @@ export async function createAdoptionRequest(payload: AdoptionRequestInsert) {
 
   const { data: pet, error: petError } = await supabase
     .from("pets")
-    .select("id, adoption_status")
+    .select("id, status")
     .eq("id", payload.pet_id)
     .single();
 
@@ -46,7 +46,7 @@ export async function createAdoptionRequest(payload: AdoptionRequestInsert) {
     throw new Error("Pet not found.");
   }
 
-  if (pet.adoption_status === "adopted") {
+  if (pet.status === "adopted") {
     throw new Error("This pet has already been adopted.");
   }
 
@@ -88,10 +88,10 @@ export async function createAdoptionRequest(payload: AdoptionRequestInsert) {
   if (error) throw error;
 
   // 3. optionally mark pet as pending once first request exists
-  if (pet.adoption_status === "available") {
+  if (pet.status === "available") {
     const { error: updateError } = await supabase
       .from("pets")
-      .update({ adoption_status: "pending" })
+      .update({ status: "pending" })
       .eq("id", payload.pet_id);
 
     if (updateError) throw updateError;

@@ -48,11 +48,27 @@ type PetProfile = {
 
 function getSexIcon(sex?: string | null) {
   if (sex === "male") {
-    return <Image src={Male_Icon} alt="male-icon" width={40} height={40} />;
+    return (
+      <Image
+        src={Male_Icon}
+        alt="male-icon"
+        width={40}
+        height={40}
+        className="text-male"
+      />
+    );
   }
 
   if (sex === "female") {
-    return <Image src={Female_Icon} alt="female-icon" width={40} height={40} />;
+    return (
+      <Image
+        src={Female_Icon}
+        alt="female-icon"
+        width={40}
+        height={40}
+        className="text-female"
+      />
+    );
   }
 
   return null;

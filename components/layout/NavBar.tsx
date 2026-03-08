@@ -51,19 +51,14 @@ export default function Navbar() {
 
       <nav className="mt-1 text-xl space-y-2 text-black">
         <div className="relative w-full max-w-md">
-          <Input
-            type="search"
-            placeholder="Search"
-            icon={
-              <Image
-                src={search_icon}
-                alt="search-icon"
-                width={25}
-                height={25}
-              />
-            }
+          <Button
+            type="button"
             className="rounded-full pl-10"
-          />
+            onClick={() => router.push("/site/search")}
+          >
+            <Image src={search_icon} alt="search-icon" width={25} height={25} />
+            Search
+          </Button>
         </div>
 
         <Button
