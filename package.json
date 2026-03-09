@@ -1,0 +1,10 @@
+{
+  "name": "kalinga-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix ./Kalinga run dev",
+    "build": "npm --prefix ./Kalinga run build",
+    "start": "npm --prefix ./Kalinga run start",
+    "lint": "npm --prefix ./Kalinga run lint"
+  }
+}
