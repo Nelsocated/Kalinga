@@ -29,7 +29,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
           "relative z-10 w-full overflow-hidden rounded-2xl",
           open
             ? "bg-[#795f08]"
-            : "bg-gradient-to-t from-black/70 via-black/40 to-transparent",
+            : "bg-linear-to-t from-black/70 via-black/40 to-transparent",
         ].join(" ")}
       >
         <div className="px-3 py-3">
@@ -38,7 +38,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
           {hasCaption && (
             <>
               {!open && (
-                <p className="mt-1 pb-2 text-sm text-white/95 line-clamp-2 break-words">
+                <p className="mt-1 pb-2 text-sm text-white/95 line-clamp-2 wrap-break-words">
                   {cleanCaption}
                 </p>
               )}
@@ -51,7 +51,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.2 }}
-                    className="mt-1 pb-2 text-sm text-white whitespace-pre-wrap break-words"
+                    className="mt-1 pb-2 text-sm text-white whitespace-pre-wrap wrap-break-words"
                   >
                     {cleanCaption}
                   </motion.p>

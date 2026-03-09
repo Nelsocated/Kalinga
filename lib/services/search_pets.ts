@@ -21,7 +21,10 @@ export async function fetchSearchPets(filters: SearchPetsParams) {
   if (age) params.set("age", age);
   if (size) params.set("size", size);
 
-  const res = await fetch(`/api/search/pets?${params.toString()}`);
+  const qs = params.toString();
+  const url = qs ? `/api/search?${qs}` : "/api/search";
+
+  const res = await fetch(url);
   const json = await res.json();
 
   if (!res.ok) throw new Error(json?.error ?? "Search failed");

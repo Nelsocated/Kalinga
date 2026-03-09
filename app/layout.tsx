@@ -1,3 +1,4 @@
+import Navbar from "@/components/layout/NavBar";
 import "./globals.css";
 import { Outfit } from "next/font/google";
 
@@ -14,7 +15,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={outfit.variable}>
-      <body>{children}</body>
+      <body className="bg-background flex min-h-screen">
+        <aside className="w-56 shrink-0 flex pl-20 pt-15">
+          <Navbar />
+        </aside>
+
+        <main className="flex-1 min-w-0 px-4 lg:px-8">{children}</main>
+      </body>
     </html>
   );
 }

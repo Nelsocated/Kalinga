@@ -44,6 +44,7 @@ export default function SignupPage() {
       }
 
       router.push("/site/home");
+      router.push("/site/home");
     } catch {
       setFormError("Network error. Try again.");
     } finally {

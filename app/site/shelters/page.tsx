@@ -1,5 +1,4 @@
 import ShelterCard from "@/components/cards/ShelterCard";
-import Navbar from "@/components/layout/NavBar";
 import { headers } from "next/headers";
 
 async function getSheltersFromApi() {
@@ -23,10 +22,6 @@ export default async function Explore() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      <div className="pl-10">
-        <Navbar />
-      </div>
-
       <div className="flex-1 flex pl-20">
         <div className="w-full max-w-5xl rounded-xl bg-primary">
           <div className="p-5 text-6xl font-bold ml-6">Shelters</div>

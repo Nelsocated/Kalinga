@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Navbar from "@/components/layout/NavBar";
 
 export default function UserProfileTemplate({
   main,
@@ -12,10 +11,6 @@ export default function UserProfileTemplate({
 }) {
   return (
     <div className="min-h-screen bg-background flex">
-      <div className="pl-10">
-        <Navbar />
-      </div>
-
       <div className="flex-1 flex pl-20">
         <div className="w-full max-w-5xl rounded-xl bg-primary">
           <div className="p-5">{main}</div>

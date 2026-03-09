@@ -27,7 +27,7 @@ export default function Button({
       onClick={onClick}
       disabled={isDisabled}
       className={`
-        w-full
+        w-auto
         py-2 px-4
         rounded-lg
         font-medium

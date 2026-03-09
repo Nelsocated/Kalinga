@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import Navbar from "@/components/layout/NavBar";
 
 export default function ProfileShell({
   main,
@@ -11,11 +10,7 @@ export default function ProfileShell({
 }) {
   return (
     <div className="min-h-screen bg-background flex">
-      <div className="pl-10">
-        <Navbar />
-      </div>
-
-      <div className="flex-1 flex justify-end">
+      <div className="flex-1 flex pl-20">
         <div className="max-w-5xl rounded-xl bg-primary">
           <main className="p-10">
             <div className="h-[88svh] w-full rounded-2xl bg-background overflow-hidden">

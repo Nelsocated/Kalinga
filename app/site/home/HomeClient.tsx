@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Feed from "@/components/feed/Feed";
-import NavBar from "@/components/layout/NavBar";
 import RightBar, { ShelterMini } from "@/components/layout/RightBar";
 import { LikeTargetType } from "@/lib/services/likes";
 
@@ -32,10 +31,8 @@ export default function HomeClient() {
 
   return (
     <div className="min-h-svh bg-background flex px-10">
-      <NavBar />
-
       <main className="flex flex-1 items-center justify-center">
-        <div className="flex items-center gap-3">
+        <div className="flex justify-center items-center gap-3">
           <Feed onNavReady={setNav} onActiveChange={setActive} />
 
           {active ? (

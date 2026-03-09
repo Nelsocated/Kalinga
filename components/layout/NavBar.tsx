@@ -5,11 +5,10 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import Button from "@/components/ui/Button";
-import Input from "../ui/input";
 import { createClient } from "@/lib/supabase/client";
+import FilterModal from "../modal/FilterModal";
 
 import kalinga_logo from "@/public/kalinga_logo.svg";
-import search_icon from "@/public/icons/search.svg";
 import fyp_icon from "@/public/icons/play-circle.svg";
 import explore_icon from "@/public/icons/Explore.svg";
 import shelter_icon from "@/public/icons/Home.svg";
@@ -37,33 +36,27 @@ export default function Navbar() {
     getUser();
   }, [supabase]);
 
+  const buttonStyle = "flex border-none gap-3";
   return (
-    <aside className="w-56 shrink-0 pt-10">
-      <div className="flex justify-center gap-3">
+    <aside>
+      <div>
         <Image
           src={kalinga_logo}
           alt="kalinga-logo"
-          width={150}
-          height={150}
+          width={120}
+          height={120}
           priority
         />
       </div>
 
-      <nav className="mt-1 text-xl space-y-2 text-black">
-        <div className="relative w-full max-w-md">
-          <Button
-            type="button"
-            className="rounded-full pl-10"
-            onClick={() => router.push("/site/search")}
-          >
-            <Image src={search_icon} alt="search-icon" width={25} height={25} />
-            Search
-          </Button>
+      <nav className="mt-5 text-xl space-y-2 text-black">
+        <div className="flex">
+          <FilterModal />
         </div>
 
         <Button
           type="button"
-          className="flex border-none justify-start gap-3"
+          className={buttonStyle}
           onClick={() => router.push("/site/home")}
         >
           <Image src={fyp_icon} alt="fyp-icon" width={25} height={25} />
@@ -72,7 +65,7 @@ export default function Navbar() {
 
         <Button
           type="button"
-          className="flex border-none justify-start gap-3"
+          className={buttonStyle}
           onClick={() => router.push("/site/explore")}
         >
           <Image src={explore_icon} alt="explore-icon" width={25} height={25} />
@@ -81,7 +74,7 @@ export default function Navbar() {
 
         <Button
           type="button"
-          className="flex border-none justify-start gap-3"
+          className={buttonStyle}
           onClick={() => router.push("/site/shelters")}
         >
           <Image src={shelter_icon} alt="shelter-icon" width={25} height={25} />
@@ -90,7 +83,7 @@ export default function Navbar() {
 
         <Button
           type="button"
-          className="flex border-none justify-start gap-3"
+          className={buttonStyle}
           onClick={() => {
             if (userId) {
               router.push(`/site/profiles/user/${userId}`);
@@ -103,7 +96,7 @@ export default function Navbar() {
 
         <Button
           type="button"
-          className="flex border-none justify-start gap-3"
+          className={buttonStyle}
           onClick={() => router.push("/site/notification")}
         >
           <Image src={notif_icon} alt="notif-icon" width={25} height={25} />
@@ -112,7 +105,7 @@ export default function Navbar() {
 
         <Button
           type="button"
-          className="flex border-none justify-start gap-3"
+          className={buttonStyle}
           onClick={() => router.push("/site/more")}
         >
           <Image src={more_icon} alt="more-icon" width={25} height={25} />

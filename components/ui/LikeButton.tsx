@@ -9,10 +9,26 @@ import {
   LikeTargetType,
 } from "@/lib/services/likes";
 
+function isExpectedAuthError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const maybeError = error as { name?: string; message?: string };
+  return (
+    maybeError.name === "AuthSessionMissingError" ||
+    maybeError.message?.includes("Auth session missing") ||
+    maybeError.message?.includes("You must be logged in to like") ||
+    false
+  );
+}
+
 type Props = {
   targetType: LikeTargetType;
   targetId: string;
   className?: string;
+  size?: number;
+  theme?: "default" | "foster";
 };
 
 function LikeSvg({ className = "" }: { className?: string }) {
@@ -21,7 +37,7 @@ function LikeSvg({ className = "" }: { className?: string }) {
       viewBox="40 0 60 72"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`text-[#F3C52A] ${className}`}
+      className={`text-primary ${className}`}
       aria-hidden="true"
       focusable="false"
     >
@@ -42,7 +58,7 @@ function LikedSvg({ className = "" }: { className?: string }) {
       viewBox="40 0 60 72"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`text-[#F3C52A] ${className}`}
+      className={`text-primary ${className}`}
       aria-hidden="true"
       focusable="false"
     >
@@ -86,7 +102,9 @@ export default function LikeButton({
         const v = await getInitialLiked({ targetType, targetId });
         if (alive) setLikedState(v);
       } catch (e) {
-        console.error(e);
+        if (!isExpectedAuthError(e)) {
+          console.error(e);
+        }
       } finally {
         if (alive) setLoading(false);
       }
@@ -106,7 +124,9 @@ export default function LikeButton({
     try {
       await setLiked({ targetType, targetId }, next);
     } catch (e) {
-      console.error(e);
+      if (!isExpectedAuthError(e)) {
+        console.error(e);
+      }
       setLikedState(!next);
       alert(e instanceof Error ? e.message : "Failed to update like.");
     }
