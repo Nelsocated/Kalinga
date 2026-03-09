@@ -91,14 +91,17 @@ export default function LoginPage() {
                 <p className="text-sm text-red-600">{formError}</p>
               ) : null}
 
-              <Button type="submit" loading={loading}>
+              <Button type="submit" loading={loading} className="w-full">
                 Log in
               </Button>
             </form>
 
             <hr className="w-full mx-auto m-3" />
 
-            <Button onClick={() => router.push("/site/auth/signup")}>
+            <Button
+              onClick={() => router.push("/auth/signup")}
+              className="w-full"
+            >
               Sign up
             </Button>
 

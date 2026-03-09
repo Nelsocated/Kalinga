@@ -120,7 +120,7 @@ export default function SignupPage() {
                 <p className="text-sm text-red-600">{formError}</p>
               ) : null}
 
-              <Button type="submit" loading={loading}>
+              <Button type="submit" loading={loading} className="w-full">
                 Submit
               </Button>
             </form>

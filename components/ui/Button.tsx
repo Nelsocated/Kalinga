@@ -17,7 +17,7 @@ export default function Button({
   type = "button",
   loading = false,
   disabled = false,
-  className = "",
+  className,
 }: ButtonProps) {
   const isDisabled = disabled || loading;
 
