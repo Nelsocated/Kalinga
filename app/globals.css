@@ -11,6 +11,38 @@ body {
   --color-text: black;
   --color-male: #6495ed;
   --color-female: #f8c8dc;
+  --color-border: #f3be0f;
 
   --font-sans: var(--font-outfit);
+
+  --color-submitted: black;
+  --color-under_review: #1b48a1;
+  --color-contacting: #6b1086;
+  --color-reject: #c01717;
+  --color-approved: #0f971c;
+  --color-adopted: #ec2e57;
+  --color-withdrawn: #f07800;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #f3be0f;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d8a90d;
 }

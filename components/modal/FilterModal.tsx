@@ -1,11 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { fetchSearchPets } from "@/lib/services/search_pets";
+import Image from "next/image";
+
+import type { Pets, SearchPetCardItem } from "@/lib/types/pets";
+import { fetchSearchPets } from "@/lib/services/pet/petSearchClient";
+
 import PetCard from "@/components/cards/PetCard";
 import Button from "@/components/ui/Button";
-import Image from "next/image";
-import Back_Button from "../ui/Back";
+import BackButton from "../ui/BackButton";
 
 import Filter from "@/public/icons/Filter.svg";
 import Gender from "@/public/icons/Gender.svg";
@@ -18,27 +21,24 @@ import female_icon from "@/public/icons/female-icon.svg";
 import Age from "@/public/icons/Age.svg";
 import Size from "@/public/icons/Size.svg";
 
-function toggleValue(
-  value: string,
-  setter: React.Dispatch<React.SetStateAction<string[]>>,
-) {
-  setter((prev) =>
-    prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
-  );
-}
-
 type ViewKey = "filters" | "results";
+
+function toggleArrayValue<T extends string>(value: T, values: T[]): T[] {
+  return values.includes(value)
+    ? values.filter((v) => v !== value)
+    : [...values, value];
+}
 
 export default function FilterModal() {
   const [open, setOpen] = useState(false);
   const [activeView, setActiveView] = useState<ViewKey>("filters");
 
-  const [species, setSpecies] = useState<string[]>([]);
-  const [sex, setSex] = useState<string[]>([]);
-  const [age, setAge] = useState<string[]>([]);
-  const [size, setSize] = useState<string[]>([]);
+  const [species, setSpecies] = useState<Pets["species"][]>([]);
+  const [sex, setSex] = useState<Pets["sex"][]>([]);
+  const [age, setAge] = useState<Pets["age"][]>([]);
+  const [size, setSize] = useState<Pets["size"][]>([]);
 
-  const [pets, setPets] = useState<any[]>([]);
+  const [pets, setPets] = useState<SearchPetCardItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterError, setFilterError] = useState<string | null>(null);
 
@@ -47,18 +47,33 @@ export default function FilterModal() {
     [species, sex, age, size],
   );
 
-  function handleToggle(
-    value: string,
-    setter: React.Dispatch<React.SetStateAction<string[]>>,
-  ) {
-    setFilterError(null); // clear immediately on any filter click
-    toggleValue(value, setter);
+  const hasAnyFilter = useMemo(
+    () =>
+      species.length > 0 || sex.length > 0 || age.length > 0 || size.length > 0,
+    [species, sex, age, size],
+  );
+
+  function handleSpeciesToggle(value: Pets["species"]) {
+    setFilterError(null);
+    setSpecies((prev) => toggleArrayValue(value, prev));
+  }
+
+  function handleSexToggle(value: Pets["sex"]) {
+    setFilterError(null);
+    setSex((prev) => toggleArrayValue(value, prev));
+  }
+
+  function handleAgeToggle(value: Pets["age"]) {
+    setFilterError(null);
+    setAge((prev) => toggleArrayValue(value, prev));
+  }
+
+  function handleSizeToggle(value: Pets["size"]) {
+    setFilterError(null);
+    setSize((prev) => toggleArrayValue(value, prev));
   }
 
   async function runSearch() {
-    const hasAnyFilter =
-      species.length > 0 || sex.length > 0 || age.length > 0 || size.length > 0;
-
     if (!hasAnyFilter) {
       setFilterError(
         "Please select at least one filter before clicking See Pets.",
@@ -69,10 +84,11 @@ export default function FilterModal() {
     try {
       setFilterError(null);
       setLoading(true);
+
       const data = await fetchSearchPets(filters);
-      setPets(data ?? []);
+      setPets(data);
       setActiveView("results");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Failed to fetch pets:", error);
       setPets([]);
       setActiveView("results");
@@ -91,24 +107,28 @@ export default function FilterModal() {
     setActiveView("filters");
   }
 
+  function closeModal() {
+    setOpen(false);
+  }
+
   function handleBack() {
     if (activeView === "results") {
       setActiveView("filters");
       return;
     }
 
-    setOpen(false);
+    closeModal();
   }
 
   const sectionTitle = "flex items-center gap-2 text-2xl font-semibold";
-  const buttonGroup = "flex flex-wrap gap-2 mt-2 ml-12";
+  const buttonGroup = "ml-12 mt-2 flex flex-wrap gap-2";
 
   const filterBtn = (active: boolean) =>
     [
-      "min-w-[130px] rounded-md border flex items-center justify-center gap-2 text-center leading-none transition",
+      "min-w-[130px] rounded-[15px] border flex items-center justify-center gap-2 text-center leading-none transition",
       active
-        ? "bg-primary text-black border-primary"
-        : "bg-white text-black border-black/20 hover:bg-primary/10",
+        ? "bg-primary text-black"
+        : "border-black/50 bg-white text-black hover:bg-primary/10",
     ].join(" ");
 
   return (
@@ -120,7 +140,7 @@ export default function FilterModal() {
           setActiveView("filters");
           setFilterError(null);
         }}
-        className="border border-primary"
+        className="border"
       >
         <div className="flex gap-3">
           <Image src={Filter} alt="filter-icon" width={25} height={25} />
@@ -130,26 +150,20 @@ export default function FilterModal() {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setOpen(false)}
-          />
+          <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
 
-          <div className="relative z-10 w-180 max-w-[92%] rounded-2xl border-2 border-primary bg-white">
-            {/* HEADER */}
-            <div className="relative rounded-t-2xl bg-primary py-4 text-4xl font-bold text-white flex items-center justify-center">
+          <div className="relative z-10 w-180 max-w-[92%] rounded-[15px] border-2 bg-white">
+            <div className="relative flex items-center justify-center rounded-t-[15px] bg-primary py-4 text-4xl font-bold text-white">
               <div className="absolute left-4">
-                <Back_Button onClick={handleBack} />
+                <BackButton onClick={handleBack} />
               </div>
 
               {activeView === "filters" ? "Find your match" : "Recommendations"}
             </div>
 
-            {/* CONTENT */}
             <div className="max-h-[82vh] overflow-y-auto p-5">
               {activeView === "filters" ? (
                 <div className="space-y-3">
-                  {/* SPECIES */}
                   <div>
                     <div className={sectionTitle}>
                       <Image src={Species} alt="" width={45} height={45} />
@@ -160,7 +174,7 @@ export default function FilterModal() {
                       <Button
                         type="button"
                         className={filterBtn(species.includes("dog"))}
-                        onClick={() => handleToggle("dog", setSpecies)}
+                        onClick={() => handleSpeciesToggle("dog")}
                       >
                         <Image src={Dog} alt="" width={32} height={32} />
                         Dog
@@ -169,7 +183,7 @@ export default function FilterModal() {
                       <Button
                         type="button"
                         className={filterBtn(species.includes("cat"))}
-                        onClick={() => handleToggle("cat", setSpecies)}
+                        onClick={() => handleSpeciesToggle("cat")}
                       >
                         <Image src={Cat} alt="" width={32} height={32} />
                         Cat
@@ -177,7 +191,6 @@ export default function FilterModal() {
                     </div>
                   </div>
 
-                  {/* SEX */}
                   <div>
                     <div className={sectionTitle}>
                       <Image src={Gender} alt="gender" width={40} height={40} />
@@ -188,7 +201,7 @@ export default function FilterModal() {
                       <Button
                         type="button"
                         className={filterBtn(sex.includes("male"))}
-                        onClick={() => handleToggle("male", setSex)}
+                        onClick={() => handleSexToggle("male")}
                       >
                         <Image
                           src={male_icon}
@@ -202,7 +215,7 @@ export default function FilterModal() {
                       <Button
                         type="button"
                         className={filterBtn(sex.includes("female"))}
-                        onClick={() => handleToggle("female", setSex)}
+                        onClick={() => handleSexToggle("female")}
                       >
                         <Image
                           src={female_icon}
@@ -215,7 +228,6 @@ export default function FilterModal() {
                     </div>
                   </div>
 
-                  {/* AGE */}
                   <div>
                     <div className={sectionTitle}>
                       <Image src={Age} alt="age-icon" width={35} height={35} />
@@ -225,8 +237,8 @@ export default function FilterModal() {
                     <div className={buttonGroup}>
                       <Button
                         type="button"
-                        className={filterBtn(age.includes("puppy/kitten"))}
-                        onClick={() => handleToggle("puppy/kitten", setAge)}
+                        className={filterBtn(age.includes("kitten/puppy"))}
+                        onClick={() => handleAgeToggle("kitten/puppy")}
                       >
                         <div>
                           Puppy/Kitten
@@ -238,7 +250,7 @@ export default function FilterModal() {
                       <Button
                         type="button"
                         className={filterBtn(age.includes("young_adult"))}
-                        onClick={() => handleToggle("young_adult", setAge)}
+                        onClick={() => handleAgeToggle("young_adult")}
                       >
                         <div>
                           Young Adult
@@ -250,7 +262,7 @@ export default function FilterModal() {
                       <Button
                         type="button"
                         className={filterBtn(age.includes("adult"))}
-                        onClick={() => handleToggle("adult", setAge)}
+                        onClick={() => handleAgeToggle("adult")}
                       >
                         <div>
                           Adult
@@ -262,7 +274,7 @@ export default function FilterModal() {
                       <Button
                         type="button"
                         className={filterBtn(age.includes("senior"))}
-                        onClick={() => handleToggle("senior", setAge)}
+                        onClick={() => handleAgeToggle("senior")}
                       >
                         <div>
                           Senior
@@ -273,7 +285,6 @@ export default function FilterModal() {
                     </div>
                   </div>
 
-                  {/* SIZE */}
                   <div>
                     <div className={sectionTitle}>
                       <Image
@@ -289,7 +300,7 @@ export default function FilterModal() {
                       <Button
                         type="button"
                         className={filterBtn(size.includes("small"))}
-                        onClick={() => handleToggle("small", setSize)}
+                        onClick={() => handleSizeToggle("small")}
                       >
                         Small
                       </Button>
@@ -297,7 +308,7 @@ export default function FilterModal() {
                       <Button
                         type="button"
                         className={filterBtn(size.includes("medium"))}
-                        onClick={() => handleToggle("medium", setSize)}
+                        onClick={() => handleSizeToggle("medium")}
                       >
                         Medium
                       </Button>
@@ -305,27 +316,32 @@ export default function FilterModal() {
                       <Button
                         type="button"
                         className={filterBtn(size.includes("large"))}
-                        onClick={() => handleToggle("large", setSize)}
+                        onClick={() => handleSizeToggle("large")}
                       >
                         Large
                       </Button>
                     </div>
                   </div>
 
-                  {/* ACTIONS */}
                   <div>
-                    {filterError && (
+                    {filterError ? (
                       <div className="mb-2 text-center text-sm font-medium text-red-600">
                         {filterError}
                       </div>
-                    )}
+                    ) : null}
 
                     <div className="flex flex-wrap justify-center gap-3">
                       <Button
+                        type="button"
                         onClick={runSearch}
-                        className="flex items-center justify-center gap-2 border border-primary"
+                        className="flex items-center justify-center gap-2 border bg-white"
                       >
-                        <Image src={Meet} alt="" width={32} height={32} />
+                        <Image
+                          src={Meet}
+                          alt="meet-icon"
+                          width={32}
+                          height={32}
+                        />
                         See Pets
                       </Button>
 
@@ -341,29 +357,31 @@ export default function FilterModal() {
                 </div>
               ) : (
                 <div className="space-y-4 pt-2">
-                  {loading && <div>Loading...</div>}
+                  {loading ? <div>Loading...</div> : null}
 
-                  {!loading && pets.length === 0 && (
+                  {!loading && pets.length === 0 ? (
                     <div className="text-center text-sm opacity-60">
                       No pets found. Try changing your filters.
                     </div>
-                  )}
+                  ) : null}
 
-                  {!loading && pets.length > 0 && (
+                  {!loading && pets.length > 0 ? (
                     <div className="text-center text-sm font-medium">
                       {pets.length} pet{pets.length > 1 ? "s" : ""} found
                     </div>
-                  )}
+                  ) : null}
 
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                    {pets.map((pet: any) => (
+                    {pets.map((pet) => (
                       <PetCard
                         key={pet.id}
                         href={`/site/profiles/pets/${pet.id}`}
                         imageUrl={pet.photo_url}
-                        petName={pet.name}
-                        shelterLogo={pet.shelter?.logo_url}
-                        shelterName={pet.shelter?.shelter_name}
+                        petName={pet.pet_name}
+                        shelterLogo={pet.shelter?.logo_url ?? ""}
+                        shelterName={
+                          pet.shelter?.shelter_name ?? "Unknown Shelter"
+                        }
                         sex={pet.sex}
                       />
                     ))}

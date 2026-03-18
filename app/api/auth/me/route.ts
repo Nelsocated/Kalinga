@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { me } from "@/lib/services/auth_service";
+import { me } from "@/lib/services/authService";
 
 export async function GET() {
   const result = await me();

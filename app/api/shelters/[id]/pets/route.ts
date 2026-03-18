@@ -1,17 +1,24 @@
 import { NextResponse } from "next/server";
-import { getShelterPostedPets } from "@/lib/db/shelter_posts";
+import { getShelterPostedPets } from "@/lib/services/shelterService";
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export async function GET(_: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
-    const data = await getShelterPostedPets(id);
-    return NextResponse.json({ data });
-  } catch (err: any) {
+
+    const pets = await getShelterPostedPets(id);
+
+    return NextResponse.json(pets, { status: 200 });
+  } catch (error) {
+    console.error("[GET /api/shelters/[id]/pets]", error);
+
     return NextResponse.json(
-      { error: err?.message ?? "Failed to fetch shelter pets" },
+      { message: "Failed to fetch shelter pets" },
       { status: 500 },
     );
   }

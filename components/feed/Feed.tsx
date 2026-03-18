@@ -1,25 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import PetCard from "./PetCard";
-
-export type FeedItem = {
-  id: string;
-  name: string;
-  created_at: string;
-  pet_media: {
-    id: string;
-    type: "video" | "photo";
-    url: string;
-    caption: string | null;
-  }[];
-  shelter: {
-    id: string;
-    shelter_name?: string | null;
-    logo_url?: string | null;
-  };
-};
+import { useEffect, useState } from "react";
+import ViewPort from "./ViewPort";
+import type { FeedItem } from "@/lib/types/feed";
+import type { ShelterMini } from "@/components/layout/RightBar";
 
 type FeedNav = {
   next: () => void;
@@ -30,107 +14,98 @@ type FeedNav = {
   total: number;
 };
 
-export default function Feed({
-  onNavReady,
-  onActiveChange,
-}: {
-  onNavReady?: (nav: FeedNav) => void;
-  onActiveChange?: (active: {
-    pet_id: string;
-    media_id: string | null;
-    shelter: FeedItem["shelter"];
-  }) => void;
-}) {
-  const [items, setItems] = useState<FeedItem[]>([]);
-  const [index, setIndex] = useState(0);
+type FeedProps = {
+  onActiveChange?: (
+    item: {
+      pet_id: string;
+      media_id: string | null;
+      shelter: ShelterMini | null;
+    } | null,
+  ) => void;
+  onNavChange?: (nav: FeedNav | null) => void;
+};
 
+export default function Feed({ onActiveChange, onNavChange }: FeedProps) {
+  const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const searchParams = useSearchParams();
-  const initialPet = searchParams.get("pet");
-
-  const total = items.length;
-  const hasPrev = index > 0;
-  const hasNext = index < total - 1;
-
-  const nav = useMemo<FeedNav>(
-    () => ({
-      next: () => setIndex((i) => Math.min(total - 1, i + 1)),
-      prev: () => setIndex((i) => Math.max(0, i - 1)),
-      hasNext,
-      hasPrev,
-      index,
-      total,
-    }),
-    [hasNext, hasPrev, index, total],
-  );
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    onNavReady?.(nav);
-  }, [nav, onNavReady]);
-
-  useEffect(() => {
-    if (!items.length) return;
-    if (!initialPet) return;
-
-    const idx = items.findIndex((p) => p.id === initialPet);
-    if (idx !== -1) setIndex(idx);
-  }, [items, initialPet]);
-
-  useEffect(() => {
-    const current = items[index];
-    if (!current) return;
-
-    const firstVideo =
-      current.pet_media.find((m) => m.type === "video") ?? null;
-
-    onActiveChange?.({
-      pet_id: current.id,
-      media_id: firstVideo?.id ?? null,
-      shelter: current.shelter,
-    });
-  }, [items, index, onActiveChange]);
-
-  useEffect(() => {
-    async function load() {
+    async function loadFeed() {
       try {
         setLoading(true);
         setError(null);
 
-        const res = await fetch("/api/feed", { cache: "no-store" });
+        const res = await fetch("/api/feed?limit=10", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const result = await res.json();
 
         if (!res.ok) {
-          const text = await res.text();
-          throw new Error(
-            `Failed to load feed (${res.status}): ${text.slice(0, 120)}`,
-          );
+          throw new Error(result.error || "Failed to fetch feed");
         }
 
-        const json = await res.json();
-        const nextItems: FeedItem[] = json.items ?? [];
-
-        setItems(nextItems);
-      } catch (e: any) {
-        setError(e?.message ?? "Something went wrong");
+        setItems(result.items ?? []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch feed");
       } finally {
         setLoading(false);
       }
     }
 
-    load();
+    loadFeed();
   }, []);
 
-  if (loading) return <div className="p-6">Loading...</div>;
-  if (error) return <div className="p-6 text-red-600">{error}</div>;
-  if (items.length === 0)
-    return <div className="p-6 text-gray-600">No pets yet.</div>;
+  useEffect(() => {
+    if (!items.length) {
+      onActiveChange?.(null);
+      onNavChange?.(null);
+      return;
+    }
 
-  const current = items[index];
+    const current = items[currentIndex];
+    if (!current) {
+      onActiveChange?.(null);
+      onNavChange?.(null);
+      return;
+    }
+
+    const videoMedia =
+      current.pet_media?.find((media) => media.type === "video") ?? null;
+
+    onActiveChange?.({
+      pet_id: current.id,
+      media_id: videoMedia?.id ?? null,
+      shelter: current.shelter
+        ? {
+            id: current.shelter.id,
+            shelter_name: current.shelter.shelter_name,
+            logo_url: current.shelter.logo_url ?? null,
+          }
+        : null,
+    });
+
+    onNavChange?.({
+      next: () =>
+        setCurrentIndex((prev) => Math.min(prev + 1, items.length - 1)),
+      prev: () => setCurrentIndex((prev) => Math.max(prev - 1, 0)),
+      hasNext: currentIndex < items.length - 1,
+      hasPrev: currentIndex > 0,
+      index: currentIndex,
+      total: items.length,
+    });
+  }, [items, currentIndex, onActiveChange, onNavChange]);
+
+  if (loading) return <div>Loading feed...</div>;
+  if (error) return <div>{error}</div>;
+  if (!items.length) return <div>No feed items found.</div>;
 
   return (
-    <div className="h-[95svh] aspect-9/16 w-full max-w-[55svh] rounded-2xl border-2 border-primary overflow-hidden bg-black">
-      <PetCard key={current.id} item={current} />
+    <div className="h-[95svh] aspect-9/16 w-full max-w-[55svh] rounded-2xl border-2 overflow-hidden bg-black">
+      <ViewPort item={items[currentIndex]} />
     </div>
   );
 }

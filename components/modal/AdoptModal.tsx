@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
-import Input from "../ui/input";
+import { useState, type FormEvent } from "react";
+import Input from "../ui/Input";
 import Button from "../ui/Button";
-import Back_Button from "../ui/Back";
+import Back_Button from "../ui/BackButton";
+import {
+  createPetAdoptionRequest,
+  fetchPetAdoptionStatus,
+  type PetStatus,
+} from "@/lib/services/adoption/adoptionClient";
 
 type Props = {
   petId: string;
 };
 
-type AdoptionStatus = "available" | "pending" | "adopted";
 type ModalView = "form" | "submitted" | "adopted";
 
 type FormState = {
@@ -25,37 +29,6 @@ type FormState = {
   confirm_attention: boolean;
   confirm_vet: boolean;
 };
-
-async function fetchPetAdoptionStatus(petId: string) {
-  const res = await fetch(
-    `/api/adoption/status?pet_id=${encodeURIComponent(petId)}`,
-    { cache: "no-store" },
-  );
-
-  const json = await res.json();
-
-  if (!res.ok) {
-    throw new Error(json?.error ?? "Failed to fetch pet adoption status.");
-  }
-
-  return json as { id: string; adoption_status: AdoptionStatus };
-}
-
-async function postAdoptionRequest(payload: { pet_id: string } & FormState) {
-  const res = await fetch("/api/adoption/request", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  const json = await res.json();
-
-  if (!res.ok) {
-    throw new Error(json?.error ?? "Failed to create adoption request.");
-  }
-
-  return json;
-}
 
 const initialForm: FormState = {
   full_name: "",
@@ -73,21 +46,24 @@ const initialForm: FormState = {
 
 export default function AdoptModal({ petId }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [status, setStatus] = useState<AdoptionStatus | null>(null);
+  const [status, setStatus] = useState<PetStatus | null>(null);
   const [view, setView] = useState<ModalView>("form");
   const [loading, setLoading] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
   const [form, setForm] = useState<FormState>(initialForm);
 
-  function closeModal() {
-    setIsOpen(false);
+  function resetModalState() {
     setErrorMsg(null);
     setLoading(false);
     setCheckingStatus(false);
     setStatus(null);
     setView("form");
+  }
+
+  function closeModal() {
+    setIsOpen(false);
+    resetModalState();
   }
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -99,27 +75,22 @@ export default function AdoptModal({ petId }: Props) {
 
   async function openModal() {
     setIsOpen(true);
-    setErrorMsg(null);
+    resetModalState();
     setCheckingStatus(true);
 
     try {
       const data = await fetchPetAdoptionStatus(petId);
-      setStatus(data.adoption_status);
-
-      if (data.adoption_status === "adopted") {
-        setView("adopted");
-      } else {
-        setView("form");
-      }
-    } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Unexpected error.");
+      setStatus(data.status);
+      setView(data.status === "adopted" ? "adopted" : "form");
+    } catch (error: unknown) {
+      setErrorMsg(error instanceof Error ? error.message : "Unexpected error.");
       setView("form");
     } finally {
       setCheckingStatus(false);
     }
   }
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const allChecked =
@@ -138,15 +109,12 @@ export default function AdoptModal({ petId }: Props) {
       setLoading(true);
       setErrorMsg(null);
 
-      await postAdoptionRequest({
-        pet_id: petId,
-        ...form,
-      });
+      await createPetAdoptionRequest(petId, form);
 
       setView("submitted");
       setForm(initialForm);
-    } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Unexpected error.");
+    } catch (error: unknown) {
+      setErrorMsg(error instanceof Error ? error.message : "Unexpected error.");
     } finally {
       setLoading(false);
     }
@@ -156,7 +124,7 @@ export default function AdoptModal({ petId }: Props) {
     <>
       <button
         onClick={openModal}
-        className="bg-primary rounded-2xl px-10 py-2 text-xl text-white font-bold"
+        className="rounded-[15px] bg-primary px-10 py-2 text-xl font-bold text-white"
       >
         Adopt!
       </button>
@@ -165,26 +133,26 @@ export default function AdoptModal({ petId }: Props) {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
 
-          <div className="relative z-10 w-125 max-w-[90%] rounded-2xl bg-white shadow-2xl">
+          <div className="relative z-10 w-125 max-w-[90%] overflow-hidden rounded-[15px] border-2 bg-white shadow-2xl">
             {checkingStatus ? (
               <>
-                <div className="rounded-t-2xl bg-primary py-4 text-center text-xl font-bold text-white">
+                <div className="rounded-t-[15px] bg-primary py-4 text-center text-xl font-bold text-white">
                   Adopt Pet
                 </div>
 
                 <div className="max-h-[75vh] overflow-y-auto p-5">
                   <div className="text-center text-base font-medium">
-                    Checking Pet Status...
+                    Checking pet status...
                   </div>
                 </div>
               </>
             ) : view === "adopted" ? (
               <>
-                <div className="rounded-t-2xl bg-primary py-4 text-center text-xl font-bold text-white">
+                <div className="rounded-t-[15px] bg-primary py-4 text-center text-xl font-bold text-white">
                   Pet Already Adopted!
                 </div>
 
-                <div className="max-h-[75vh] overflow-y-auto p-5 space-y-4 text-center">
+                <div className="max-h-[75vh] space-y-4 overflow-y-auto p-5 text-center">
                   <div className="font-semibold">
                     Sorry, this pet has already found a home.
                   </div>
@@ -201,17 +169,17 @@ export default function AdoptModal({ petId }: Props) {
               </>
             ) : view === "submitted" ? (
               <>
-                <div className="rounded-t-2xl bg-primary py-4 text-center text-xl font-bold text-white">
+                <div className="rounded-t-[15px] bg-primary py-4 text-center text-xl font-bold text-white">
                   Application Submitted!
                 </div>
 
-                <div className="max-h-[75vh] overflow-y-auto p-5 space-y-4 text-center">
+                <div className="max-h-[75vh] space-y-4 overflow-y-auto p-5 text-center">
                   <div className="font-semibold">
                     Thank you for submitting your adoption application!
                   </div>
                   <div className="text-justify">
                     We&apos;re excited that you&apos;re considering giving a pet
-                    a loving home. The shelter will be in touch soon!
+                    a loving home. The shelter will be in touch soon.
                   </div>
 
                   <div className="pt-2">
@@ -223,21 +191,21 @@ export default function AdoptModal({ petId }: Props) {
               </>
             ) : (
               <>
-                <div className="rounded-t-2xl bg-primary py-4 grid grid-cols-3 items-center">
+                <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-4">
                   <div className="pl-4">
                     <Back_Button onClick={closeModal} />
                   </div>
                   <div className="text-center text-xl font-bold text-white">
                     Adopt Pet
                   </div>
-                  <></>
+                  <div />
                 </div>
 
-                <div className="max-h-[75vh] overflow-y-auto p-5 space-y-5">
+                <div className="max-h-[75vh] space-y-5 overflow-y-auto p-5">
                   {status === "pending" ? (
                     <div className="text-sm leading-relaxed">
-                      This pet currently has a pending adoption application, but
-                      you may still submit your interest.
+                      This pet currently has an active adoption process, but you
+                      may still submit your interest.
                     </div>
                   ) : null}
 
@@ -272,6 +240,7 @@ export default function AdoptModal({ petId }: Props) {
                       onChange={(e) => updateField("email", e.target.value)}
                       placeholder="Email"
                       type="email"
+                      required
                     />
 
                     <Input
@@ -286,16 +255,17 @@ export default function AdoptModal({ petId }: Props) {
                     <label className="leading-7">
                       Why do you want to adopt this pet?
                     </label>
+
                     <textarea
                       value={form.reason}
                       onChange={(e) => updateField("reason", e.target.value)}
                       placeholder="Why do you want to adopt this pet?"
                       required
-                      className="min-h-[30] w-full rounded-xl border border-primary focus:focus:ring-2 focus:ring-primary px-4 py-3 outline-none"
+                      className="min-h-30 w-full rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
                     />
 
                     <div>
-                      <div className="text-lg font-bold pb-2">
+                      <div className="pb-2 text-lg font-bold">
                         Pet Care Checklist
                       </div>
 
@@ -339,7 +309,7 @@ export default function AdoptModal({ petId }: Props) {
                             className="mt-1 accent-primary"
                           />
                           <span>
-                            I can provide daily feeding & fresh water.
+                            I can provide daily feeding and fresh water.
                           </span>
                         </label>
 
@@ -374,12 +344,17 @@ export default function AdoptModal({ petId }: Props) {
                     </div>
 
                     {errorMsg ? (
-                      <div className="text-sm text-red-600 text-center">
+                      <div className="text-center text-sm text-red-600">
                         {errorMsg}
                       </div>
                     ) : null}
-                    <div>
-                      <Button type="submit" disabled={loading}>
+
+                    <div className="flex justify-center">
+                      <Button
+                        type="submit"
+                        disabled={loading}
+                        className="border border-primary"
+                      >
                         {loading ? "Submitting..." : "Submit"}
                       </Button>
                     </div>

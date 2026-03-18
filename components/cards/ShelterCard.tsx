@@ -24,7 +24,7 @@ function Stat({
   value: number | null | undefined;
 }) {
   return (
-    <div className="rounded-xl bg-primary px-7 py-1 flex justify-center items-center gap-6">
+    <div className="rounded-[15px] bg-primary px-7 py-1 flex justify-center items-center gap-6">
       <div className="text-2xl font-semibold">{value ?? "-"}</div>
       <div className="text-lg">{label}</div>
     </div>
@@ -47,7 +47,7 @@ export default function ShelterCard({
     <Link
       href={href}
       className={[
-        "block w-full rounded-2xl bg-background p-3 shadow-sm transition  hover:bg-black/5",
+        "block w-full rounded-[15px] bg-background p-3 shadow-sm transition  hover:bg-black/5",
         className,
       ].join(" ")}
     >

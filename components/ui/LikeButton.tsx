@@ -3,24 +3,16 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-import {
-  getInitialLiked,
-  setLiked,
-  LikeTargetType,
-} from "@/lib/services/likes";
+export type LikeTargetType = "pet" | "shelter" | "video";
 
 function isExpectedAuthError(error: unknown) {
   if (!error || typeof error !== "object") {
     return false;
   }
 
-  const maybeError = error as { name?: string; message?: string };
-  return (
-    maybeError.name === "AuthSessionMissingError" ||
-    maybeError.message?.includes("Auth session missing") ||
-    maybeError.message?.includes("You must be logged in to like") ||
-    false
-  );
+  const maybeError = error as { message?: string };
+
+  return maybeError.message?.includes("You must be logged in to like") || false;
 }
 
 type Props = {
@@ -31,10 +23,55 @@ type Props = {
   theme?: "default" | "foster";
 };
 
+async function fetchInitialLiked(
+  targetType: LikeTargetType,
+  targetId: string,
+): Promise<boolean> {
+  const params = new URLSearchParams({
+    targetType,
+    targetId,
+  });
+
+  const res = await fetch(`/api/likes/status?${params.toString()}`, {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch like status");
+  }
+
+  const body = await res.json();
+  return !!body.liked;
+}
+
+async function updateLiked(
+  targetType: LikeTargetType,
+  targetId: string,
+  nextLiked: boolean,
+) {
+  const res = await fetch("/api/likes", {
+    method: nextLiked ? "POST" : "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      targetType,
+      targetId,
+    }),
+  });
+
+  const body = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(body?.message ?? "Failed to update like");
+  }
+}
+
 function LikeSvg({ className = "" }: { className?: string }) {
   return (
     <svg
-      viewBox="40 0 60 72"
+      viewBox="40 0 62 72"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`text-primary ${className}`}
@@ -55,7 +92,7 @@ function LikeSvg({ className = "" }: { className?: string }) {
 function LikedSvg({ className = "" }: { className?: string }) {
   return (
     <svg
-      viewBox="40 0 60 72"
+      viewBox="40 0 62 72"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`text-primary ${className}`}
@@ -91,7 +128,7 @@ export default function LikeButton({
   targetId,
   className = "",
 }: Props) {
-  const [liked, setLikedState] = useState(false);
+  const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -99,14 +136,18 @@ export default function LikeButton({
 
     (async () => {
       try {
-        const v = await getInitialLiked({ targetType, targetId });
-        if (alive) setLikedState(v);
-      } catch (e) {
-        if (!isExpectedAuthError(e)) {
-          console.error(e);
+        const value = await fetchInitialLiked(targetType, targetId);
+        if (alive) {
+          setLiked(value);
+        }
+      } catch (error) {
+        if (!isExpectedAuthError(error)) {
+          console.error(error);
         }
       } finally {
-        if (alive) setLoading(false);
+        if (alive) {
+          setLoading(false);
+        }
       }
     })();
 
@@ -119,16 +160,17 @@ export default function LikeButton({
     if (loading) return;
 
     const next = !liked;
-    setLikedState(next);
+    setLiked(next);
 
     try {
-      await setLiked({ targetType, targetId }, next);
-    } catch (e) {
-      if (!isExpectedAuthError(e)) {
-        console.error(e);
+      await updateLiked(targetType, targetId, next);
+    } catch (error) {
+      if (!isExpectedAuthError(error)) {
+        console.error(error);
       }
-      setLikedState(!next);
-      alert(e instanceof Error ? e.message : "Failed to update like.");
+
+      setLiked(!next);
+      alert(error instanceof Error ? error.message : "Failed to update like.");
     }
   }
 
@@ -138,7 +180,7 @@ export default function LikeButton({
       onClick={onToggle}
       whileTap={{ scale: 0.8 }}
       disabled={loading}
-      className="select-none cursor-pointer disabled:opacity-60"
+      className="cursor-pointer select-none disabled:opacity-60"
       aria-pressed={liked}
       aria-label={liked ? "Unlike" : "Like"}
     >

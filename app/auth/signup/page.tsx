@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Input from "@/components/ui/input";
+import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import kalinga_logo from "@/public/kalinga_logo.svg";
 import Image from "next/image";
@@ -54,24 +54,24 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-primary flex items-center justify-center">
-      <div className="bg-background w-[180svh] h-[85svh] rounded-2xl shadow-lg flex items-center justify-center">
+      <div className="bg-background w-[180svh] h-[85svh] rounded-[15px] shadow-lg flex items-center justify-center">
         <main className="flex w-full max-w-5xl items-center gap-20">
           <div className="md:flex flex-1 flex-col items-center justify-center">
             <Image
               src={kalinga_logo}
               alt="kalinga-logo"
-              width={300}
-              height={300}
+              width={200}
+              height={200}
               priority
             ></Image>
             <h1 className="flex text-3xl text-black font-semibold text-center">
-              Will you help us find our
+              Will you help us find
               <br />
-              fur-ever homes?
+              our fur-ever homes?
             </h1>
           </div>
 
-          <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-white border-2 border-primary">
+          <div className="w-full max-w-md rounded-[15px] p-6 shadow-sm bg-white border-2">
             <h1 className="flex text-3xl font-bold text-black justify-center">
               Create an Account
             </h1>

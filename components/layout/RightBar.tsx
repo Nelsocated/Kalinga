@@ -9,7 +9,7 @@ import LikeButton from "../ui/LikeButton";
 import up_button from "@/public/buttons/Up.svg";
 import down_button from "@/public/buttons/Down.svg";
 
-import { LikeTargetType } from "@/lib/services/likes";
+import { LikeTargetType } from "@/lib/services/pet/likeService";
 
 type FeedNav = {
   next: () => void;
@@ -51,14 +51,13 @@ export default function RightBar({ pet_id, media_id, shelter, nav }: Props) {
         <button
           type="button"
           onClick={goToShelter}
-          className="h-20 w-20 rounded-full overflow-hidden"
+          className="h-17 w-17 rounded-full overflow-hidden"
         >
           <Image
             src={shelter?.logo_url ?? "/fallback.png"}
             alt="Shelter"
-            width={90}
-            height={90}
-            className="h-full w-full object-cover"
+            width={110}
+            height={110}
           />
         </button>
 
@@ -77,7 +76,7 @@ export default function RightBar({ pet_id, media_id, shelter, nav }: Props) {
             id={media_id}
             type="video"
             petId={pet_id}
-            className="w-15 h-15"
+            className="w-13 h-13"
           />
         ) : null}
       </div>

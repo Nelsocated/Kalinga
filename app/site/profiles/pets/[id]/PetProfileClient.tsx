@@ -1,18 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import ProfileShell from "@/components/profile/pet/PetProfileTemplate";
-import ProfileHeader from "@/components/profile/pet/PetProfileHeader";
+import Image from "next/image";
+
+import PetProfileTemplate from "@/components/profile/pet/PetProfileTemplate";
+import PetProfileHeader from "@/components/profile/pet/PetProfileHeader";
 import ProfileSection from "@/components/profile/ProfileSection";
 import CharacteristicChip, {
   CharacteristicItem,
 } from "@/components/profile/CharacteristicChip";
 import LikeButton from "@/components/ui/LikeButton";
+import Back_Button from "@/components/ui/BackButton";
+import AdoptModal from "@/components/modal/AdoptModal";
+
 import Male_Icon from "@/public/icons/male-icon.svg";
 import Female_Icon from "@/public/icons/female-icon.svg";
-import Image from "next/image";
-import Back_Button from "@/components/ui/Back";
-import AdoptModal from "@/components/modal/AdoptModal";
 
 type Media = {
   id: string;
@@ -33,17 +35,21 @@ type PetProfile = {
   name: string;
   description: string | null;
   age_label?: string | null;
-  breed: string;
-  personality: string;
-  status: boolean;
-  species: string;
+  breed: string | null;
+  personality: string | null;
+  species: string | null;
+  photo_url: string | null;
   vaccinated: boolean;
   spayed_neutered: boolean;
   sex?: string | null;
   size?: string | null;
-  photo_url: string;
   shelter: ShelterMini | null;
   pet_media?: Media[];
+};
+
+type PetProfileClientProps = {
+  id: string;
+  initialPet: PetProfile;
 };
 
 function getSexIcon(sex?: string | null) {
@@ -77,62 +83,75 @@ function getSexIcon(sex?: string | null) {
 export default function PetProfileClient({
   id,
   initialPet,
-}: {
-  id: string;
-  initialPet: PetProfile;
-}) {
-  const [pet] = useState<PetProfile>(initialPet);
+}: PetProfileClientProps) {
   const [start, setStart] = useState(0);
 
   const extraPhotos = useMemo(() => {
-    const media = pet?.pet_media ?? [];
+    const media = initialPet.pet_media ?? [];
+
     return media
-      .filter((m) => m.type === "photo" && m.url !== pet?.photo_url)
+      .filter(
+        (item) => item.type === "photo" && item.url !== initialPet.photo_url,
+      )
       .slice(0, 5);
-  }, [pet]);
+  }, [initialPet]);
 
   const canSlide = extraPhotos.length > 3;
 
   const visibleExtras = useMemo(() => {
-    if (extraPhotos.length <= 3) return extraPhotos;
+    if (extraPhotos.length <= 3) {
+      return extraPhotos;
+    }
+
     return [0, 1, 2].map(
       (offset) => extraPhotos[(start + offset) % extraPhotos.length],
     );
   }, [extraPhotos, start]);
 
+  const characteristics: CharacteristicItem[] = useMemo(
+    () => [
+      { label: "Species", value: initialPet.species },
+      { label: "Breed", value: initialPet.breed },
+      { label: "Age", value: initialPet.age_label },
+      { label: "Size", value: initialPet.size },
+      { label: "Vaccinated", value: initialPet.vaccinated, type: "boolean" },
+      {
+        label: "Spayed/Neutered",
+        value: initialPet.spayed_neutered,
+        type: "boolean",
+      },
+    ],
+    [initialPet],
+  );
+
   const next = () => {
     if (!canSlide) return;
-    setStart((s) => (s + 1) % extraPhotos.length);
+    setStart((prev) => (prev + 1) % extraPhotos.length);
   };
 
   const prev = () => {
     if (!canSlide) return;
-    setStart((s) => (s - 1 + extraPhotos.length) % extraPhotos.length);
+    setStart((prev) => (prev - 1 + extraPhotos.length) % extraPhotos.length);
   };
 
-  const characteristics: CharacteristicItem[] = useMemo(() => {
-    return [
-      { label: "Species", value: pet.species },
-      { label: "Breed", value: pet.breed },
-      { label: "Age", value: pet.age_label },
-      { label: "Size", value: pet.size },
-      { label: "Vaccinated", value: pet.vaccinated, type: "boolean" },
-      { label: "Spayed/Neutered", value: pet.spayed_neutered, type: "boolean" },
-    ];
-  }, [pet]);
-
   return (
-    <ProfileShell
+    <PetProfileTemplate
       main={
         <>
-          <ProfileHeader
-            title={pet.name}
-            sex={getSexIcon(pet.sex)}
-            subtitle={pet.shelter?.shelter_name}
-            subtitleHref={`/site/profiles/shelter/${pet.shelter?.id}`}
-            location={pet.shelter?.location ?? "Unknown Location"}
-            imageUrl={pet.shelter?.logo_url}
-            likeButton={<LikeButton targetType="pet" targetId={pet.id} />}
+          <PetProfileHeader
+            title={initialPet.name}
+            sex={getSexIcon(initialPet.sex)}
+            subtitle={initialPet.shelter?.shelter_name}
+            subtitleHref={
+              initialPet.shelter?.id
+                ? `/site/profiles/shelter/${initialPet.shelter.id}`
+                : undefined
+            }
+            location={initialPet.shelter?.location ?? "Unknown Location"}
+            imageUrl={initialPet.shelter?.logo_url}
+            likeButton={
+              <LikeButton targetType="pet" targetId={initialPet.id} />
+            }
           />
 
           <ProfileSection title="Characteristics">
@@ -157,22 +176,22 @@ export default function PetProfileClient({
 
           <ProfileSection title="Information">
             <div className="text-sm">
-              {pet.description ?? "No description yet."}
+              {initialPet.description ?? "No description yet."}
             </div>
           </ProfileSection>
         </>
       }
       side={
-        <div className="p-7 relevant">
-          <div className="absolute top-11 left-96">
+        <div className="relevant p-7">
+          <div className="absolute top-11">
             <Back_Button />
           </div>
 
-          <div className="mb-4 mt-5 overflow-hidden rounded-2xl bg-black/5">
-            {pet.photo_url ? (
+          <div className="mt-5 mb-4 overflow-hidden rounded-2xl bg-black/5">
+            {initialPet.photo_url ? (
               <img
-                src={pet.photo_url}
-                alt={`${pet.name} main photo`}
+                src={initialPet.photo_url}
+                alt={`${initialPet.name} main photo`}
                 className="h-75 w-full object-cover"
               />
             ) : (
@@ -182,14 +201,14 @@ export default function PetProfileClient({
             )}
           </div>
 
-          {extraPhotos.length ? (
+          {extraPhotos.length > 0 ? (
             <div className="relative w-full">
               <div className="grid grid-cols-3 gap-3">
-                {visibleExtras.map((p) => (
+                {visibleExtras.map((photo) => (
                   <img
-                    key={p.id}
-                    src={p.url}
-                    alt={p.caption ?? "Pet photo"}
+                    key={photo.id}
+                    src={photo.url}
+                    alt={photo.caption ?? "Pet photo"}
                     className="aspect-5/7 w-full rounded-xl object-cover shadow-sm"
                   />
                 ))}
@@ -197,8 +216,9 @@ export default function PetProfileClient({
 
               {canSlide && (
                 <button
+                  type="button"
                   onClick={prev}
-                  className="absolute -left-6 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-black/5 hover:shadow-lg"
+                  className="absolute top-1/2 -left-6 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-black/5 hover:shadow-lg"
                 >
                   ‹
                 </button>
@@ -206,8 +226,9 @@ export default function PetProfileClient({
 
               {canSlide && (
                 <button
+                  type="button"
                   onClick={next}
-                  className="absolute -right-6 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-black/5 hover:shadow-lg"
+                  className="absolute top-1/2 -right-6 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-black/5 hover:shadow-lg"
                 >
                   ›
                 </button>

@@ -58,7 +58,7 @@ export default function PetCard({
     <Link
       href={href}
       className={[
-        "relative block w-50 rounded-3xl border border-primary bg-primary overflow-visible",
+        "relative block w-50 rounded-[15px] border bg-primary overflow-visible",
         className,
       ].join(" ")}
     >
@@ -69,7 +69,7 @@ export default function PetCard({
       ) : null}
 
       <div className="p-1">
-        <div className="relative h-45 overflow-hidden rounded-3xl">
+        <div className="relative h-45 overflow-hidden rounded-[15px]">
           <Image
             src={src}
             alt={`${petName} photo`}

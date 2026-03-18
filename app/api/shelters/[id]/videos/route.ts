@@ -1,17 +1,24 @@
 import { NextResponse } from "next/server";
-import { getShelterPostedVideos } from "@/lib/db/shelter_posts";
+import { getShelterPostedVideos } from "@/lib/services/shelterService";
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export async function GET(_: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
-    const data = await getShelterPostedVideos(id);
-    return NextResponse.json({ data });
-  } catch (err: any) {
+
+    const videos = await getShelterPostedVideos(id);
+
+    return NextResponse.json(videos, { status: 200 });
+  } catch (error) {
+    console.error("[GET /api/shelters/[id]/videos]", error);
+
     return NextResponse.json(
-      { error: err?.message ?? "Failed to fetch shelter videos" },
+      { message: "Failed to fetch shelter videos" },
       { status: 500 },
     );
   }

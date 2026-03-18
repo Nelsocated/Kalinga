@@ -1,42 +1,57 @@
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import PetProfileClient from "./PetProfileClient";
+import { getPetById } from "@/lib/services/pet/petService";
+import { getPetPhotosByPetId } from "@/lib/services/petMediaService";
+import { fetchShelterById } from "@/lib/services/shelterService";
 
-async function getPetProfileAPI(id: string) {
-  const h = await headers();
+type PageProps = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  const protocol =
-    h.get("x-forwarded-proto") ??
-    (process.env.NODE_ENV === "development" ? "http" : "https");
-
-  if (!host) throw new Error("Missing host header.");
-
-  const res = await fetch(`${protocol}://${host}/api/profiles/pets/${id}`, {
-    cache: "no-store",
-    headers: {
-      cookie: h.get("cookie") ?? "",
-    },
-  });
-
-  const body = await res.json().catch(() => ({}));
-
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(body?.error ?? `Request failed: ${res.status}`);
-
-  // supports either { data } or raw object response
-  return body?.data ?? body ?? null;
-}
-
-export default async function PetProfilePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function PetProfilePage({ params }: PageProps) {
   const { id } = await params;
 
-  const pet = await getPetProfileAPI(id);
-  if (!pet) return notFound();
+  const pet = await getPetById(id);
 
-  return <PetProfileClient id={id} initialPet={pet} />;
+  if (!pet) {
+    return notFound();
+  }
+
+  const [shelter, petMedia] = await Promise.all([
+    pet.shelter_id ? fetchShelterById(pet.shelter_id) : Promise.resolve(null),
+    getPetPhotosByPetId(pet.id),
+  ]);
+
+  const mappedPet = {
+    id: pet.id,
+    name: pet.pet_name || "Unknown Pet",
+    description: pet.description || null,
+    age_label: pet.age || null,
+    breed: pet.breed || "Unknown Breed",
+    personality: pet.personality || "No personality listed",
+    species: pet.species || "Unknown Species",
+    vaccinated: pet.vaccinated,
+    spayed_neutered: pet.spayed_neutered,
+    sex: pet.sex ?? null,
+    size: pet.size || null,
+    photo_url: pet.photo_url || null,
+    shelter: shelter
+      ? {
+          id: shelter.id,
+          shelter_name: shelter.shelter_name ?? null,
+          logo_url: shelter.logo_url ?? null,
+          location: shelter.location ?? null,
+        }
+      : null,
+    pet_media: petMedia.map((media) => ({
+      id: media.id,
+      type: media.type,
+      url: media.url,
+      caption: media.caption ?? null,
+    })),
+  };
+
+  return <PetProfileClient id={id} initialPet={mappedPet} />;
 }

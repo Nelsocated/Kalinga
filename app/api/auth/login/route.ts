@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { login } from "@/lib/services/auth_service";
+import { login } from "@/lib/services/authService";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);

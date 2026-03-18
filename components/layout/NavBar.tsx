@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import Button from "@/components/ui/Button";
-import { createClient } from "@/lib/supabase/client";
+import { createClientSupabase } from "@/lib/supabase/client";
 import FilterModal from "../modal/FilterModal";
 
 import kalinga_logo from "@/public/kalinga_logo.svg";
@@ -18,7 +18,7 @@ import more_icon from "@/public/icons/More horizontal.svg";
 
 export default function Navbar() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = createClientSupabase();
 
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -36,15 +36,16 @@ export default function Navbar() {
     getUser();
   }, [supabase]);
 
-  const buttonStyle = "flex border-none gap-3";
+  const buttonStyle = "flex border-none gap-3 w-full";
+
   return (
     <aside>
       <div>
         <Image
           src={kalinga_logo}
           alt="kalinga-logo"
-          width={120}
-          height={120}
+          width={110}
+          height={110}
           priority
         />
       </div>

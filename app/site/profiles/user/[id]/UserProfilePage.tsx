@@ -1,10 +1,9 @@
 "use client";
 
-import Edit_Profile from "@/components/modal/Edit_Profile";
-import TopCard from "@/components/profile/user/UserShelterTopCard";
+import EditProfileModal from "@/components/modal/EditProfileModal";
+import Topcard from "@/components/profile/user/TopCard";
 import ProfileSection from "@/components/profile/ProfileSection";
-import ProfileTabsCard from "@/components/profile/card/ProfileTabsCard";
-import ProfileShell from "@/components/profile/user/UserProfileTemplate";
+import ProfileTemplate from "@/components/profile/user/ProfileTemplate";
 
 type UserUI = {
   id: string;
@@ -17,24 +16,30 @@ type UserUI = {
   created_at?: string | null;
 };
 
-export default function UserProfilePage({ user }: { user: UserUI }) {
+export default function UserProfilePage({
+  user,
+  tabs,
+}: {
+  user: UserUI;
+  tabs: React.ReactNode;
+}) {
   return (
-    <ProfileShell
+    <ProfileTemplate
       side={
         <>
           <ProfileSection title="Bio">{user.bio ?? "—"}</ProfileSection>
           <ProfileSection title="Contact">{user.contact ?? "—"}</ProfileSection>
-          <ProfileTabsCard role="user" />
+          {tabs}
         </>
       }
       main={
         <>
-          <TopCard
+          <Topcard
             title={user.full_name}
             subtitle={`@${user.username}`}
             location={user.location ?? ""}
             imageUrl={user.avatar_url}
-            rightSlot={<Edit_Profile />}
+            rightSlot={<EditProfileModal />}
           />
         </>
       }

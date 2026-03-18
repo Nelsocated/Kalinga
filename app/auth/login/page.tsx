@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Input from "@/components/ui/input";
+import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import kalinga_logo from "@/public/kalinga_logo.svg";
 import Image from "next/image";
@@ -46,7 +46,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-primary flex items-center justify-center">
-      <div className="bg-background w-[180svh] h-[85svh] rounded-2xl shadow-lg flex items-center justify-center">
+      <div className="bg-background w-[180svh] h-[85svh] rounded-[15px] shadow-lg flex items-center justify-center">
         <div className="fixed top-20 right-30">
           <Button onClick={() => router.push("/site/aboutus")}>About Us</Button>
         </div>
@@ -61,11 +61,13 @@ export default function LoginPage() {
               priority
             ></Image>
             <h1 className="flex text-3xl text-black font-semibold justify-center">
-              Will you help us find <br /> our fur-ever homes?
+              Will you help us find
+              <br />
+              our fur-ever homes?
             </h1>
           </div>
 
-          <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-white border-2 border-primary">
+          <div className="w-full max-w-md rounded-[15px] p-6 shadow-sm bg-white border-2">
             <form onSubmit={onSubmit} className="mt-6 space-y-4 shadow-m">
               <Input
                 label="Email"
@@ -96,7 +98,7 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <hr className="w-full mx-auto m-3" />
+            <hr className="w-full mx-auto m-3 border-black/50" />
 
             <Button
               onClick={() => router.push("/auth/signup")}

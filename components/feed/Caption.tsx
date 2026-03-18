@@ -26,9 +26,9 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
         layout
         transition={{ type: "spring", stiffness: 320, damping: 30 }}
         className={[
-          "relative z-10 w-full overflow-hidden rounded-2xl",
+          "relative z-10 w-full overflow-hidden rounded-[15px]",
           open
-            ? "bg-[#795f08]"
+            ? "bg-[#9c7800]"
             : "bg-linear-to-t from-black/70 via-black/40 to-transparent",
         ].join(" ")}
       >
@@ -47,9 +47,9 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
                 {open && (
                   <motion.p
                     key="caption"
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
+                    exit={{ opacity: 0, y: 10 }}
                     transition={{ duration: 0.2 }}
                     className="mt-1 pb-2 text-sm text-white whitespace-pre-wrap wrap-break-words"
                   >

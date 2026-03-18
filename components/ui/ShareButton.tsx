@@ -13,7 +13,7 @@ type Props = {
   className?: string;
 };
 
-export default function Share({ id, type, petId, className }: Props) {
+export default function ShareButton({ id, type, petId, className }: Props) {
   const [copied, setCopied] = useState(false);
 
   const copyLink = async () => {

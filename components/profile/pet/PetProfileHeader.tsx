@@ -5,7 +5,7 @@ import React from "react";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 import { useRouter } from "next/navigation";
 
-export default function ProfileHeader({
+export default function PetProfileHeader({
   title,
   sex,
   subtitle,

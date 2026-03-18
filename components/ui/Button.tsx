@@ -17,7 +17,7 @@ export default function Button({
   type = "button",
   loading = false,
   disabled = false,
-  className,
+  className = "",
 }: ButtonProps) {
   const isDisabled = disabled || loading;
 
@@ -29,12 +29,11 @@ export default function Button({
       className={`
         w-auto
         py-2 px-4
-        rounded-lg
+        rounded-[15px]
         font-medium
         transition
-        border-
-        border-primary
-        bg-yellow text-black
+        border
+        bg-background text-black
         hover:bg-primary
         disabled:opacity-50
         disabled:cursor-not-allowed

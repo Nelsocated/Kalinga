@@ -1,11 +1,25 @@
 import { NextResponse } from "next/server";
-import { getFeed } from "@/lib/services/feed";
+import { getFeed } from "@/lib/services/feedService";
 
-export async function GET() {
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Failed to fetch feed";
+}
+
+export async function GET(req: Request) {
   try {
-    const data = await getFeed();
+    const { searchParams } = new URL(req.url);
+    const limitParam = searchParams.get("limit");
+    const limit = Number(limitParam ?? 10);
+
+    const data = await getFeed(
+      Number.isFinite(limit) && limit > 0 ? limit : 10,
+    );
+
     return NextResponse.json({ items: data });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: getErrorMessage(error) },
+      { status: 500 },
+    );
   }
 }

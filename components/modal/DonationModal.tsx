@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import QR from "@/public/buttons/QR.svg";
 import Donate from "@/public/buttons/Donate.svg";
 import Image from "next/image";
-import Back_Button from "../ui/Back";
+import BackButton from "../ui/BackButton";
 
 type Donation = {
   id: string;
@@ -50,8 +50,9 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
       try {
         setErrorMsg(null);
 
-        const qs = new URLSearchParams({ shelter_id: shelterId }).toString();
-        const res = await fetch(`/api/donation?${qs}`, { cache: "no-store" });
+        const res = await fetch(`/api/shelters/${shelterId}/donation`, {
+          cache: "no-store",
+        });
 
         const json = await res.json().catch(() => ({}));
         if (!res.ok) {
@@ -104,11 +105,15 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="relative z-10 w-125 max-w-[90%] rounded-2xl bg-white shadow-2xl">
-            <Back_Button onClick={() => setIsOpen(false)} />
-
-            <div className="rounded-t-2xl bg-primary py-4 text-center text-xl font-bold text-white">
-              Donations
+          <div className="relative z-10 w-125 max-w-[90%] rounded-[15px] border-2 bg-white shadow-2xl">
+            <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-4">
+              <div className="pl-4">
+                <BackButton onClick={() => setIsOpen(false)} />
+              </div>
+              <div className="text-center text-xl font-bold text-white">
+                Donations
+              </div>
+              <div />
             </div>
 
             <div className="max-h-[75vh] overflow-y-auto p-5 space-y-6">
@@ -208,7 +213,7 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
                             <img
                               src={item.qr_url}
                               alt="QR"
-                              className="w-40 rounded-lg border"
+                              className="w-40 rounded-[15px] border"
                             />
                           ) : null}
                         </div>

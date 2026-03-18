@@ -17,8 +17,8 @@ export default function FosterCard({
   children,
 }: FosterCardProps) {
   return (
-    <div className="relative flex w-full rounded-3xl border-2 border-primary bg-primary hover:shadow-lg transition">
-      <div className="flex bg-background rounded-3xl w-full">
+    <div className="relative flex w-full rounded-[15px] border-2 bg-primary hover:shadow-lg transition">
+      <div className="flex bg-background rounded-[15px] w-full">
         <div>{children}</div>
 
         <div className="flex-1 p-7">
