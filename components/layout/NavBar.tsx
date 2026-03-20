@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import React, { useRef, useState } from "react";
 
 import Button from "@/components/ui/Button";
 import Input from "../ui/input";
@@ -13,12 +14,15 @@ import shelter_icon from "@/public/icons/Home.svg";
 import profile_icon from "@/public/icons/user.svg";
 import notif_icon from "@/public/icons/notifications.svg";
 import more_icon from "@/public/icons/More horizontal.svg";
+import MoreDropdown from "./MoreDropdown";
 
 export default function Navbar() {
   const router = useRouter();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreBtnRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <aside className="ml-6 lg:ml-8 w-56 shrink-0 pt-10">
+    <aside className="ml-6 lg:ml-8 w-56 shrink-0 pt-10 relative">
       <div className="flex justify-center gap-3">
         <Image
           src={kalinga_logo}
@@ -85,11 +89,13 @@ export default function Navbar() {
         <Button
           type="button"
           className="flex border-none justify-start gap-3"
-          onClick={() => router.push("/site/more")}
+          ref={moreBtnRef}
+          onClick={() => setMoreOpen((v) => !v)}
         >
           <Image src={more_icon} alt="more-icon" />
           <span> More</span>
         </Button>
+        <MoreDropdown open={moreOpen} onClose={() => setMoreOpen(false)} anchorRef={moreBtnRef} />
       </nav>
     </aside>
   );
