@@ -1,16 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getUserAdoptionNotifications } from "@/lib/services/adoption/adoptionService";
+
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
-export async function GET(
-  _req: NextRequest,
-  context: { params: Promise<{ id: string }> },
-) {
+export async function GET(_: Request, { params }: RouteContext) {
   try {
-    const { id: userId } = await context.params;
+    const { id: userId } = await params;
 
     if (!userId) {
       return NextResponse.json(
