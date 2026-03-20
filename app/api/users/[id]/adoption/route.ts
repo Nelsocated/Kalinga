@@ -2,18 +2,18 @@ import { NextResponse } from "next/server";
 import { getUserAdoptionNotifications } from "@/lib/services/adoption/adoptionService";
 
 type RouteContext = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
-export async function GET(_req: Request, { params }: RouteContext) {
+export async function GET(_: Request, { params }: RouteContext) {
   try {
-    const userId = params.id;
+    const { id: userId } = await params;
 
     if (!userId) {
       return NextResponse.json(

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUserAdoptionNotifications } from "@/lib/services/adoption/adoptionService";
+import { getUserById } from "@/lib/services/user/usersService";
 
 type RouteContext = {
   params: Promise<{
@@ -11,20 +11,21 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
-export async function GET(_: Request, { params }: RouteContext) {
+export async function GET(_req: Request, { params }: RouteContext) {
   try {
-    const { id: userId } = await params;
+    const { id } = await params;
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User id is required." },
-        { status: 400 },
-      );
+    if (!id) {
+      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
     }
 
-    const notifications = await getUserAdoptionNotifications(userId);
+    const user = await getUserById(id);
 
-    return NextResponse.json({ data: notifications }, { status: 200 });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ data: user }, { status: 200 });
   } catch (error: unknown) {
     return NextResponse.json(
       { error: getErrorMessage(error) },
