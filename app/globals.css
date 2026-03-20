@@ -46,3 +46,10 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #d8a90d;
 }
+
+body {
+  scrollbar-gutter: stable;
+}
+.scroll-stable {
+  scrollbar-gutter: stable;
+}

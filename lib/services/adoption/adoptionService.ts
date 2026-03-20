@@ -1,12 +1,14 @@
 import "server-only";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { Adoption_Requests } from "@/lib/types/adoptionRequests";
 
 export type PetStatus = "available" | "pending" | "adopted";
 
 export type AdoptionRequestStatus =
   | "pending"
-  | "contacting applicant"
-  | "not approved"
+  | "under_review"
+  | "contacting_applicant"
+  | "not_approved"
   | "withdrawn"
   | "approved"
   | "adopted";
@@ -44,6 +46,7 @@ export type AdoptionRequestRow = {
   confirm_vet: boolean;
   status: AdoptionRequestStatus;
   created_at: string;
+  updated_at: string;
 };
 
 type PetRow = {
@@ -135,4 +138,36 @@ export async function createAdoptionRequest(
   if (error) throw new Error(error.message);
 
   return data as AdoptionRequestRow;
+}
+
+export async function getUserAdoptionNotifications(
+  userId: string,
+): Promise<Adoption_Requests[]> {
+  const supabase = await createServerSupabase();
+
+  const { data, error } = await supabase
+    .from("adoption_requests")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []) as Adoption_Requests[];
+}
+
+export async function getShelterAdoptionNotifications(
+  shelterId: string,
+): Promise<Adoption_Requests[]> {
+  const supabase = await createServerSupabase();
+
+  const { data, error } = await supabase
+    .from("adoption_requests")
+    .select("*")
+    .eq("shelter_id", shelterId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []) as Adoption_Requests[];
 }

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Edit from "@/public/buttons/Edit.svg";
-import Back from "@/public/buttons/Back.svg";
+import BackButton from "../ui/BackButton";
 
 import Input from "@/components/ui/Input";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
@@ -15,6 +15,7 @@ import {
   uploadMyUserAvatar,
 } from "@/lib/services/user/userClient";
 import type { UserUpdatePayload } from "@/lib/services/user/usersService";
+import Button from "../ui/Button";
 
 export default function EditProfileModal() {
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -169,15 +170,9 @@ export default function EditProfileModal() {
               className="min-w-[70svh] overflow-hidden rounded-[15px] border-2 bg-background shadow-xl"
             >
               <div className="flex items-center justify-between bg-primary px-3 py-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="rounded-[15px] px-2 py-1 hover:bg-black/10"
-                >
-                  <Image src={Back} alt="back" width={20} height={20} />
-                </button>
+                <BackButton onClick={closeModal} />
 
-                <div className="text-sm font-semibold text-black">
+                <div className="text-2xl font-semibold text-black">
                   Edit Profile
                 </div>
 

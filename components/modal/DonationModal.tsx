@@ -116,7 +116,7 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
               <div />
             </div>
 
-            <div className="max-h-[75vh] overflow-y-auto p-5 space-y-6">
+            <div className="max-h-[75vh] overflow-y-auto scroll-stable p-5 space-y-6">
               {errorMsg ? (
                 <div className="text-sm text-red-600">{errorMsg}</div>
               ) : null}

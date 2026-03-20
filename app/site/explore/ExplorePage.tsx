@@ -109,12 +109,12 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
   const showBoth = mode === "none";
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen bg-background">
       <div className="flex flex-1 pl-20">
-        <div className="w-full max-w-5xl rounded-[15px] bg-primary">
+        <div className="flex h-full w-full max-w-5xl flex-col rounded-[15px] bg-primary">
           <div className="ml-6 p-5 text-6xl font-bold">Explore</div>
 
-          <main className="h-screen w-full overflow-y-auto rounded-[15px] border-2 bg-white p-6">
+          <main className="flex-1 min-h-0 w-full overflow-y-auto scroll-stable rounded-[15px] border-2 bg-white p-6">
             <div className="ml-6 flex flex-col gap-7">
               {(showBoth || showOnlyLongest) && (
                 <section>

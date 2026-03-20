@@ -100,10 +100,10 @@ export default function ShelterTopCard({
   }, [hasMore, list.length]);
 
   return (
-    <div className="h-full min-h-0 pr-7">
-      <div className="flex h-full min-h-0 flex-col rounded-[15px] bg-white">
+    <div className="min-h-0 pr-7">
+      <div className="flex min-h-0 flex-col rounded-[15px] bg-white">
         {/* Tabs */}
-        <div className="flex flex-col items-center gap-3 p-4">
+        <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-20">
             {tabs.map((key) => {
               const active = tab === key;
@@ -129,10 +129,7 @@ export default function ShelterTopCard({
         </div>
 
         {/* List */}
-        <div
-          ref={scrollRef}
-          className="mt-3 min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 pb-6 pr-1"
-        >
+        <div ref={scrollRef} className="mt-3 min-h-0 flex-1 px-4 pr-1">
           {loading ? (
             <div className="rounded-[15px] border border-black/10 bg-white p-6 text-center text-sm opacity-60">
               Loading...

@@ -5,12 +5,12 @@ export default async function Explore() {
   const shelters = await getSheltersWithStats().catch(() => []);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen bg-background">
       <div className="flex flex-1 pl-20">
-        <div className="w-full max-w-5xl rounded-[15px] bg-primary">
+        <div className="flex h-full w-full max-w-5xl flex-col rounded-[15px] bg-primary">
           <div className="ml-6 p-5 text-6xl font-bold">Shelters</div>
 
-          <main className="h-screen w-full overflow-y-auto rounded-[15px] border-2 bg-white">
+          <main className="flex-1 overflow-y-auto scroll-stable rounded-[15px] border-2 bg-white">
             <div className="m-4 flex flex-col gap-3">
               {shelters.length === 0 ? (
                 <div className="text-2xl opacity-70">No shelters found.</div>

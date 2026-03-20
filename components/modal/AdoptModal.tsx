@@ -152,7 +152,7 @@ export default function AdoptModal({ petId }: Props) {
                   Pet Already Adopted!
                 </div>
 
-                <div className="max-h-[75vh] space-y-4 overflow-y-auto p-5 text-center">
+                <div className="max-h-[75vh] space-y-4 overflow-y-auto scroll-stable p-5 text-center">
                   <div className="font-semibold">
                     Sorry, this pet has already found a home.
                   </div>
@@ -201,7 +201,7 @@ export default function AdoptModal({ petId }: Props) {
                   <div />
                 </div>
 
-                <div className="max-h-[75vh] space-y-5 overflow-y-auto p-5">
+                <div className="max-h-[75vh] space-y-5 overflow-y-auto scroll-stable p-5">
                   {status === "pending" ? (
                     <div className="text-sm leading-relaxed">
                       This pet currently has an active adoption process, but you

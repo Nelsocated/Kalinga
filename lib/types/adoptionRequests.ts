@@ -5,10 +5,10 @@ export interface Adoption_Requests {
   user_id: string;
   full_name: string;
   email: string;
-  phone: string;
-  address: string;
-  occupation: string;
-  reason: string;
+  phone: string | null;
+  address: string | null;
+  occupation: string | null;
+  reason: string | null;
   confirm_safe: boolean;
   confirm_allergies: boolean;
   confirm_food: boolean;
@@ -16,10 +16,12 @@ export interface Adoption_Requests {
   confirm_vet: boolean;
   status:
     | "pending"
-    | "contacting applicant"
-    | "not approved"
+    | "under_review"
+    | "contacting_applicant"
+    | "not_approved"
     | "withdrawn"
     | "approved"
     | "adopted";
+  updated_at: string;
   created_at: string;
 }

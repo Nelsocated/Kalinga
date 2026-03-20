@@ -15,10 +15,10 @@ import Gender from "@/public/icons/Gender.svg";
 import Dog from "@/public/icons/Dog.svg";
 import Cat from "@/public/icons/Cat.svg";
 import Species from "@/public/icons/Species.svg";
-import Meet from "@/public/icons/meet(ver 2).svg";
+import Meet from "@/public/icons/meet(ver2).svg";
 import male_icon from "@/public/icons/male-icon.svg";
 import female_icon from "@/public/icons/female-icon.svg";
-import Age from "@/public/icons/Age.svg";
+import Date from "@/public/icons/Date.svg";
 import Size from "@/public/icons/Size.svg";
 
 type ViewKey = "filters" | "results";
@@ -161,7 +161,7 @@ export default function FilterModal() {
               {activeView === "filters" ? "Find your match" : "Recommendations"}
             </div>
 
-            <div className="max-h-[82vh] overflow-y-auto p-5">
+            <div className="max-h-[82vh] overflow-y-auto scroll-stable p-5">
               {activeView === "filters" ? (
                 <div className="space-y-3">
                   <div>
@@ -230,7 +230,12 @@ export default function FilterModal() {
 
                   <div>
                     <div className={sectionTitle}>
-                      <Image src={Age} alt="age-icon" width={35} height={35} />
+                      <Image
+                        src={Date}
+                        alt="date-icon"
+                        width={35}
+                        height={35}
+                      />
                       Age
                     </div>
 

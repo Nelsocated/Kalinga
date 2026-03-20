@@ -164,8 +164,8 @@ export default function UserTab() {
   }, [hasMore, filtered.length]);
 
   return (
-    <div className="h-full min-h-0 pr-7">
-      <div className="flex h-full min-h-0 flex-col rounded-[15px] bg-white">
+    <div className="min-h-0 pr-7">
+      <div className="flex min-h-0 flex-col rounded-[15px] bg-white">
         <div className="flex flex-col items-center gap-3 p-4">
           <div className="flex items-center gap-20">
             {tabs.map((key) => {
@@ -192,10 +192,7 @@ export default function UserTab() {
           <hr className="border-black/10" />
         </div>
 
-        <div
-          ref={scrollRef}
-          className="mt-3 min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 pb-6 pr-1"
-        >
+        <div ref={scrollRef} className="mt-3 min-h-0 flex-1 px-4 pr-1">
           {loading ? (
             <div className="rounded-[15px] border border-black/10 bg-white p-6 text-center text-sm opacity-60">
               Loading...
