@@ -75,7 +75,9 @@ export default function Input({
           icon && iconPosition === "left" ? "pl-10" : "",
           icon && iconPosition === "right" ? "pr-10" : "",
           disabled ? "opacity-60 cursor-not-allowed" : "",
-          error ? "border-red-500 focus:ring-red-500" : "border focus:border",
+          error
+            ? "border-red-500 focus:ring-red-500"
+            : "border-primary focus:border-primary",
           inputClassName,
         ].join(" ")}
       />
