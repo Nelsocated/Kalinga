@@ -14,6 +14,7 @@ import explore_icon from "@/public/icons/Explore.svg";
 import shelter_icon from "@/public/icons/Home.svg";
 import profile_icon from "@/public/icons/user.svg";
 import notif_icon from "@/public/icons/notifications.svg";
+import messages_icon from "@/public/icons/Messages.svg";
 import more_icon from "@/public/icons/More horizontal.svg";
 
 export default function Navbar() {
@@ -44,13 +45,13 @@ export default function Navbar() {
         <Image
           src={kalinga_logo}
           alt="kalinga-logo"
-          width={110}
-          height={110}
+          width={100}
+          height={100}
           priority
         />
       </div>
 
-      <nav className="mt-5 text-xl space-y-2 text-black">
+      <nav className="mt-3 text-xl space-y-2 text-black">
         <div className="flex">
           <FilterModal />
         </div>
@@ -102,6 +103,20 @@ export default function Navbar() {
         >
           <Image src={notif_icon} alt="notif-icon" width={25} height={25} />
           <span>Notification</span>
+        </Button>
+
+        <Button
+          type="button"
+          className={buttonStyle}
+          onClick={() => router.push("/site/messages")}
+        >
+          <Image
+            src={messages_icon}
+            alt="messages-icon"
+            width={23}
+            height={23}
+          />
+          <span>Messages</span>
         </Button>
 
         <Button
