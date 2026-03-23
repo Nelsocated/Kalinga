@@ -255,7 +255,6 @@ export default function AdoptModal({ petId }: Props) {
                     <label className="leading-7">
                       Why do you want to adopt this pet?
                     </label>
-
                     <textarea
                       value={form.reason}
                       onChange={(e) => updateField("reason", e.target.value)}

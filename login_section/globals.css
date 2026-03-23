@@ -1,0 +1,73 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.card {
+  display: flex;
+  width: 700px;
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  position: relative;
+}
+
+.card.signup {
+  width: 800px;
+}
+
+.left {
+  flex: 1;
+  text-align: center;
+}
+
+.logo-circle {
+  width: 120px;
+  height: 120px;
+  border: 2px solid black;
+  border-radius: 50%;
+  margin: 0 auto 20px auto;
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.right input {
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.right button {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.secondary {
+  background: white;
+  border: 1px solid black;
+}
+
+.about {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.link {
+  font-size: 12px;
+  margin-top: 5px;
+  color: blue;
+  cursor: pointer;
+}

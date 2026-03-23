@@ -52,7 +52,6 @@ function SectionHeader({
   return (
     <div className="mb-4 flex items-center justify-between">
       <h2 className="text-4xl font-semibold">{title}</h2>
-
       <button
         type="button"
         onClick={onClick}
@@ -125,7 +124,6 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
                       setMode((m) => (m === "longest" ? "none" : "longest"))
                     }
                   />
-
                   {longestCards.length === 0 ? (
                     <p className="text-sm text-gray-600">No data yet.</p>
                   ) : (
