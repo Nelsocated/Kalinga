@@ -60,7 +60,7 @@ export default function LoginPage() {
               height={300}
               priority
             ></Image>
-            <h1 className="flex text-3xl text-black font-semibold justify-center">
+            <h1 className="flex text-3xl text-black font-medium justify-center">
               Will you help us find
               <br />
               our fur-ever homes?

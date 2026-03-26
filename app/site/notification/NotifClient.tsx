@@ -131,7 +131,7 @@ export default function NotifClient({ notifications }: Props) {
   }, [router, supabase]);
 
   return (
-    <section className="ml-20 flex h-screen max-w-5xl flex-col overflow-hidden rounded-[15px] border bg-white shadow-sm">
+    <section className="ml-20 flex h-dvh max-w-5xl flex-col overflow-hidden rounded-[15px] border bg-white shadow-sm">
       <div className="bg-primary px-6 py-5 md:px-8">
         <div className="flex items-center gap-3">
           <div className="text-4xl font-bold tracking-tight">Notifications</div>

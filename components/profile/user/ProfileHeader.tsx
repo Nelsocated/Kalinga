@@ -20,7 +20,7 @@ export default function ProfileHeader({
   subtitle,
   imageUrl,
   actions,
-  titleClassName = "text-4xl font-bold",
+  titleClassName = "text-xl font-semibold",
   avatarClassName = "rounded-full",
   rightSlot,
 }: BaseProfileHeaderProps) {
@@ -30,18 +30,12 @@ export default function ProfileHeader({
     <div className="relative w-full">
       <div className="flex items-center justify-between w-full">
         <div className="flex flex-row items-center">
-          <div className={`w-30 h-30 overflow-hidden ${avatarClassName}`}>
-            <Image
-              src={src}
-              alt={title}
-              width={30}
-              height={30}
-              className="h-full w-full object-cover"
-            />
+          <div className="rounded-full overflow-hidden">
+            <Image src={src} alt={title} width={100} height={100} />
           </div>
 
           <div className="flex flex-col pl-2">
-            <div className={`${titleClassName} font-bold`}>{title}</div>
+            <div className="text-4xl font-semibold">{title}</div>
             <div className="text-lg">{subtitle}</div>
             {actions ? <div>{actions}</div> : null}
           </div>

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import ShelterProfileClient from "./ShelterProfileClient";
-import ProfileTabs from "@/components/profile/card/ProfileTabs";
+import ProfileTabs from "@/components/profile/card/ProfileTab";
 import {
   fetchShelterById,
   getShelterPostedPets,

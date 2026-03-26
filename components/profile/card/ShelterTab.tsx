@@ -32,16 +32,16 @@ const TAB_META = {
 
 const ITEMS_PER_BATCH = 10;
 
-function buildVideoHref(
-  videoId: string | number,
-  petId?: string | number | null,
-) {
+function buildVideoHref(videoId: string, petId?: string | null) {
   const params = new URLSearchParams();
-  if (petId != null && String(petId).trim() !== "") {
-    params.set("pets", String(petId));
+
+  if (petId) {
+    params.set("pets", petId);
+    return `/site/profiles/pets/?${params.toString()}`;
   }
-  params.set("media", String(videoId));
-  return `/?${params.toString()}`;
+
+  params.set("media", videoId);
+  return `/site/home/?${params.toString()}`;
 }
 
 type Props = {

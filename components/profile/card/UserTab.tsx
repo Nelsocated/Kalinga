@@ -10,12 +10,13 @@ import play from "@/public/tabs/play.svg";
 import home from "@/public/tabs/home.svg";
 import pet from "@/public/tabs/pet.svg";
 
-import type { LikedMiniItem, LikedKind } from "@/lib/services/pet/likeService";
+import type { LikedMiniItem, LikedKind } from "@/lib/services/likeService";
 
 import VideoCard from "@/components/cards/VideoCard";
 import PetCard from "@/components/cards/PetCard";
 import ShelterCard from "@/components/cards/ShelterCard";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
+import { param, video } from "framer-motion/client";
 
 export type TabsKey = "videos" | "pets" | "shelters";
 
@@ -55,11 +56,11 @@ function buildVideoHref(videoId: string, petId?: string | null) {
 
   if (petId) {
     params.set("pets", petId);
+    return `/site/profiles/pets/?${params.toString()}`;
   }
 
   params.set("media", videoId);
-
-  return `/?${params.toString()}`;
+  return `/site/home/?${params.toString()}`;
 }
 
 function toPetGender(value?: string | null): "male" | "female" {

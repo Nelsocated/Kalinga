@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getInitialLikedByUser } from "@/lib/services/pet/likeService";
+import { getInitialLikedByUser } from "@/lib/services/likeService";
 
 export async function GET(request: Request) {
   try {

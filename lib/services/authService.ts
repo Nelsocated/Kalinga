@@ -18,86 +18,122 @@ export type ServiceResult<T> =
   | { ok: true; data: T }
   | { ok: false; status: number; error: string; details?: unknown };
 
+export interface IAuthService {
+  signup(
+    input: unknown,
+  ): Promise<ServiceResult<{ user: unknown; session: unknown }>>;
+  login(
+    input: unknown,
+  ): Promise<ServiceResult<{ user: unknown; session: unknown }>>;
+  me(): Promise<ServiceResult<{ user: unknown }>>;
+  logout(): Promise<ServiceResult<null>>;
+}
+
+class AuthService implements IAuthService {
+  async signup(
+    input: unknown,
+  ): Promise<ServiceResult<{ user: unknown; session: unknown }>> {
+    const parsed = SignupSchema.safeParse(input);
+
+    if (!parsed.success) {
+      return {
+        ok: false,
+        status: 400,
+        error: "Invalid body",
+        details: parsed.error.flatten(),
+      };
+    }
+
+    const supabase = await createServerSupabase();
+
+    const { data, error } = await supabase.auth.signUp({
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: {
+        data: {
+          username: parsed.data.username,
+          full_name: parsed.data.full_name,
+        },
+      },
+    });
+
+    if (error) {
+      return { ok: false, status: 400, error: error.message };
+    }
+
+    return { ok: true, data: { user: data.user, session: data.session } };
+  }
+
+  async login(
+    input: unknown,
+  ): Promise<ServiceResult<{ user: unknown; session: unknown }>> {
+    const parsed = LoginSchema.safeParse(input);
+
+    if (!parsed.success) {
+      return {
+        ok: false,
+        status: 400,
+        error: "Invalid body",
+        details: parsed.error.flatten(),
+      };
+    }
+
+    const supabase = await createServerSupabase();
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: parsed.data.email,
+      password: parsed.data.password,
+    });
+
+    if (error) {
+      return { ok: false, status: 401, error: error.message };
+    }
+
+    return { ok: true, data: { user: data.user, session: data.session } };
+  }
+
+  async me(): Promise<ServiceResult<{ user: unknown }>> {
+    const supabase = await createServerSupabase();
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error) {
+      return { ok: false, status: 401, error: error.message };
+    }
+
+    return { ok: true, data: { user: data.user } };
+  }
+
+  async logout(): Promise<ServiceResult<null>> {
+    const supabase = await createServerSupabase();
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      return { ok: false, status: 400, error: error.message };
+    }
+
+    return { ok: true, data: null };
+  }
+}
+
+export const authService: IAuthService = new AuthService();
+
+// Backward-compatible named functions
 export async function signup(
   input: unknown,
 ): Promise<ServiceResult<{ user: unknown; session: unknown }>> {
-  const parsed = SignupSchema.safeParse(input);
-
-  if (!parsed.success) {
-    return {
-      ok: false,
-      status: 400,
-      error: "Invalid body",
-      details: parsed.error.flatten(),
-    };
-  }
-
-  const supabase = await createServerSupabase();
-
-  const { data, error } = await supabase.auth.signUp({
-    email: parsed.data.email,
-    password: parsed.data.password,
-    options: {
-      data: {
-        username: parsed.data.username,
-        full_name: parsed.data.full_name,
-      },
-    },
-  });
-
-  if (error) {
-    return { ok: false, status: 400, error: error.message };
-  }
-
-  return { ok: true, data: { user: data.user, session: data.session } };
+  return authService.signup(input);
 }
 
 export async function login(
   input: unknown,
 ): Promise<ServiceResult<{ user: unknown; session: unknown }>> {
-  const parsed = LoginSchema.safeParse(input);
-
-  if (!parsed.success) {
-    return {
-      ok: false,
-      status: 400,
-      error: "Invalid body",
-      details: parsed.error.flatten(),
-    };
-  }
-
-  const supabase = await createServerSupabase();
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: parsed.data.email,
-    password: parsed.data.password,
-  });
-
-  if (error) {
-    return { ok: false, status: 401, error: error.message };
-  }
-
-  return { ok: true, data: { user: data.user, session: data.session } };
+  return authService.login(input);
 }
 
 export async function me(): Promise<ServiceResult<{ user: unknown }>> {
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error) {
-    return { ok: false, status: 401, error: error.message };
-  }
-
-  return { ok: true, data: { user: data.user } };
+  return authService.me();
 }
 
 export async function logout(): Promise<ServiceResult<null>> {
-  const supabase = await createServerSupabase();
-  const { error } = await supabase.auth.signOut();
-
-  if (error) {
-    return { ok: false, status: 400, error: error.message };
-  }
-
-  return { ok: true, data: null };
+  return authService.logout();
 }

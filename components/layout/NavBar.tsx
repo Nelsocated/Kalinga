@@ -7,6 +7,7 @@ import Image from "next/image";
 import Button from "@/components/ui/Button";
 import { createClientSupabase } from "@/lib/supabase/client";
 import FilterModal from "../modal/FilterModal";
+import MoreModal from "../modal/MoreModal";
 
 import kalinga_logo from "@/public/kalinga_logo.svg";
 import fyp_icon from "@/public/icons/play-circle.svg";
@@ -15,7 +16,6 @@ import shelter_icon from "@/public/icons/Home.svg";
 import profile_icon from "@/public/icons/user.svg";
 import notif_icon from "@/public/icons/notifications.svg";
 import messages_icon from "@/public/icons/Messages.svg";
-import more_icon from "@/public/icons/More horizontal.svg";
 
 export default function Navbar() {
   const router = useRouter();
@@ -40,7 +40,7 @@ export default function Navbar() {
   const buttonStyle = "flex border-none gap-3 w-full";
 
   return (
-    <aside>
+    <aside className="max-w-sm">
       <div>
         <Image
           src={kalinga_logo}
@@ -119,14 +119,7 @@ export default function Navbar() {
           <span>Messages</span>
         </Button>
 
-        <Button
-          type="button"
-          className={buttonStyle}
-          onClick={() => router.push("/site/more")}
-        >
-          <Image src={more_icon} alt="more-icon" width={25} height={25} />
-          <span>More</span>
-        </Button>
+        <MoreModal />
       </nav>
     </aside>
   );

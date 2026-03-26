@@ -127,7 +127,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
                   {longestCards.length === 0 ? (
                     <p className="text-sm text-gray-600">No data yet.</p>
                   ) : (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-4 pt-3">
                       {(showOnlyLongest
                         ? longestCards
                         : longestCards.slice(0, 4)

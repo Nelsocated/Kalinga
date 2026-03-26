@@ -1,9 +1,8 @@
 "use client";
 
-import Navbar from "@/components/layout/NavBar";
 import Image from "next/image";
 import user_icon from "@/public/icons/user.svg";
-import more_icon from "@/public/icons/More horizontal.svg";
+import more_icon from "@/public/icons/More.svg";
 
 import { useState } from "react";
 
@@ -156,7 +155,7 @@ export default function SettingsPage() {
             </div>
           )}
           {active === "deletion" && (
-            <div className="relative flex flex-col items-center justify-center min-h-[400px] w-full">
+            <div className="relative flex flex-col items-center justify-center min-h-100 w-full">
               <h2 className="text-3xl md:text-4xl font-extrabold text-black text-center mb-6">
                 Deleting your account will:
               </h2>
@@ -175,7 +174,7 @@ export default function SettingsPage() {
                 Delete Account
               </button>
               {showDeleteConfirm && (
-                <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-[350px]">
+                <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-88">
                   <div className="rounded-t-[15px] rounded-b-[15px] bg-white border-2 border-primary shadow-lg">
                     <div className="bg-primary rounded-t-[15px] px-6 py-3">
                       <h3 className="text-xl font-extrabold text-center text-[#b91c1c]">

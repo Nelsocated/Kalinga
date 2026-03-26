@@ -60,11 +60,11 @@ export default function SignupPage() {
             <Image
               src={kalinga_logo}
               alt="kalinga-logo"
-              width={200}
-              height={200}
+              width={300}
+              height={300}
               priority
             ></Image>
-            <h1 className="flex text-3xl text-black font-semibold text-center">
+            <h1 className="flex text-3xl text-black font-medium text-center">
               Will you help us find
               <br />
               our fur-ever homes?

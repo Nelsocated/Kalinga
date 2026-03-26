@@ -9,7 +9,7 @@ import LikeButton from "../ui/LikeButton";
 import up_button from "@/public/buttons/Up.svg";
 import down_button from "@/public/buttons/Down.svg";
 
-import { LikeTargetType } from "@/lib/services/pet/likeService";
+import { LikeTargetType } from "@/lib/services/likeService";
 
 type FeedNav = {
   next: () => void;

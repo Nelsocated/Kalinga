@@ -127,35 +127,53 @@ export async function getLikedStuffByUser(
 ): Promise<LikedMiniItem[]> {
   const { petIds, shelterIds, videoIds } = await getLikedIdsByUser(userId);
 
-  const [pets, shelters, videos] = await Promise.all([
+  // Fetch pets/videos first so we can derive shelter IDs from liked pets
+  const [pets, videos] = await Promise.all([
     getPetsByIds(petIds),
-    getSheltersByIds(shelterIds),
     getVideosByIds(videoIds),
   ]);
 
-  const petItems: LikedMiniItem[] = pets.map((pet) => ({
-    id: pet.id,
-    kind: "pet",
-    href: `/site/profiles/pet/${pet.id}`,
-    title: pet.pet_name ?? "Pet",
-    petName: pet.pet_name ?? "Pet",
-    subtitle: pet.breed ?? null,
-    imageUrl: (pet.photo_url ?? "").trim() || DEFAULT_AVATAR_URL,
-    gender: pet.sex ?? "unknown",
-    shelterName: null,
-    shelterLogo: DEFAULT_AVATAR_URL,
-  }));
+  const petShelterIds = pets
+    .map((pet) => (pet as { shelter_id?: string | null }).shelter_id ?? "")
+    .filter(Boolean);
 
-  const shelterItems: LikedMiniItem[] = shelters.map((shelter) => ({
-    id: shelter.id,
-    kind: "shelter",
-    href: `/site/profiles/shelter/${shelter.id}`,
-    title: shelter.shelter_name ?? "Shelter",
-    subtitle: shelter.location ?? null,
-    imageUrl: (shelter.logo_url ?? "").trim() || DEFAULT_AVATAR_URL,
-    petsAvailable: shelter.total_available_pets ?? 0,
-    petsAdopted: shelter.total_adopted_pets ?? 0,
-  }));
+  const allNeededShelterIds = [...new Set([...shelterIds, ...petShelterIds])];
+  const shelters = await getSheltersByIds(allNeededShelterIds);
+
+  const shelterMap = new Map(shelters.map((s) => [s.id, s]));
+  const likedShelterSet = new Set(shelterIds);
+
+  const petItems: LikedMiniItem[] = pets.map((pet) => {
+    const shelterId =
+      (pet as { shelter_id?: string | null }).shelter_id ?? null;
+    const shelter = shelterId ? shelterMap.get(shelterId) : undefined;
+
+    return {
+      id: pet.id,
+      kind: "pet",
+      href: `/site/profiles/pet/${pet.id}`,
+      title: pet.pet_name ?? "Pet",
+      petName: pet.pet_name ?? "Pet",
+      subtitle: pet.breed ?? null,
+      imageUrl: (pet.photo_url ?? "").trim() || DEFAULT_AVATAR_URL,
+      gender: pet.sex ?? "unknown",
+      shelterName: shelter?.shelter_name ?? null,
+      shelterLogo: (shelter?.logo_url ?? "").trim() || DEFAULT_AVATAR_URL,
+    };
+  });
+
+  const shelterItems: LikedMiniItem[] = shelters
+    .filter((shelter) => likedShelterSet.has(shelter.id))
+    .map((shelter) => ({
+      id: shelter.id,
+      kind: "shelter",
+      href: `/site/profiles/shelter/${shelter.id}`,
+      title: shelter.shelter_name ?? "Shelter",
+      subtitle: shelter.location ?? null,
+      imageUrl: (shelter.logo_url ?? "").trim() || DEFAULT_AVATAR_URL,
+      petsAvailable: shelter.total_available_pets ?? 0,
+      petsAdopted: shelter.total_adopted_pets ?? 0,
+    }));
 
   const videoItems: LikedMiniItem[] = videos.map((video) => ({
     id: video.id,

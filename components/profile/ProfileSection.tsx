@@ -10,7 +10,7 @@ export default function ProfileSection({
   children: ReactNode;
 }) {
   return (
-    <section className="mt-3">
+    <section className="mt-3 p-3">
       <div className="text-lg font-bold">{title}</div>
       <div className="pr-10 pt-2">{children}</div>
     </section>
