@@ -153,9 +153,9 @@ export default function ChangePasswordView() {
     <>
       <section>
         {step === 1 ? (
-          <div className="w-full space-y-10">
+          <div className="w-full space-y-3">
             <div className={rowClass}>
-              <h2 className={`text-2xl font-semibold ${labelClass}`}>
+              <h2 className={`text-subtitle font-semibold ${labelClass}`}>
                 Change Password
               </h2>
             </div>
@@ -183,24 +183,26 @@ export default function ChangePasswordView() {
               </p>
             ) : null}
 
-            <div className="flex justify-center">
-              <Button
-                type="button"
-                onClick={handleContinue}
-                disabled={checkingEmail}
-              >
-                {checkingEmail ? "Checking..." : "Change Password"}
-              </Button>
-            </div>
+            <div className="mt-8 space-y-6">
+              <div className="flex justify-center">
+                <Button
+                  type="button"
+                  onClick={handleContinue}
+                  disabled={checkingEmail}
+                >
+                  {checkingEmail ? "Checking..." : "Change Password"}
+                </Button>
+              </div>
 
-            <div className="flex justify-center">
-              <LogoutButton className={border} withIcon={false} />
+              <div className="flex justify-center">
+                <LogoutButton className={border} withIcon={false} />
+              </div>
             </div>
           </div>
         ) : (
-          <div className="w-full space-y-10">
+          <div className="w-full space-y-3">
             <div className={rowClass}>
-              <div className={`text-2xl font-semibold ${labelClass}`}>
+              <div className={`text-subtitle font-semibold ${labelClass}`}>
                 Change Password
               </div>
               <BackButton onClick={() => setStep(1)} />
@@ -254,7 +256,7 @@ export default function ChangePasswordView() {
               </p>
             ) : null}
 
-            <div className="flex justify-center gap-3">
+            <div className={`flex justify-center gap-3`}>
               <button
                 type="button"
                 onClick={() => {
@@ -263,7 +265,7 @@ export default function ChangePasswordView() {
                   setMessage("");
                 }}
                 disabled={loading}
-                className="rounded-[15px] border border-reject px-4 py-2 text-sm font-medium hover:bg-reject"
+                className="rounded-[15px] border border-reject px-10 py-2 text-sm font-medium hover:bg-reject"
               >
                 Cancel
               </button>
@@ -272,6 +274,7 @@ export default function ChangePasswordView() {
                 type="button"
                 onClick={handleChangePassword}
                 disabled={loading}
+                className="px-12"
               >
                 {loading ? "Updating..." : "Save"}
               </Button>

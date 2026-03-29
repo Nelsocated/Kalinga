@@ -273,8 +273,8 @@ export default function UserMessagesClient({
   }
 
   return (
-    <div className="relative flex h-screen w-full justify-center bg-background pl-20">
-      <div className="h-screen w-full max-w-5xl overflow-hidden rounded-[15px] border-2 bg-white">
+    <div className="relative flex min-h-screen w-full justify-center bg-background py-5 pl-20">
+      <div className="w-full max-w-240 max-h-[94vh] overflow-hidden rounded-[15px] border-2 bg-white">
         <div className="flex items-center bg-primary px-5">
           <h1 className="text-header font-bold text-black">Messages</h1>
           <BackButton />

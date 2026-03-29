@@ -47,7 +47,7 @@ export default function DeleteAccountView() {
     <>
       <section className="p-5">
         <div className="mb-5 flex justify-center items-center flex-col">
-          <h2 className="text-subtitle font-semibold text-black">
+          <h2 className="text-subtitle font-bold text-black">
             Deleting your account will:
           </h2>
           <ul className="mt-1 text-lg text-black list-disc list-inside">
@@ -56,17 +56,18 @@ export default function DeleteAccountView() {
             <li>Prevent you from accessing the account again</li>
           </ul>
 
-          <div className="max-w-2xl rounded-[15px] bg-red-50 p-4 text-description mt-7 text-reject">
-            Deleting your account will permanently remove your access to
-            Kalinga.
+          <div className="font-bold text-lg mt-7 text-reject text-center leading-6">
+            Deleting your account will permanently
+            <br />
+            remove your access to Kalinga.
           </div>
         </div>
 
-        <div className="mt-5 flex justify-center items-center">
+        <div className="mt-10 flex justify-center items-center">
           <button
             type="button"
             onClick={() => setOpenConfirm(true)}
-            className="rounded-[15px] bg-white border-2 border-reject px-4 py-2 text-lg font-medium text-black hover:bg-reject"
+            className="rounded-[15px] bg-white border-2 border-reject px-4 py-2 text-lg font-bold text-black hover:bg-reject"
           >
             Delete My Account
           </button>
@@ -112,7 +113,7 @@ export default function DeleteAccountView() {
                   type="button"
                   onClick={closeModal}
                   disabled={loading}
-                  className="rounded-[15px] border px-4 py-2 text-sm font-medium"
+                  className="rounded-[15px] border px-4 py-2 text-description font-medium"
                 >
                   Cancel
                 </Button>

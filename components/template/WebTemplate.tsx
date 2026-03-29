@@ -10,12 +10,12 @@ export default function WebTemplate({
   main: React.ReactNode;
 }) {
   return (
-    <div className="h-screen bg-background flex overflow-hidden">
-      <div className="flex-1 flex pl-20">
+    <div className="min-h-screen bg-background flex overflow-hidden">
+      <div className="flex-1 flex justify-center pl-20 py-5">
         {/* Card container */}
-        <div className="w-full max-w-5xl rounded-[15px] bg-primary flex flex-col h-full">
+        <div className="w-full max-w-240 max-h-[94vh] rounded-[15px] bg-primary flex flex-col">
           {/* Top section */}
-          <div className="p-3 pl-5 shrink-0">{header}</div>
+          <div className="p-2 pl-5 shrink-0">{header}</div>
 
           {/* Scrollable section */}
           <main

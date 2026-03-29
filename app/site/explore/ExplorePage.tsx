@@ -135,7 +135,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
   return (
     <WebTemplate
       header={
-        <div className="flex items-center px-5 py-2">
+        <div className="flex items-center px-5">
           <h1 className="text-header font-bold text-black">Explore</h1>
           <BackButton />
         </div>

@@ -15,7 +15,6 @@ import {
   uploadMyUserAvatar,
 } from "@/lib/services/user/userClient";
 import type { UserUpdatePayload } from "@/lib/services/user/usersService";
-import Button from "../ui/Button";
 
 export default function EditProfileModal() {
   const dialogRef = useRef<HTMLDivElement | null>(null);
