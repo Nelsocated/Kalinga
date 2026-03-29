@@ -26,13 +26,6 @@ export type SearchPetCardItem = Pets & {
 };
 
 export type Multi<T extends string> = T | T[];
-export type PetFilters = {
-  species?: Multi<Pets["species"]>;
-  sex?: Multi<Pets["sex"]>;
-  age?: Multi<Pets["age"]>;
-  size?: Multi<Pets["size"]>;
-  status?: Multi<Pets["status"]>;
-};
 
 export type PetRow = {
   id: string | null;
