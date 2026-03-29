@@ -1,14 +1,6 @@
 import "server-only";
 import { createClientSupabase } from "@/lib/supabase/client";
-import type { Pets, PetRow, Multi } from "@/lib/types/pets";
-
-type PetFilters = {
-  species?: Multi<Pets["species"]>;
-  sex?: Multi<Pets["sex"]>;
-  age?: Multi<Pets["age"]>;
-  size?: Multi<Pets["size"]>;
-  status?: Multi<Pets["status"]>;
-};
+import type { Pets, PetFilters, PetRow, Multi } from "@/lib/types/pets";
 
 const PET_SELECT = `
   id,

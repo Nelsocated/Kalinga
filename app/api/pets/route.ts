@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPets, type PetFilters } from "@/lib/services/pet/petService";
+import { getPets } from "@/lib/services/pet/petService";
+import type { PetFilters } from "@/lib/types/pets";
 
 export async function GET(request: NextRequest) {
   try {
