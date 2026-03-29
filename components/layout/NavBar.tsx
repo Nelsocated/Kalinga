@@ -37,7 +37,7 @@ export default function Navbar() {
     getUser();
   }, [supabase]);
 
-  const buttonStyle = "flex border-none gap-3 w-full";
+  const buttonStyle = "flex border-none gap-3 w-full text-lg";
 
   return (
     <aside className="max-w-sm">

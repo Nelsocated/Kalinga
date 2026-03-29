@@ -158,7 +158,7 @@ export default function ComposeView({
       {mode !== "reply" ? (
         <div className="border-b px-4 py-3">
           <div className="flex items-center gap-3">
-            <span className="shrink-0 text-sm font-semibold text-black">
+            <span className="shrink-0 text-description font-semibold text-black">
               To:
             </span>
 
@@ -166,7 +166,7 @@ export default function ComposeView({
               <button
                 type="button"
                 onClick={() => setOpen((prev) => !prev)}
-                className="flex h-11 w-full items-center justify-between rounded-md border bg-white px-3 text-left text-sm text-black"
+                className="flex h-11 w-full items-center justify-between rounded-md border bg-white px-3 text-left text-description text-black"
               >
                 {selectedShelter ? (
                   <div className="flex min-w-0 items-center gap-2">
@@ -181,31 +181,31 @@ export default function ComposeView({
                     </div>
 
                     <div className="min-w-0 leading-tight">
-                      <p className="truncate text-sm font-semibold text-black">
+                      <p className="truncate text-desciption font-semibold text-black">
                         {selectedShelter.name}
                       </p>
                       {selectedShelter.location ? (
-                        <p className="truncate text-xs text-neutral-500">
+                        <p className="truncate text-small text-neutral-500">
                           {selectedShelter.location}
                         </p>
                       ) : null}
                     </div>
                   </div>
                 ) : (
-                  <span className="text-sm text-neutral-400">
+                  <span className="text-description text-neutral-400">
                     Select a shelter
                   </span>
                 )}
 
-                <span className="ml-3 shrink-0 text-xs text-neutral-500">
+                <span className="ml-3 shrink-0 text-small text-neutral-500">
                   {open ? "▲" : "▼"}
                 </span>
               </button>
 
               {open ? (
-                <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
+                <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto scroll-stable rounded-md border bg-white shadow-lg">
                   {shelters.length === 0 ? (
-                    <div className="px-3 py-2 text-sm text-neutral-500">
+                    <div className="px-3 py-1 text-description text-neutral-500">
                       No shelters available
                     </div>
                   ) : (
@@ -220,7 +220,7 @@ export default function ComposeView({
                             setShelterId(shelter.id);
                             setOpen(false);
                           }}
-                          className={`block w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-100 ${
+                          className={`block w-full px-3 py-1 text-left text-description transition hover:bg-neutral-100 ${
                             isSelected ? "bg-background" : "bg-white"
                           }`}
                         >
@@ -236,11 +236,11 @@ export default function ComposeView({
                             </div>
 
                             <div className="min-w-0 leading-tight">
-                              <p className="truncate text-sm font-semibold text-black">
+                              <p className="truncate text-description font-semibold text-black">
                                 {shelter.name}
                               </p>
                               {shelter.location ? (
-                                <p className="truncate text-xs text-neutral-500">
+                                <p className="truncate text-small text-neutral-500">
                                   {shelter.location}
                                 </p>
                               ) : null}
@@ -256,15 +256,15 @@ export default function ComposeView({
           </div>
 
           {error && !shelterId ? (
-            <p className="mt-2 pl-10 text-xs text-red-500">
+            <p className="mt-2 pl-10 text-small text-red-500">
               Please select a shelter.
             </p>
           ) : null}
         </div>
       ) : (
-        <div className="border-b px-4 py-3">
+        <div className="border-b px-4 py-2">
           <div className="flex items-center gap-3">
-            <span className="shrink-0 text-sm font-semibold text-black">
+            <span className="shrink-0 text-description font-semibold text-black">
               To:
             </span>
 
@@ -280,11 +280,11 @@ export default function ComposeView({
               </div>
 
               <div className="min-w-0 leading-tight">
-                <p className="truncate text-sm font-semibold text-black">
+                <p className="truncate text-description font-semibold text-black">
                   {lockedShelter?.name}
                 </p>
                 {lockedShelter?.location ? (
-                  <p className="truncate text-xs text-neutral-500">
+                  <p className="truncate text-small text-neutral-500">
                     {lockedShelter.location}
                   </p>
                 ) : null}
@@ -294,20 +294,22 @@ export default function ComposeView({
         </div>
       )}
 
-      <div className="border-b px-4 py-3">
+      <div className="border-b px-4 py-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-black">Subject:</span>
+          <span className="text-description font-semibold text-black">
+            Subject:
+          </span>
           <input
             value={subject}
             readOnly={mode === "reply"}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="Enter subject"
-            className="flex-1 bg-transparent text-lg font-semibold text-black outline-none placeholder:text-neutral-400"
+            className="flex-1 bg-transparent text-description font-semibold text-black outline-none placeholder:text-neutral-400"
           />
         </div>
 
         {error && !subject.trim() ? (
-          <p className="mt-2 text-xs text-red-500">Subject is required.</p>
+          <p className="mt-2 text-small text-red-500">Subject is required.</p>
         ) : null}
       </div>
 
@@ -320,7 +322,9 @@ export default function ComposeView({
         />
 
         {error && !body.trim() ? (
-          <p className="mt-2 text-xs text-red-500">Message body is required.</p>
+          <p className="mt-2 text-small text-red-500">
+            Message body is required.
+          </p>
         ) : null}
 
         <div className="mt-6 flex justify-center gap-2">
@@ -358,7 +362,7 @@ export default function ComposeView({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 ">
       {content}
     </div>
   );

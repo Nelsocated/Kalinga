@@ -1,42 +1,11 @@
 import "server-only";
 import { createClientSupabase } from "../supabase/client";
-import type { Pet_Media } from "@/lib/types/petMedia";
-
-type PetMini = {
-  id: string;
-  name: string | null;
-  photo_url: string | null;
-};
-
-type VideoWithPet = {
-  id: string;
-  pet_id: string;
-  type: "photo" | "video";
-  url: string | null;
-  caption: string | null;
-  created_at: string;
-  pet: PetMini | null;
-};
-
-type VideoWithShelterPet = {
-  id: string;
-  pet_id: string;
-  type: "photo" | "video";
-  url: string | null;
-  caption: string | null;
-  created_at: string;
-  pets: PetMini | null;
-};
-
-type VideoRow = {
-  id: string;
-  pet_id: string;
-  type: "photo" | "video";
-  url: string | null;
-  caption: string | null;
-  created_at: string;
-  pets: PetMini | PetMini[] | null;
-};
+import type {
+  Pet_Media,
+  VideoWithPet,
+  VideoWithShelterPet,
+  VideoRow,
+} from "@/lib/types/petMedia";
 
 export async function getPetPhotosByPetId(petId: string): Promise<Pet_Media[]> {
   const supabase = await createClientSupabase();

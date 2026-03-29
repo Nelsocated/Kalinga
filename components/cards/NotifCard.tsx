@@ -14,12 +14,8 @@ export default function NotifCard({ item, isActive = false, onSelect }: Props) {
       onClick={onSelect}
       className="relative grid w-full grid-cols-1 gap-3 border-y bg-white px-4 py-2 text-left transition md:grid-cols-[1.1fr_1.7fr_1fr] md:items-center"
     >
-      {/* divider after col 1 */}
       <div className="pointer-events-none absolute top-0 bottom-0 hidden w-px bg-primary md:block left-[calc(1.1/(1.1+1.7+1)*100%)]" />
-
-      {/* divider after col 2 */}
       <div className="pointer-events-none absolute top-0 bottom-0 hidden w-px bg-primary md:block left-[calc((1.1+1.7)/(1.1+1.7+1)*100%)]" />
-
       <div className="flex justify-center text-lg font-medium">
         {item.shelter}
       </div>

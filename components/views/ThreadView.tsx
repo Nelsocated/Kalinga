@@ -50,11 +50,11 @@ export default function ThreadView({
 
   return (
     <div className="relative flex h-full min-h-0 flex-col border-l bg-white">
-      <div className="shrink-0 border-b px-6 py-4">
-        <h2 className="text-xl font-bold text-black">
+      <div className="shrink-0 border-b px-6 py-2">
+        <h2 className="text-subtitle font-bold text-black">
           {selectedThread.subject}
         </h2>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-description text-neutral-500">
           {selectedThread.thread_type === "adoption"
             ? "Adoption-related conversation"
             : "General conversation"}
@@ -63,10 +63,10 @@ export default function ThreadView({
 
       <div className="min-h-0 flex-1 overflow-y-auto scroll-stable pb-20">
         {sortedMessages.length === 0 ? (
-          <p className="px-6 py-5 text-sm text-neutral-500">No messages yet.</p>
+          <p className="px-6 py-3 text-sm text-neutral-500">No messages yet.</p>
         ) : (
           sortedMessages.map((message) => (
-            <article key={message.id} className="border-b px-6 py-3">
+            <article key={message.id} className="border-b px-6 py-2">
               <div className="flex items-start gap-3">
                 <Avatar
                   name={message.sender.name}
@@ -74,15 +74,15 @@ export default function ThreadView({
                 />
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-black">
+                  <p className="text-description font-semibold text-black">
                     {message.sender.name}
                   </p>
-                  <p className="mt-0.5 text-xs text-neutral-500">
+                  <p className="mt-0.5 text-small text-neutral-500">
                     {formatFullDate(message.created_at)}
                   </p>
 
                   <div className="mt-3">
-                    <p className="whitespace-pre-wrap text-sm leading-6 text-black">
+                    <p className="whitespace-pre-wrap text-description leading-6 text-black">
                       {message.body}
                     </p>
                   </div>
@@ -93,11 +93,11 @@ export default function ThreadView({
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 border-t bg-white px-6 py-4">
+      <div className="absolute bottom-7 w-full border-t bg-white px-6 py-2">
         <button
           type="button"
           onClick={onOpenReplyModal}
-          className="rounded-[15px] border bg-white px-5 py-2 text-sm font-semibold text-black transition hover:bg-primary"
+          className="rounded-[15px] border bg-white px-5 py-2 text-description font-semibold text-black transition hover:bg-primary"
         >
           Reply
         </button>

@@ -53,7 +53,7 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`text-xl flex items-center rounded-[15px] px-2 border ${className} ${
+      className={`text-[25px] flex items-center rounded-[15px] px-2 border ${className} ${
         active ? "bg-primary text-black" : "bg-white text-black"
       }`}
     >

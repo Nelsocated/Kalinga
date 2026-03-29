@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import MessagesTabs from "@/components/messages/MessagesTabs";
-import ThreadList from "@/components/messages/ThreadList";
-import ThreadView from "@/components/messages/ThreadView";
-import ComposeView from "@/components/messages/ComposeView";
-import SentMessagesList from "@/components/messages/SentMessagesList";
+import MessagesTabs from "@/components/tabs/MessagesTabs";
+import ThreadList from "@/components/lists/ThreadList";
+import ThreadView from "@/components/views/ThreadView";
+import ComposeView from "@/components/views/ComposeView";
+import SentMessagesList from "@/components/lists/SentMessagesList";
 import BackButton from "@/components/ui/BackButton";
 import type {
   PersonCard,
@@ -275,8 +275,8 @@ export default function UserMessagesClient({
   return (
     <div className="relative flex h-screen w-full justify-center bg-background pl-20">
       <div className="h-screen w-full max-w-5xl overflow-hidden rounded-[15px] border-2 bg-white">
-        <div className="flex items-center bg-primary px-5 py-4">
-          <h1 className="text-3xl font-bold text-black">Messages</h1>
+        <div className="flex items-center bg-primary px-5">
+          <h1 className="text-header font-bold text-black">Messages</h1>
           <BackButton />
         </div>
 
@@ -328,7 +328,9 @@ export default function UserMessagesClient({
         </div>
 
         {error ? (
-          <div className="border-t px-4 py-2 text-sm text-red-500">{error}</div>
+          <div className="border-t px-4 py-2 text-description text-red-500">
+            {error}
+          </div>
         ) : null}
       </div>
 
@@ -337,7 +339,7 @@ export default function UserMessagesClient({
           <div className="w-full max-w-xl rounded-[15px] border bg-white shadow-lg">
             <div className="border-b px-5 py-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-black">
+                <h2 className="text-subtitle font-bold text-black">
                   {openedMessage.subject || "(No subject)"}
                 </h2>
 
@@ -350,7 +352,7 @@ export default function UserMessagesClient({
 
             <div className="scroll-stable overflow-y-auto px-5 py-4">
               <div className="flex justify-between">
-                <p className="text-lg">
+                <p className="text-subtitle">
                   To:{" "}
                   <span className="font-semibold">
                     {openedMessage.receiver.name}
@@ -362,7 +364,7 @@ export default function UserMessagesClient({
                 </p>
               </div>
 
-              <p className="mt-7 whitespace-pre-wrap text-sm leading-6 text-black">
+              <p className="mt-7 whitespace-pre-wrap text-description leading-6 text-black">
                 {openedMessage.body}
               </p>
             </div>

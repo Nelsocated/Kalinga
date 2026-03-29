@@ -30,9 +30,10 @@ export default function Button({
         w-auto
         py-2 px-4
         rounded-[15px]
-        font-medium
+        font-semibold
         transition
         border
+        text-description
         bg-background text-black
         hover:bg-primary
         disabled:opacity-50

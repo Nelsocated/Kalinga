@@ -69,7 +69,7 @@ export default function Input({
         aria-invalid={!!error}
         aria-describedby={hint || error ? `${id}-desc` : undefined}
         className={[
-          "block w-full rounded-[15px] border px-3 py-2 text-sm outline-none transition",
+          "block w-full rounded-[15px] border px-3 py-2 text-description outline-none transition",
           "bg-white text-gray-900 placeholder:text-gray-600",
           "focus:ring-2 focus:ring-primary",
           icon && iconPosition === "left" ? "pl-10" : "",
@@ -77,7 +77,7 @@ export default function Input({
           disabled ? "opacity-60 cursor-not-allowed" : "",
           error
             ? "border-red-500 focus:ring-red-500"
-            : "border-primary focus:border-primary",
+            : "border focus:border-primary",
           inputClassName,
         ].join(" ")}
       />

@@ -22,6 +22,14 @@ body {
   --color-approved: #0f971c;
   --color-adopted: #ec2e57;
   --color-withdrawn: #f07800;
+
+  --text-header: 64px;
+  --text-subheader: 48px;
+  --text-title: 30px;
+  --text-subtitle: 26px;
+  --text-lg: 20px;
+  --text-description: 15px;
+  --text-small: 12px;
 }
 
 @layer base {

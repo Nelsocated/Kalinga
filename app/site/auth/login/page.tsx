@@ -60,7 +60,7 @@ export default function LoginPage() {
               height={300}
               priority
             ></Image>
-            <h1 className="flex text-3xl text-black font-semibold justify-center">
+            <h1 className="flex text-subheader text-black font-medium justify-center">
               Will you help us find <br /> our fur-ever homes?
             </h1>
           </div>
@@ -102,7 +102,7 @@ export default function LoginPage() {
               Sign up
             </Button>
 
-            <p className="mt-4 text-sm text-black-600">
+            <p className="mt-4 text-description text-black-600">
               Do you own a shelter?{" "}
               <a
                 className="font-medium text-black hover:underline"

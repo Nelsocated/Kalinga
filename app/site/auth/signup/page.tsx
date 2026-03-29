@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Input from "@/components/ui/input";
+import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import kalinga_logo from "@/public/kalinga_logo.svg";
 import Image from "next/image";
@@ -63,18 +63,18 @@ export default function SignupPage() {
               height={300}
               priority
             ></Image>
-            <h1 className="flex text-3xl text-black font-semibold text-center">
+            <h1 className="flex text-title text-black font-semibold text-center">
               Will you help us find our
               <br />
               fur-ever homes?
             </h1>
           </div>
 
-          <div className="w-full max-w-md rounded-2xl p-6 shadow-sm bg-white border-2 border-primary">
-            <h1 className="flex text-3xl font-bold text-black justify-center">
+          <div className="w-full max-w-md rounded-title p-6 shadow-sm bg-white border-2">
+            <h1 className="flex text-3xl font-bold text-primary justify-center">
               Create an Account
             </h1>
-            <p className="mt-1 text-center text-xl text-black">
+            <p className="mt-1 text-center text-description text-black">
               Get started on Kalinga!
             </p>
 
@@ -124,7 +124,7 @@ export default function SignupPage() {
               </Button>
             </form>
 
-            <p className="mt-4 text-sm text-black-600">
+            <p className="mt-4 text-description text-black-600">
               Already have an account?{" "}
               <a
                 className="font-medium text-black hover:underline"

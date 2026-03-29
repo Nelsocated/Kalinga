@@ -1,8 +1,8 @@
 "use client";
 
-import TopCard from "@/components/profile/user/TopCard";
-import ProfileSection from "@/components/profile/ProfileSection";
-import ProfileTemplate from "@/components/profile/user/ProfileTemplate";
+import TopCard from "@/components/template/user/TopCard";
+import ProfileSection from "@/components/template/ProfileSection";
+import WebTemplate from "@/components/template/WebTemplate";
 
 import ShareButton from "@/components/ui/ShareButton";
 import LikeButton from "@/components/ui/LikeButton";
@@ -37,21 +37,8 @@ export default function ShelterProfileClient({
   tabs,
 }: ShelterProfileClientProps) {
   return (
-    <ProfileTemplate
-      side={
-        <>
-          <ProfileSection title="Information">
-            {shelter.about ?? "—"}
-          </ProfileSection>
-
-          <ProfileSection title="Contact">
-            {shelter.contact ?? "—"}
-          </ProfileSection>
-
-          {tabs}
-        </>
-      }
-      main={
+    <WebTemplate
+      header={
         <TopCard
           title={shelter.shelter_name}
           subtitle={shelter.location ?? ""}
@@ -79,6 +66,19 @@ export default function ShelterProfileClient({
             </div>
           }
         />
+      }
+      main={
+        <>
+          <ProfileSection title="Information">
+            {shelter.about ?? "—"}
+          </ProfileSection>
+
+          <ProfileSection title="Contact">
+            {shelter.contact ?? "—"}
+          </ProfileSection>
+
+          {tabs}
+        </>
       }
     />
   );

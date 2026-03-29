@@ -3,12 +3,12 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 
-import PetProfileTemplate from "@/components/profile/pet/PetProfileTemplate";
-import PetProfileHeader from "@/components/profile/pet/PetProfileHeader";
-import ProfileSection from "@/components/profile/ProfileSection";
+import PetProfileTemplate from "@/components/template/PetProfileTemplate";
+import PetProfileHeader from "@/components/template/pet/PetProfileHeader";
+import ProfileSection from "@/components/template/ProfileSection";
 import CharacteristicChip, {
   CharacteristicItem,
-} from "@/components/profile/CharacteristicChip";
+} from "@/components/template/pet/CharacteristicChip";
 import LikeButton from "@/components/ui/LikeButton";
 import Back_Button from "@/components/ui/BackButton";
 import AdoptModal from "@/components/modal/AdoptModal";
@@ -52,7 +52,7 @@ type PetProfileClientProps = {
   initialPet: PetProfile;
 };
 
-function getSexIcon(sex?: string | null) {
+export function getSexIcon(sex?: string | null) {
   if (sex === "male") {
     return (
       <Image

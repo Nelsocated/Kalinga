@@ -11,12 +11,12 @@ export default function PetProfileTemplate({
   return (
     <div className="min-h-screen bg-background flex">
       <div className="flex-1 flex pl-20">
-        <div className="max-w-5xl rounded-[15px] bg-primary">
+        <div className="max-w-240 rounded-[15px] bg-primary">
           <main className="p-10">
             <div className="h-[88svh] w-full rounded-[15px] bg-background overflow-hidden">
               <div className="grid h-full gap-3 lg:grid-cols-[60svh_1fr]">
                 <div>{side}</div>
-                <div>{main}</div>
+                <div className="overflow-y-auto scroll-stable">{main}</div>
               </div>
             </div>
           </main>

@@ -63,7 +63,7 @@ export default function PetCard({
       ].join(" ")}
     >
       {topLabel ? (
-        <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border-2 border-primary bg-white px-4 py-1 text-xs font-bold text-primary leading-none shadow-sm">
+        <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border-2 max-w-45 truncate bg-white px-4 py-1 text-xs font-bold text-primary leading-none shadow-sm">
           {topLabel}
         </div>
       ) : null}
@@ -81,11 +81,11 @@ export default function PetCard({
 
       <div className="p-2 pt-1 ml-1">
         <div className="flex items-center">
-          <div className="text-xl font-bold leading-none">{petName}</div>
+          <div className="text-[20px] font-bold leading-none">{petName}</div>
           {getSexIcon(sex)}
         </div>
 
-        <div className="flex items-center text-sm leading-none">
+        <div className="flex items-center text-[10px] leading-none">
           <Image
             src={shelterLogo}
             alt={shelterName}

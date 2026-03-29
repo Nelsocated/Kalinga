@@ -98,12 +98,14 @@ export default function StatusCard({ item, onClose }: Props) {
 
   return (
     <div className="h-[50svh] overflow-hidden rounded-[15px] border-2 bg-white shadow-sm">
-      <div className="relative bg-primary px-6 py-4">
+      <div className="relative bg-primary px-6 py-3">
         <div className="absolute left-6 top-1/2 -translate-y-1/2">
           <BackButton onClick={onClose} />
         </div>
 
-        <h2 className="text-center text-2xl font-extrabold">{item.title}</h2>
+        <h2 className="text-center text-subtitle font-extrabold">
+          {item.title}
+        </h2>
       </div>
 
       <div className="p-6 md:p-10">
@@ -162,7 +164,7 @@ export default function StatusCard({ item, onClose }: Props) {
                   />
 
                   <p
-                    className={`mt-4 text-center text-base font-medium ${
+                    className={`mt-4 text-center text-description font-medium ${
                       isReached ? stepTextColor : "text-primary"
                     }`}
                   >
