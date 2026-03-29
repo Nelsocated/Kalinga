@@ -4,11 +4,8 @@ import { useEffect, useState } from "react";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
 import LogoutButton from "../ui/LogoutButton";
-import BackButton from "../ui/BackButton";
 
 export default function ChangePasswordView() {
-  const [step, setStep] = useState<1 | 2>(1);
-
   const [email, setEmail] = useState("");
   const [accountEmail, setAccountEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -18,7 +15,6 @@ export default function ChangePasswordView() {
   const [loading, setLoading] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(true);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
   const [successOpen, setSuccessOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -57,42 +53,50 @@ export default function ChangePasswordView() {
     loadCurrentUser();
   }, []);
 
-  function handleContinue() {
-    setError("");
-    setMessage("");
-
-    const trimmedEmail = email.trim();
-
-    if (!trimmedEmail) {
-      setError("Please enter your email.");
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(trimmedEmail)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
-    if (!accountEmail) {
-      setError("Unable to verify your account email right now.");
-      return;
-    }
-
-    if (trimmedEmail.toLowerCase() !== accountEmail.trim().toLowerCase()) {
-      setError("Email does not match your account.");
-      return;
-    }
-
-    setStep(2);
-  }
-
   async function handleChangePassword() {
     try {
-      setLoading(true);
       setError("");
-      setMessage("");
+
+      const trimmedEmail = email.trim();
+
+      if (!trimmedEmail) {
+        setError("Please enter your email.");
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(trimmedEmail)) {
+        setError("Please enter a valid email address.");
+        return;
+      }
+
+      if (!accountEmail) {
+        setError("Unable to verify your account email right now.");
+        return;
+      }
+
+      if (trimmedEmail.toLowerCase() !== accountEmail.trim().toLowerCase()) {
+        setError("Email does not match your account.");
+        return;
+      }
+
+      if (!currentPassword) {
+        setError("Please enter your current password.");
+        return;
+      }
+
+      if (!newPassword) {
+        setError("Please enter a new password.");
+        return;
+      }
+
+      if (!confirmNewPassword) {
+        setError("Please confirm your new password.");
+        return;
+      }
+
+      setLoading(true);
 
       const res = await fetch("/api/auth/change", {
         method: "PATCH",
@@ -100,7 +104,7 @@ export default function ChangePasswordView() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email,
+          email: trimmedEmail,
           currentPassword,
           newPassword,
           confirmNewPassword,
@@ -114,12 +118,10 @@ export default function ChangePasswordView() {
         return;
       }
 
-      setMessage("");
+      setEmail("");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
-      setStep(1);
-      setEmail("");
       setSuccessOpen(true);
     } catch {
       setError("Something went wrong while changing your password.");
@@ -145,148 +147,105 @@ export default function ChangePasswordView() {
   }
 
   const border = "border-1";
-  const labelClass = "w-56 shrink-0 text-right text-xl font-medium";
-  const rowClass = "mx-auto flex w-full max-w-xl items-center gap-5";
+  const labelClass = "w-56 shrink-0 text-right text-lg font-medium";
+  const rowClass = "mx-auto flex w-full max-w-2xl items-center gap-5";
   const inputWrapClass = "flex-1";
 
   return (
     <>
       <section>
-        {step === 1 ? (
-          <div className="w-full space-y-3">
-            <div className={rowClass}>
-              <h2 className={`text-subtitle font-semibold ${labelClass}`}>
-                Change Password
-              </h2>
-            </div>
-
-            <div className={rowClass}>
-              <label className={labelClass}>Email:</label>
-              <div className={inputWrapClass}>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {error ? (
-              <p className="mx-auto max-w-105 rounded-[15px] bg-red-50 px-3 py-2 text-sm text-red-600">
-                {error}
-              </p>
-            ) : null}
-
-            {message ? (
-              <p className="mx-auto max-w-105 rounded-[15px] bg-green-50 px-3 py-2 text-sm text-green-600">
-                {message}
-              </p>
-            ) : null}
-
-            <div className="mt-8 space-y-6">
-              <div className="flex justify-center">
-                <Button
-                  type="button"
-                  onClick={handleContinue}
-                  disabled={checkingEmail}
-                >
-                  {checkingEmail ? "Checking..." : "Change Password"}
-                </Button>
-              </div>
-
-              <div className="flex justify-center">
-                <LogoutButton className={border} withIcon={false} />
-              </div>
+        <div className="w-full space-y-3 pt-3">
+          <div className={rowClass}>
+            <label className={labelClass}>Email:</label>
+            <div className={inputWrapClass}>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={checkingEmail}
+                placeholder="Enter Email"
+              />
             </div>
           </div>
-        ) : (
-          <div className="w-full space-y-3">
-            <div className={rowClass}>
-              <div className={`text-subtitle font-semibold ${labelClass}`}>
-                Change Password
-              </div>
-              <BackButton onClick={() => setStep(1)} />
+
+          <div className={rowClass}>
+            <label className={labelClass}>Current Password:</label>
+            <div className={inputWrapClass}>
+              <Input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter Current Password"
+              />
             </div>
+          </div>
 
-            <div className={rowClass}>
-              <label className={labelClass}>Current Password:</label>
-              <div className={inputWrapClass}>
-                <Input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Enter Current Password"
-                />
-              </div>
+          <div className={rowClass}>
+            <label className={labelClass}>New Password:</label>
+            <div className={inputWrapClass}>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter New Password"
+              />
             </div>
+          </div>
 
-            <div className={rowClass}>
-              <label className={labelClass}>New Password:</label>
-              <div className={inputWrapClass}>
-                <Input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter New Password"
-                />
-              </div>
+          <div className={rowClass}>
+            <label className={labelClass}>Confirm New Password:</label>
+            <div className={inputWrapClass}>
+              <Input
+                type="password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                placeholder="Confirm New Password"
+              />
             </div>
+          </div>
 
-            <div className={rowClass}>
-              <label className={labelClass}>Confirm New Password:</label>
-              <div className={inputWrapClass}>
-                <Input
-                  type="password"
-                  value={confirmNewPassword}
-                  onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  placeholder="Confirm New Password"
-                />
-              </div>
-            </div>
+          {error ? (
+            <p className="mx-auto max-w-2xl rounded-[15px] bg-red-50 px-3 py-2 text-sm text-red-600">
+              {error}
+            </p>
+          ) : null}
 
-            {error ? (
-              <p className="mx-auto max-w-105 rounded-[15px] bg-red-50 px-3 py-2 text-sm text-red-600">
-                {error}
-              </p>
-            ) : null}
-
-            {message ? (
-              <p className="mx-auto max-w-105 rounded-[15px] bg-green-50 px-3 py-2 text-sm text-green-600">
-                {message}
-              </p>
-            ) : null}
-
-            <div className={`flex justify-center gap-3`}>
-              <button
+          <div className="mt-8 space-y-4">
+            <div className="flex justify-center gap-3">
+              <Button
                 type="button"
                 onClick={() => {
-                  setStep(1);
+                  setEmail("");
+                  setCurrentPassword("");
+                  setNewPassword("");
+                  setConfirmNewPassword("");
                   setError("");
-                  setMessage("");
                 }}
-                disabled={loading}
-                className="rounded-[15px] border border-reject px-10 py-2 text-sm font-medium hover:bg-reject"
+                disabled={loading || checkingEmail}
               >
-                Cancel
-              </button>
+                Clear
+              </Button>
 
               <Button
                 type="button"
                 onClick={handleChangePassword}
-                disabled={loading}
-                className="px-12"
+                disabled={loading || checkingEmail}
               >
-                {loading ? "Updating..." : "Save"}
+                {loading ? "Updating..." : "Change Password"}
               </Button>
             </div>
+
+            <div className="flex justify-center mt-7">
+              <LogoutButton className={border} withIcon={false} />
+            </div>
           </div>
-        )}
+        </div>
       </section>
 
       {successOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4">
           <div className="w-full max-w-53 overflow-hidden rounded-[15px] border bg-white shadow-md">
-            <div className="bg-primary px-4 py-2 text-center text-subtitle font-semibold text-black">
+            <div className="bg-primary px-4 py-2 text-center text-subtitle font-semibold text-white">
               Password Status
             </div>
 
