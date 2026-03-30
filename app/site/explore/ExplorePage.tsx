@@ -11,29 +11,7 @@ import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 import Back from "@/public/buttons/Back.svg";
 import Forward from "@/public/buttons/Forward.svg";
 
-type PetGender = "male" | "female" | "unknown";
-
-type LongestPet = {
-  id: string;
-  years_inShelter: number | null;
-  name: string | null;
-  sex: PetGender;
-  photo_url: string | null;
-  shelter_name: string | null;
-  shelter_logo_url: string | null;
-};
-
-type FosterStory = {
-  id: string;
-  pet_id: string;
-  title: string | null;
-  description: string | null;
-  pet_name: string | null;
-  pet_sex: PetGender;
-  pet_photo_url: string | null;
-  shelter_name: string | null;
-  shelter_logo_url: string | null;
-};
+import type { LongestPet, FosterStory } from "./page";
 
 type ExplorePageProps = {
   longest: LongestPet[];
@@ -99,6 +77,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
         const imageUrl = item.pet_photo_url || DEFAULT_AVATAR_URL;
         const title = item.title?.trim() || "";
         const description = item.description?.trim() || "";
+        const location = item.shelter_location?.trim() || "Unknown location";
 
         const params = new URLSearchParams({
           petId,
@@ -110,6 +89,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
           type: "photo",
           title,
           description,
+          location,
         });
 
         return {
@@ -123,6 +103,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
           shelterLogo,
           title,
           description,
+          location,
         };
       }),
     [foster],
@@ -159,7 +140,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
                     className={
                       showOnlyLongest
                         ? "grid grid-cols-4 gap-4 pt-3 overflow-y-auto scroll stable"
-                        : "grid grid-cols-1 gap-4 pt-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+                        : "grid grid-cols-1 gap-4 pt-3 overflow-y-auto scroll stable"
                     }
                   >
                     {(showOnlyLongest
@@ -195,7 +176,13 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
                 {fosterCards.length === 0 ? (
                   <p className="text-sm text-gray-600">No data yet.</p>
                 ) : (
-                  <div className="grid pt-3 grid-cols-1 gap-4 overflow-y-auto scroll stable">
+                  <div
+                    className={
+                      showOnlyFoster
+                        ? "grid grid-cols-1 gap-4 pt-3 overflow-y-auto scroll stable"
+                        : "grid grid-cols-4 gap-4 pt-3"
+                    }
+                  >
                     {(showOnlyFoster
                       ? fosterCards
                       : fosterCards.slice(0, 4)

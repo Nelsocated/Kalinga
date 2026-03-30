@@ -25,10 +25,12 @@ export default function FosterCard({
       <div className="flex w-full rounded-[15px] bg-background">
         <div>{children}</div>
 
-        <div className="flex flex-1 flex-col justify-between p-7">
+        <div className="flex flex-1 flex-col justify-between p-5">
           <div>
-            <h3 className="text-3xl font-extrabold">“{title}”</h3>
-            <p className="ml-4 line-clamp-4 wrap-break-words overflow-hidden pt-2 pr-10 whitespace-pre-line break-all text-justify truncate">
+            <h3 className="text-subtitle leading-7 font-extrabold wrap-break-words line-clamp-2">
+              “{title}”
+            </h3>
+            <p className="ml-4 pr-10 text-justify leading-6 wrap-break-words line-clamp-6">
               {description}
             </p>
           </div>

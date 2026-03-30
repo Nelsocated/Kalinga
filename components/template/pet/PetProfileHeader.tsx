@@ -32,7 +32,7 @@ export default function PetProfileHeader({
   return (
     <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between">
       <div className="absolute right-0 top-1 scale-85">{likeButton}</div>
-      <div className="flex flex-col pt-15">
+      <div className="flex flex-col pt-5">
         <div className="flex flex-row gap-1 text-5xl font-bold">
           {title} {sex}
         </div>
@@ -48,18 +48,18 @@ export default function PetProfileHeader({
             />
           </div>
 
-          <div className="ml-3 leading-tight">
+          <div className="ml-2 leading-tight">
             {subtitle &&
               (subtitleHref ? (
                 <button
                   type="button"
                   onClick={() => router.push(subtitleHref)}
-                  className="text-lg font-semibold transition hover:underline"
+                  className="text-description font-semibold transition hover:underline"
                 >
                   {subtitle}
                 </button>
               ) : (
-                <div className="text-lg font-semibold">{subtitle}</div>
+                <div className="text-description font-semibold">{subtitle}</div>
               ))}
 
             {location ? <div className="text-sm">{location}</div> : null}

@@ -120,12 +120,13 @@ export default function FilterModal() {
     closeModal();
   }
 
-  const sectionTitle = "flex items-center gap-2 text-2xl font-semibold";
-  const buttonGroup = "ml-12 mt-2 flex flex-wrap gap-2";
+  const sectionTitle =
+    "flex justify-center items-center gap-2 text-subtitle font-semibold";
+  const buttonGroup = "mt-1 flex flex-wrap gap-2";
 
   const filterBtn = (active: boolean) =>
     [
-      "min-w-[130px] rounded-[15px] border flex items-center justify-center gap-2 text-center leading-none transition",
+      "rounded-[15px] px-2 py-1 border text-lg font-medium flex items-center justify-center gap-2 text-center leading-none transition",
       active
         ? "bg-primary text-black"
         : "border-black/50 bg-white text-black hover:bg-primary/10",
@@ -153,7 +154,7 @@ export default function FilterModal() {
           <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
 
           <div className="relative z-10 w-180 max-w-[92%] rounded-[15px] border-2 bg-white">
-            <div className="relative flex items-center justify-center rounded-t-[15px] bg-primary py-4 text-4xl font-bold text-white">
+            <div className="relative flex items-center justify-center rounded-t-[15px] bg-primary text-subheader font-bold text-white">
               <div className="absolute left-4">
                 <BackButton onClick={handleBack} />
               </div>
@@ -161,9 +162,9 @@ export default function FilterModal() {
               {activeView === "filters" ? "Find your match" : "Recommendations"}
             </div>
 
-            <div className="max-h-[82vh] overflow-y-auto scroll-stable p-5">
+            <div className="max-h-[82vh] overflow-y-auto scroll-stable py-3">
               {activeView === "filters" ? (
-                <div className="space-y-3">
+                <div className="space-y-5 flex flex-col items-center justify-center">
                   <div>
                     <div className={sectionTitle}>
                       <Image src={Species} alt="" width={45} height={45} />
@@ -171,23 +172,23 @@ export default function FilterModal() {
                     </div>
 
                     <div className={buttonGroup}>
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(species.includes("dog"))}
                         onClick={() => handleSpeciesToggle("dog")}
                       >
                         <Image src={Dog} alt="" width={32} height={32} />
                         Dog
-                      </Button>
+                      </button>
 
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(species.includes("cat"))}
                         onClick={() => handleSpeciesToggle("cat")}
                       >
-                        <Image src={Cat} alt="" width={32} height={32} />
+                        <Image src={Cat} alt="" width={30} height={30} />
                         Cat
-                      </Button>
+                      </button>
                     </div>
                   </div>
 
@@ -198,7 +199,7 @@ export default function FilterModal() {
                     </div>
 
                     <div className={buttonGroup}>
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(sex.includes("male"))}
                         onClick={() => handleSexToggle("male")}
@@ -210,9 +211,9 @@ export default function FilterModal() {
                           height={26}
                         />
                         Male
-                      </Button>
+                      </button>
 
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(sex.includes("female"))}
                         onClick={() => handleSexToggle("female")}
@@ -224,7 +225,7 @@ export default function FilterModal() {
                           height={26}
                         />
                         Female
-                      </Button>
+                      </button>
                     </div>
                   </div>
 
@@ -240,7 +241,7 @@ export default function FilterModal() {
                     </div>
 
                     <div className={buttonGroup}>
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(age.includes("kitten/puppy"))}
                         onClick={() => handleAgeToggle("kitten/puppy")}
@@ -250,9 +251,9 @@ export default function FilterModal() {
                           <br />
                           (Under 1 year)
                         </div>
-                      </Button>
+                      </button>
 
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(age.includes("young_adult"))}
                         onClick={() => handleAgeToggle("young_adult")}
@@ -262,9 +263,9 @@ export default function FilterModal() {
                           <br />
                           (1–3 years)
                         </div>
-                      </Button>
+                      </button>
 
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(age.includes("adult"))}
                         onClick={() => handleAgeToggle("adult")}
@@ -274,9 +275,9 @@ export default function FilterModal() {
                           <br />
                           (3–7 years)
                         </div>
-                      </Button>
+                      </button>
 
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(age.includes("senior"))}
                         onClick={() => handleAgeToggle("senior")}
@@ -286,7 +287,7 @@ export default function FilterModal() {
                           <br />
                           (7+ years)
                         </div>
-                      </Button>
+                      </button>
                     </div>
                   </div>
 
@@ -302,29 +303,29 @@ export default function FilterModal() {
                     </div>
 
                     <div className={buttonGroup}>
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(size.includes("small"))}
                         onClick={() => handleSizeToggle("small")}
                       >
                         Small
-                      </Button>
+                      </button>
 
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(size.includes("medium"))}
                         onClick={() => handleSizeToggle("medium")}
                       >
                         Medium
-                      </Button>
+                      </button>
 
-                      <Button
+                      <button
                         type="button"
                         className={filterBtn(size.includes("large"))}
                         onClick={() => handleSizeToggle("large")}
                       >
                         Large
-                      </Button>
+                      </button>
                     </div>
                   </div>
 
@@ -338,6 +339,14 @@ export default function FilterModal() {
                     <div className="flex flex-wrap justify-center gap-3">
                       <Button
                         type="button"
+                        onClick={resetFilters}
+                        className="border border-black/20 bg-white text-black"
+                      >
+                        Reset
+                      </Button>
+
+                      <Button
+                        type="button"
                         onClick={runSearch}
                         className="flex items-center justify-center gap-2 border bg-white"
                       >
@@ -348,14 +357,6 @@ export default function FilterModal() {
                           height={32}
                         />
                         See Pets
-                      </Button>
-
-                      <Button
-                        type="button"
-                        onClick={resetFilters}
-                        className="border border-black/20 bg-white text-black"
-                      >
-                        Reset
                       </Button>
                     </div>
                   </div>

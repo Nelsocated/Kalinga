@@ -10,12 +10,14 @@ export default function ProfileSection({
   children: ReactNode;
 }) {
   return (
-    <section className="mt-3 p-2">
-      <div className="line-clamp-2 wrap-break-words text-lg font-bold">
-        {title}
-      </div>
+    <section className="p-2">
+      {title && (
+        <div className="text-lg font-bold leading-5 wrap-break-words">
+          {title}
+        </div>
+      )}
 
-      <div className="line-clamp-6 wrap-break-words overflow-hidden pt-2 pr-10 whitespace-pre-line break-all text-justify">
+      <div className="pt-1 pr-4 whitespace-pre-line leading-5 wrap-break-words *:m-0">
         {children}
       </div>
     </section>

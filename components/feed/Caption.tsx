@@ -17,8 +17,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
 
-  const cleanCaption =
-    "idk my name anymore heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee".trim();
+  const cleanCaption = (caption ?? "No caption").trim();
   const hasCaption = cleanCaption.length > 0;
 
   return (
@@ -34,7 +33,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
         ].join(" ")}
       >
         <div
-          className={["px-5 py-3", open ? "flex flex-col h-64" : ""].join(" ")}
+          className={["px-5 py-2", open ? "flex flex-col h-64" : ""].join(" ")}
         >
           <p className="text-subtitle font-bold leading-tight">
             {shelter_name}
@@ -63,31 +62,32 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
                 )}
               </AnimatePresence>
 
-              <div className="flex justify-between items-center">
+              <div className="mt-2 flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => setOpen((v) => !v)}
-                  className="text-description font-medium hover:underline"
+                  className="text-description font-medium leading-none hover:underline"
                 >
                   {open ? "Less" : "More"}
                 </button>
 
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    className="text-subtitle font-bold text-white hover:underline"
-                    onClick={() => router.push(`/site/profiles/pets/${id}`)}
-                  >
-                    Meet {name}!
-                  </button>
+                <button
+                  type="button"
+                  onClick={() => router.push(`/site/profiles/pets/${id}`)}
+                  className="flex items-center gap-2 text-description font-bold text-white hover:underline"
+                >
+                  <span className="leading-none">Meet {name}!</span>
 
-                  <Image
-                    src={meet_icon}
-                    alt="meet-icon"
-                    width={50}
-                    height={50}
-                  />
-                </div>
+                  <div className="flex items-center justify-center">
+                    <Image
+                      src={meet_icon}
+                      alt="meet-icon"
+                      width={50}
+                      height={50}
+                      className="relative bottom-2"
+                    />
+                  </div>
+                </button>
               </div>
             </>
           )}

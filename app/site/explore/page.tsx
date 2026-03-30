@@ -8,9 +8,9 @@ import { getFosterStories } from "@/lib/services/fosterService";
 
 export const dynamic = "force-dynamic";
 
-type PetGender = "male" | "female" | "unknown";
+export type PetGender = "male" | "female" | "unknown";
 
-type LongestPet = {
+export type LongestPet = {
   id: string;
   shelter_id: string;
   years_inShelter: number | null;
@@ -19,9 +19,10 @@ type LongestPet = {
   photo_url: string | null;
   shelter_name: string | null;
   shelter_logo_url: string | null;
+  shelter_location: string | null;
 };
 
-type FosterStory = {
+export type FosterStory = {
   id: string;
   pet_id: string;
   title: string | null;
@@ -31,6 +32,7 @@ type FosterStory = {
   pet_photo_url: string | null;
   shelter_name: string | null;
   shelter_logo_url: string | null;
+  shelter_location: string | null;
 };
 
 export default async function Page() {
@@ -45,17 +47,16 @@ export default async function Page() {
     ),
   ];
 
-  const longestShelters =
-    longestShelterIds.length > 0
-      ? await getSheltersByIds(longestShelterIds)
-      : [];
+  const longestShelters = await getSheltersByIds(longestShelterIds);
 
   const longestShelterMap = new Map(
-    longestShelters.map((shelter) => [String(shelter.id), shelter]),
+    longestShelters.map((shelter) => [shelter.id, shelter]),
   );
 
   const longest: LongestPet[] = longestBase.map((pet) => {
-    const shelter = longestShelterMap.get(String(pet.shelter_id));
+    const shelter = pet.shelter_id
+      ? longestShelterMap.get(String(pet.shelter_id))
+      : null;
 
     return {
       id: String(pet.id),
@@ -69,12 +70,21 @@ export default async function Page() {
       photo_url: pet.photo_url ?? null,
       shelter_name: shelter?.shelter_name ?? null,
       shelter_logo_url: shelter?.logo_url ?? null,
+      shelter_location: shelter?.location ?? null,
     };
   });
 
-  const fosterPetIds = fosterBase.map((item) => item.pet_id);
+  const fosterPetIds = [
+    ...new Set(
+      fosterBase
+        .map((item) => item.pet_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+
   const fosterPets =
     fosterPetIds.length > 0 ? await getPetsByIds(fosterPetIds) : [];
+
   const petMap = new Map(fosterPets.map((pet) => [String(pet.id), pet]));
 
   const fosterShelterIds = [
@@ -85,11 +95,10 @@ export default async function Page() {
     ),
   ];
 
-  const fosterShelters =
-    fosterShelterIds.length > 0 ? await getSheltersByIds(fosterShelterIds) : [];
+  const fosterShelters = await getSheltersByIds(fosterShelterIds);
 
   const fosterShelterMap = new Map(
-    fosterShelters.map((shelter) => [String(shelter.id), shelter]),
+    fosterShelters.map((shelter) => [shelter.id, shelter]),
   );
 
   const foster: FosterStory[] = fosterBase.map((story) => {
@@ -111,6 +120,7 @@ export default async function Page() {
       pet_photo_url: pet?.photo_url ?? null,
       shelter_name: shelter?.shelter_name ?? null,
       shelter_logo_url: shelter?.logo_url ?? null,
+      shelter_location: shelter?.location ?? null,
     };
   });
 

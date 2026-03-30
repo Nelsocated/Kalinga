@@ -15,7 +15,7 @@ export default function WebTemplate({
         {/* Card container */}
         <div className="w-full max-w-240 max-h-[94vh] rounded-[15px] bg-primary flex flex-col">
           {/* Top section */}
-          <div className="p-2 pl-5 shrink-0">{header}</div>
+          <div className="pl-5 shrink-0">{header}</div>
 
           {/* Scrollable section */}
           <main

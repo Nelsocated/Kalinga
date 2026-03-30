@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import PetProfileTemplate from "@/components/template/PetProfileTemplate";
 import PetProfileHeader from "@/components/template/pet/PetProfileHeader";
 import ProfileSection from "@/components/template/ProfileSection";
-import Back_Button from "@/components/ui/BackButton";
+import BackButton from "@/components/ui/BackButton";
 import Button from "@/components/ui/Button";
-
+import PhotoView from "@/components/views/PhotoView";
+import LikeButton from "@/components/ui/LikeButton";
 import { getSexIcon } from "../../pets/[id]/PetProfileClient";
 
 type Media = {
@@ -46,42 +46,11 @@ export default function FosterProfilePage({
   pet_media = [],
 }: FosterProfileProps) {
   const router = useRouter();
-  const [start, setStart] = useState(0);
-
-  const extraPhotos = useMemo(() => {
-    return pet_media
-      .filter(
-        (item) => item.type === "photo" && item.url && item.url !== photo_url,
-      )
-      .slice(0, 5);
-  }, [pet_media, photo_url]);
-
-  const canSlide = extraPhotos.length > 3;
-
-  const visibleExtras = useMemo(() => {
-    if (extraPhotos.length <= 3) {
-      return extraPhotos;
-    }
-
-    return [0, 1, 2].map(
-      (offset) => extraPhotos[(start + offset) % extraPhotos.length],
-    );
-  }, [extraPhotos, start]);
-
-  const next = () => {
-    if (!canSlide) return;
-    setStart((prev) => (prev + 1) % extraPhotos.length);
-  };
-
-  const prev = () => {
-    if (!canSlide) return;
-    setStart((prev) => (prev - 1 + extraPhotos.length) % extraPhotos.length);
-  };
 
   return (
     <PetProfileTemplate
       main={
-        <>
+        <div className="overflow-y-auto">
           <PetProfileHeader
             title={name}
             sex={getSexIcon(sex)}
@@ -93,75 +62,30 @@ export default function FosterProfilePage({
 
           <div>
             <ProfileSection>
-              <div className="text-2xl font-semibold">
-                {`"${title}"` || "Untitled story"}
+              <div className="text-lg font-semibold whitespace-normal text-justify [word-break:normal] wrap-normal ">
+                {title ? `"${title}"` : "Untitled story"}
               </div>
             </ProfileSection>
 
             <ProfileSection>
-              <div className="whitespace-pre-line text-medium leading-relaxed ">
+              <div className="text-description whitespace-pre-line [word-break:normal] wrap-break-word text-justify">
                 {description || "No description yet."}
               </div>
             </ProfileSection>
           </div>
-        </>
+        </div>
       }
       side={
         <div className="relevant p-7">
-          <div className="absolute top-11">
-            <Back_Button />
+          <div className="absolute top-13 right-25">
+            <BackButton />
+            <LikeButton
+              targetType="pet"
+              targetId={id}
+              className="text-primary h-15"
+            />
           </div>
-
-          <div className="mt-5 mb-4 overflow-hidden rounded-2xl bg-black/5">
-            {photo_url ? (
-              <img
-                src={photo_url}
-                alt={`${name} main photo`}
-                className="h-75 w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-75 items-center justify-center text-sm opacity-70">
-                No main photo yet.
-              </div>
-            )}
-          </div>
-
-          {extraPhotos.length > 0 ? (
-            <div className="relative w-full">
-              <div className="grid grid-cols-3 gap-3">
-                {visibleExtras.map((photo) => (
-                  <img
-                    key={photo.id}
-                    src={photo.url}
-                    alt={photo.caption ?? "Pet photo"}
-                    className="aspect-5/7 w-full rounded-xl object-cover shadow-sm"
-                  />
-                ))}
-              </div>
-
-              {canSlide && (
-                <button
-                  type="button"
-                  onClick={prev}
-                  className="absolute top-1/2 -left-6 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-black/5 hover:shadow-lg"
-                >
-                  ‹
-                </button>
-              )}
-
-              {canSlide && (
-                <button
-                  type="button"
-                  onClick={next}
-                  className="absolute top-1/2 -right-6 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-black/5 hover:shadow-lg"
-                >
-                  ›
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="text-sm opacity-70">No extra photos yet.</div>
-          )}
+          <PhotoView name={name} photo_url={photo_url} pet_media={pet_media} />
 
           <div className="mt-5 flex justify-center">
             <Button
