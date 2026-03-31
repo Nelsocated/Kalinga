@@ -44,7 +44,6 @@ export default function SignupPage() {
       }
 
       router.push("/site/home");
-      router.push("/site/home");
     } catch {
       setFormError("Network error. Try again.");
     } finally {
@@ -53,87 +52,99 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-primary flex items-center justify-center">
-      <div className="bg-background w-[180svh] h-[85svh] rounded-[15px] shadow-lg flex items-center justify-center">
-        <main className="flex w-full max-w-5xl items-center gap-20">
-          <div className="md:flex flex-1 flex-col items-center justify-center">
-            <Image
-              src={kalinga_logo}
-              alt="kalinga-logo"
-              width={300}
-              height={300}
-              priority
-            ></Image>
-            <h1 className="flex text-3xl text-black font-medium text-center">
-              Will you help us find
-              <br />
-              our fur-ever homes?
-            </h1>
-          </div>
-
-          <div className="w-full max-w-md rounded-[15px] p-6 shadow-sm bg-white border-2">
-            <h1 className="flex text-3xl font-bold text-black justify-center">
-              Create an Account
-            </h1>
-            <p className="mt-1 text-center text-xl text-black">
-              Get started on Kalinga!
-            </p>
-
-            <form onSubmit={onSubmit} className="mt-6 space-y-4 shadow-m">
-              <Input
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@email.com"
-                autoComplete="email"
-                required
+    <div className="h-svh overflow-hidden bg-primary p-3 sm:p-4 lg:p-6">
+      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-center rounded-[15px] bg-background shadow-lg">
+        <main className="flex h-full w-full items-center justify-center p-3 sm:p-4 lg:p-6">
+          <div className="grid h-full w-full max-w-6xl items-center gap-6 lg:grid-cols-2 lg:gap-12">
+            <div className="hidden h-full min-h-0 flex-col items-center justify-center lg:flex">
+              <Image
+                src={kalinga_logo}
+                alt="kalinga-logo"
+                width={260}
+                height={260}
+                priority
+                className="h-auto w-full max-w-55 xl:max-w-65"
               />
+              <h1 className="mt-4 text-center text-2xl font-medium text-black xl:text-3xl">
+                Will you help us find
+                <br />
+                our fur-ever homes?
+              </h1>
+            </div>
 
-              <Input
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
-                autoComplete="new-password"
-                required
-              />
+            <div className="mx-auto w-full max-w-md rounded-[15px] border-2 bg-white p-4 shadow-sm sm:p-5">
+              <h1 className="flex justify-center text-subtitle font-bold text-black">
+                Create an Account
+              </h1>
+              <p className="mt-1 text-center text-description text-black">
+                Get started on Kalinga!
+              </p>
 
-              <Input
-                label="Fullname"
-                value={fullName}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Fullname"
-                required
-              />
+              <form onSubmit={onSubmit} className="mt-2 space-y-3">
+                <Input
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@email.com"
+                  autoComplete="email"
+                  required
+                />
 
-              <Input
-                label="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
-                required
-              />
+                <Input
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                  autoComplete="new-password"
+                  required
+                />
 
-              {formError ? (
-                <p className="text-sm text-red-600">{formError}</p>
-              ) : null}
+                <Input
+                  label="Fullname"
+                  value={fullName}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Fullname"
+                  required
+                />
 
-              <Button type="submit" loading={loading} className="w-full">
-                Submit
-              </Button>
-            </form>
+                <Input
+                  label="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Username"
+                  required
+                />
 
-            <p className="mt-4 text-sm text-black-600">
-              Already have an account?{" "}
-              <a
-                className="font-medium text-black hover:underline"
-                href="/auth/login"
+                {formError ? (
+                  <p className="text-sm text-red-600">{formError}</p>
+                ) : null}
+
+                <Button type="submit" loading={loading} className="w-full">
+                  Submit
+                </Button>
+              </form>
+
+              <hr className="mx-auto my-3 w-full border-black/50" />
+
+              <Button
+                onClick={() => router.push("/auth/login")}
+                className="w-full"
               >
                 Log in
-              </a>
-            </p>
+              </Button>
+
+              <p className="mt-4 text-sm text-black">
+                Do you own a shelter?{" "}
+                <a
+                  className="font-medium text-black hover:underline"
+                  href="/site/shelterCreation"
+                >
+                  Create a Page
+                </a>
+              </p>
+            </div>
           </div>
         </main>
       </div>

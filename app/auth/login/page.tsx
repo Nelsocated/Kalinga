@@ -1,4 +1,4 @@
-// app/login/page.tsx;
+// app/login/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -45,77 +45,79 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-primary flex items-center justify-center">
-      <div className="bg-background w-[180svh] h-[85svh] rounded-[15px] shadow-lg flex items-center justify-center">
-        <div className="fixed top-20 right-30">
-          <Button onClick={() => router.push("/site/aboutus")}>About Us</Button>
+    <div className="min-h-screen bg-primary px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <div className="mx-auto grid min-h-[calc(100svh-2rem)] w-full max-w-7xl rounded-[15px] bg-background shadow-lg sm:min-h-[calc(100svh-3rem)]">
+        <div className="col-start-1 row-start-1 z-10 justify-self-end self-start p-6 sm:p-6">
+          <Button onClick={() => router.push("/site/about")}>About Us</Button>
         </div>
 
-        <main className="flex w-full max-w-5xl items-center gap-20">
-          <div className="md:flex flex-1 flex-col pb-5 items-center justify-center">
-            <Image
-              src={kalinga_logo}
-              alt="kalinga-logo"
-              width={300}
-              height={300}
-              priority
-            ></Image>
-            <h1 className="flex text-3xl text-black font-medium justify-center">
-              Will you help us find
-              <br />
-              our fur-ever homes?
-            </h1>
-          </div>
-
-          <div className="w-full max-w-md rounded-[15px] p-6 shadow-sm bg-white border-2">
-            <form onSubmit={onSubmit} className="mt-6 space-y-4 shadow-m">
-              <Input
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@email.com"
-                autoComplete="email"
-                required
+        <main className="col-start-1 row-start-1 flex min-h-0 items-center justify-center p-4 pt-20 sm:p-6 sm:pt-24 lg:p-10">
+          <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-16">
+            <div className="hidden min-h-0 flex-col items-center justify-center lg:flex">
+              <Image
+                src={kalinga_logo}
+                alt="kalinga-logo"
+                width={300}
+                height={300}
+                priority
               />
+              <h1 className="mt-4 text-center text-2xl font-medium text-black sm:text-3xl">
+                Will you help us find
+                <br />
+                our fur-ever homes?
+              </h1>
+            </div>
 
-              <Input
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
-                autoComplete="new-password"
-                required
-              />
+            <div className="mx-auto w-full max-w-md rounded-[15px] border-2 bg-white p-5 shadow-sm sm:p-6">
+              <form onSubmit={onSubmit} className="space-y-4">
+                <Input
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@email.com"
+                  autoComplete="email"
+                  required
+                />
 
-              {formError ? (
-                <p className="text-sm text-red-600">{formError}</p>
-              ) : null}
+                <Input
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                  autoComplete="current-password"
+                  required
+                />
 
-              <Button type="submit" loading={loading} className="w-full">
-                Log in
-              </Button>
-            </form>
+                {formError ? (
+                  <p className="text-sm text-red-600">{formError}</p>
+                ) : null}
 
-            <hr className="w-full mx-auto m-3 border-black/50" />
+                <Button type="submit" loading={loading} className="w-full">
+                  Log in
+                </Button>
+              </form>
 
-            <Button
-              onClick={() => router.push("/auth/signup")}
-              className="w-full"
-            >
-              Sign up
-            </Button>
+              <hr className="mx-auto my-3 w-full border-black/50" />
 
-            <p className="mt-4 text-sm text-black-600">
-              Do you own a shelter?{" "}
-              <a
-                className="font-medium text-black hover:underline"
-                href="/site/shelterCreation"
+              <Button
+                onClick={() => router.push("/auth/signup")}
+                className="w-full"
               >
-                Create a Page
-              </a>
-            </p>
+                Sign up
+              </Button>
+
+              <p className="mt-4 text-sm text-black">
+                Do you own a shelter?{" "}
+                <a
+                  className="font-medium text-black hover:underline"
+                  href="/site/shelterCreation"
+                >
+                  Create a Page
+                </a>
+              </p>
+            </div>
           </div>
         </main>
       </div>
