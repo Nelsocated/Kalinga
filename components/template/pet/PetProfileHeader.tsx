@@ -31,8 +31,7 @@ export default function PetProfileHeader({
 
   return (
     <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between">
-      <div className="absolute right-0 top-1 scale-85">{likeButton}</div>
-      <div className="flex flex-col pt-5">
+      <div className="flex flex-col">
         <div className="flex flex-row gap-1 text-5xl font-bold">
           {title} {sex}
         </div>

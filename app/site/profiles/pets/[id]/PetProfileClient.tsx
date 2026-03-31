@@ -149,26 +149,28 @@ export default function PetProfileClient({
         </>
       }
       side={
-        <div className="relevant p-7">
-          <div className="absolute top-13 right-25">
-            <BackButton />
-            <LikeButton
-              targetType="pet"
-              targetId={id}
-              className="text-primary h-15"
-            />
-          </div>
-
+        <div className="px-7 pb-2">
           <PhotoView
             name={initialPet.name}
             photo_url={initialPet.photo_url ?? ""}
             pet_media={initialPet.pet_media ?? []}
           />
 
-          <div className="mt-5 flex justify-center">
+          <div className="mt-4 flex justify-center">
             <AdoptModal petId={id} />
           </div>
         </div>
+      }
+      top={
+        <>
+          <BackButton />
+
+          <LikeButton
+            targetType="pet"
+            targetId={id}
+            className="text-primary h-15"
+          />
+        </>
       }
     />
   );

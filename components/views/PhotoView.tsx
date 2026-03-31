@@ -78,10 +78,10 @@ export default function PhotoView({ name, photo_url, pet_media = [] }: Props) {
           <img
             src={selectedPhoto.url}
             alt={selectedPhoto.caption ?? `${name} photo`}
-            className="h-75 w-full object-cover"
+            className="h-60 w-full object-cover"
           />
         ) : (
-          <div className="flex h-75 items-center justify-center text-description opacity-70">
+          <div className="flex h-60 items-center justify-center text-description opacity-70">
             No main photo yet.
           </div>
         )}
@@ -108,7 +108,7 @@ export default function PhotoView({ name, photo_url, pet_media = [] }: Props) {
                   <img
                     src={photo.url}
                     alt={photo.caption ?? "Pet photo"}
-                    className="aspect-5/7 w-full object-cover shadow-sm"
+                    className="aspect-3/4 w-full object-cover shadow-sm"
                   />
                 </button>
               );

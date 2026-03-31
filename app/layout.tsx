@@ -18,3 +18,11 @@ export default function RootLayout({
     </html>
   );
 }
+
+export const metadata = {
+  title: "Kalinga",
+  description: "Pet adoption platform",
+  icons: {
+    icon: "/kalinga_logo(ver2).svg",
+  },
+};

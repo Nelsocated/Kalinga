@@ -12,7 +12,7 @@ export default function ProfileSection({
   return (
     <section className="p-2">
       {title && (
-        <div className="text-lg font-bold leading-5 wrap-break-words">
+        <div className="text-lg font-bold leading-5 wrap-break-words mb-2">
           {title}
         </div>
       )}

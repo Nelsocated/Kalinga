@@ -3,6 +3,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import ShareButton from "../ui/ShareButton";
+import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 
 import Button from "../ui/Button";
 import LikeButton from "../ui/LikeButton";
@@ -54,7 +55,7 @@ export default function RightBar({ pet_id, media_id, shelter, nav }: Props) {
           className="h-17 w-17 rounded-full overflow-hidden"
         >
           <Image
-            src={shelter?.logo_url ?? "/fallback.png"}
+            src={shelter?.logo_url ?? DEFAULT_AVATAR_URL}
             alt="Shelter"
             width={110}
             height={110}

@@ -50,7 +50,7 @@ export default function FosterProfilePage({
   return (
     <PetProfileTemplate
       main={
-        <div className="overflow-y-auto">
+        <div>
           <PetProfileHeader
             title={name}
             sex={getSexIcon(sex)}
@@ -76,27 +76,30 @@ export default function FosterProfilePage({
         </div>
       }
       side={
-        <div className="relevant p-7">
-          <div className="absolute top-13 right-25">
-            <BackButton />
-            <LikeButton
-              targetType="pet"
-              targetId={id}
-              className="text-primary h-15"
-            />
-          </div>
+        <div className="px-7 pb-2">
           <PhotoView name={name} photo_url={photo_url} pet_media={pet_media} />
 
-          <div className="mt-5 flex justify-center">
+          <div className="mt-4 flex justify-center">
             <Button
               type="button"
               onClick={() => router.push(`/site/profiles/pets/${petId}`)}
-              className="bg-primary font-semibold text-lg px-5"
+              className="bg-primary font-semibold text-lg px-4"
             >
               More Info
             </Button>
           </div>
         </div>
+      }
+      top={
+        <>
+          <BackButton />
+
+          <LikeButton
+            targetType="pet"
+            targetId={petId}
+            className="text-primary h-15"
+          />
+        </>
       }
     />
   );
