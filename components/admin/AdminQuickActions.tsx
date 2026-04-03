@@ -14,7 +14,8 @@ export default function AdminQuickActions() {
         onClick={() => router.push("/admin/analytics")}
         title="Analytics"
         className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-md hover:bg-primary/80 transition-colors"
-      >
+      >     
+    
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="18" y1="20" x2="18" y2="10" />
           <line x1="12" y1="20" x2="12" y2="4" />
@@ -24,7 +25,7 @@ export default function AdminQuickActions() {
 
       {/* Document / Reports button */}
       <button
-        onClick={() => router.push("/admin/reports")}
+        onClick={() => router.push("/admin/applications")}
         title="Reports"
         className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-md hover:bg-primary/80 transition-colors"
       >
