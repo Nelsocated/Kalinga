@@ -16,6 +16,13 @@ const MOCK_VIDEOS = [
   { id: "4", title: "Video Title - Pet Name", date: "Date Posted", views: "12,345", likes: "12,345" },
 ];
 
+const MOCK_SHELTERS = [
+  { id: "1", name: "Shelter", location: "Location", pets: "12,345", adoptions: "12,345" },
+  { id: "2", name: "Shelter", location: "Location", pets: "12,345", adoptions: "12,345" },
+  { id: "3", name: "Shelter", location: "Location", pets: "12,345", adoptions: "12,345" },
+  { id: "4", name: "Shelter", location: "Location", pets: "12,345", adoptions: "12,345" },
+];
+
 export default function AnalyticsDashboardPage() {
   const router = useRouter();
 
@@ -56,7 +63,6 @@ export default function AnalyticsDashboardPage() {
             <h2 className="text-2xl font-black text-black mb-4">Videos</h2>
 
             <div className="border border-primary rounded-xl overflow-hidden">
-              {/* Table Header */}
               <div className="grid grid-cols-[1fr_auto_auto] items-center px-4 py-3 border-b border-primary/30">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-sm text-black">All</span>
@@ -68,7 +74,6 @@ export default function AnalyticsDashboardPage() {
                 <span className="font-semibold text-sm text-black w-20 text-center">Likes</span>
               </div>
 
-              {/* Video Rows */}
               {MOCK_VIDEOS.map((video) => (
                 <div
                   key={video.id}
@@ -83,6 +88,41 @@ export default function AnalyticsDashboardPage() {
                   </div>
                   <span className="text-sm font-medium text-black w-20 text-center">{video.views}</span>
                   <span className="text-sm font-medium text-black w-20 text-center">{video.likes}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Shelters Section */}
+          <div className="px-6 pb-6 bg-background">
+            <h2 className="text-2xl font-black text-black mb-4">Shelters</h2>
+
+            <div className="border border-primary rounded-xl overflow-hidden">
+              <div className="grid grid-cols-[1fr_auto_auto] items-center px-4 py-3 border-b border-primary/30">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-sm text-black">All</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                  </svg>
+                </div>
+                <span className="font-semibold text-sm text-black w-20 text-center">Pets</span>
+                <span className="font-semibold text-sm text-black w-28 text-center">Completed Adoptions</span>
+              </div>
+
+              {MOCK_SHELTERS.map((shelter) => (
+                <div
+                  key={shelter.id}
+                  className="grid grid-cols-[1fr_auto_auto] items-center px-4 py-3 border-b border-primary/30 last:border-0 hover:bg-primary/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-primary shrink-0" />
+                    <div>
+                      <p className="font-semibold text-sm text-black">{shelter.name}</p>
+                      <p className="text-xs text-gray-400">{shelter.location}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium text-black w-20 text-center">{shelter.pets}</span>
+                  <span className="text-sm font-medium text-black w-28 text-center">{shelter.adoptions}</span>
                 </div>
               ))}
             </div>
