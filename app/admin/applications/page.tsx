@@ -59,8 +59,11 @@ export default function ShelterApplicationsPage() {
                     <span className="font-bold text-black text-xl">{app.name}</span>
                     <span className="text-xs text-gray-500">{app.time}</span>
                   </div>
-                  <button className="w-full border border-primary rounded-lg py-1.5 text-sm font-medium text-black hover:bg-primary/10 transition-colors">
-                    Review Application
+                  <button
+                    onClick={() => router.push(`/admin/applications/${app.id}`)}
+                      className="w-full border border-primary rounded-lg py-1.5 text-sm font-medium text-black hover:bg-primary/10 transition-colors"
+                      >
+                          Review Application
                   </button>
                 </div>
               </div>

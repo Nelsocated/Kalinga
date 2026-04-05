@@ -1,4 +1,3 @@
-// app/admin/layout.tsx
 import AdminNavbar from "@/components/admin/AdminNavbar";
 import AdminQuickActions from "@/components/admin/AdminQuickActions";
 
@@ -13,8 +12,6 @@ export default function AdminLayout({
         <AdminNavbar />
       </aside>
       <main className="flex-1 min-w-0">{children}</main>
-
-      {/* Fixed top-right quick action buttons */}
       <AdminQuickActions />
     </div>
   );
