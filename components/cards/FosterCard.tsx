@@ -7,7 +7,6 @@ import Forward from "@/public/buttons/Forward.svg";
 
 type FosterCardProps = {
   href: string; // for foster profile button
-  petId: string;
   title: string;
   description: string;
   children: ReactNode;
@@ -15,7 +14,6 @@ type FosterCardProps = {
 
 export default function FosterCard({
   href,
-  petId,
   title,
   description,
   children,

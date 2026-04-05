@@ -19,7 +19,6 @@ type Media = {
 };
 
 type FosterProfileProps = {
-  id: string;
   petId: string;
   name: string;
   sex: string;
@@ -33,7 +32,6 @@ type FosterProfileProps = {
 };
 
 export default function FosterProfilePage({
-  id,
   petId,
   name,
   sex,
@@ -97,7 +95,7 @@ export default function FosterProfilePage({
           <LikeButton
             targetType="pet"
             targetId={petId}
-            className="text-primary h-15"
+            className="text-primary h-12"
           />
         </>
       }

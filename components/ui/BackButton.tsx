@@ -14,9 +14,14 @@ export default function BackButton({ onClick, className }: Props) {
 
   function handleClick() {
     if (onClick) {
-      onClick(); // modal close or custom behavior
+      onClick();
+      return;
+    }
+
+    if (window.history.length > 2) {
+      router.back();
     } else {
-      router.back(); // default: go to previous page
+      router.push("/site/home");
     }
   }
 
@@ -26,7 +31,7 @@ export default function BackButton({ onClick, className }: Props) {
       onClick={handleClick}
       className={`flex items-center justify-center ${className ?? ""}`}
     >
-      <Image src={BackIcon} alt="Back" width={35} height={35} priority />
+      <Image src={BackIcon} alt="Back" width={40} height={40} priority />
     </button>
   );
 }

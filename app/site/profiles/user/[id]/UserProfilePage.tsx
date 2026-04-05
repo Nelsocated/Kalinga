@@ -1,6 +1,6 @@
 "use client";
 
-import EditProfileModal from "@/components/modal/EditProfileModal";
+import EditProfileModal from "@/components/modal/EditProfile/UserEditProfile";
 import Topcard from "@/components/template/user/TopCard";
 import ProfileSection from "@/components/template/ProfileSection";
 import WebTemplate from "@/components/template/WebTemplate";

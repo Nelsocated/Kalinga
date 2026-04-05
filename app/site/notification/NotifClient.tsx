@@ -8,7 +8,6 @@ import WebTemplate from "@/components/template/WebTemplate";
 import NotifCard from "@/components/cards/NotifCard";
 import StatusCard from "@/components/cards/StatusCard";
 import StatusModal from "@/components/modal/StatusModal";
-import BackButton from "@/components/ui/BackButton";
 import { createClientSupabase } from "@/lib/supabase/client";
 
 import type { NotificationItem } from "./page";
@@ -25,12 +24,17 @@ export default function NotifClient({ notifications }: Props) {
   const router = useRouter();
   const supabase = createClientSupabase();
 
-  const [selected, setSelected] = useState<NotificationItem | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [showStatusCard, setShowStatusCard] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const statusCardRef = useRef<HTMLDivElement | null>(null);
+
+  const selected = useMemo(
+    () => notifications.find((item) => item.id === selectedId) ?? null,
+    [notifications, selectedId],
+  );
 
   const hasNotifications = notifications.length > 0;
 
@@ -42,12 +46,12 @@ export default function NotifClient({ notifications }: Props) {
     "text-title font-semibold flex items-center rounded-[15px] pl-7 border bg-white px-2 ml-6 border-l-0";
 
   function handleNotifClick(item: NotificationItem) {
-    if (selected?.id === item.id && showStatusCard) {
+    if (selectedId === item.id && showStatusCard) {
       setOpenModal(true);
       return;
     }
 
-    setSelected(item);
+    setSelectedId(item.id);
     setOpenModal(false);
     setShowStatusCard(true);
   }
@@ -59,6 +63,7 @@ export default function NotifClient({ notifications }: Props) {
   function handleCloseStatusCard() {
     setShowStatusCard(false);
     setOpenModal(false);
+    setSelectedId(null);
   }
 
   useEffect(() => {
@@ -91,24 +96,6 @@ export default function NotifClient({ notifications }: Props) {
     });
   }, [selected, showStatusCard]);
 
-  // keep selected card in sync after refresh
-  useEffect(() => {
-    if (!selected) return;
-
-    const updatedSelected = notifications.find(
-      (item) => item.id === selected.id,
-    );
-
-    if (!updatedSelected) {
-      setSelected(null);
-      setShowStatusCard(false);
-      setOpenModal(false);
-      return;
-    }
-
-    setSelected(updatedSelected);
-  }, [notifications, selected]);
-
   // realtime subscription
   useEffect(() => {
     const channel = supabase
@@ -133,17 +120,12 @@ export default function NotifClient({ notifications }: Props) {
 
   return (
     <WebTemplate
-      header={
-        <div className="flex items-center px-5">
-          <h1 className="text-header font-bold text-black">Notifications</h1>
-          <BackButton />
-        </div>
-      }
+      header={<div>Notifications</div>}
       main={
         <>
           <div
             ref={scrollContainerRef}
-            className="flex-1 min-h-0 overflow-y-auto scroll-stable py-5 "
+            className="flex-1 min-h-0 overflow-y-auto scroll-stable py-5"
           >
             <div className="grid grid-cols-3 place-items-center gap-15 mb-5">
               <div className="relative flex items-center">
@@ -183,7 +165,6 @@ export default function NotifClient({ notifications }: Props) {
                   <NotifCard
                     key={item.id}
                     item={item}
-                    isActive={selected?.id === item.id && showStatusCard}
                     onSelect={() => handleNotifClick(item)}
                     onOpenDetails={() => handleNotifClick(item)}
                   />

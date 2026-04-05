@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 
 import WebTemplate from "@/components/template/WebTemplate";
-import BackButton from "@/components/ui/BackButton";
 import PetCard from "@/components/cards/PetCard";
 import FosterCard from "@/components/cards/FosterCard";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
@@ -115,14 +114,9 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
 
   return (
     <WebTemplate
-      header={
-        <div className="flex items-center px-5">
-          <h1 className="text-header font-bold text-black">Explore</h1>
-          <BackButton />
-        </div>
-      }
+      header={<div>Explore</div>}
       main={
-        <main className="pt-5">
+        <main>
           <div className="ml-6 flex flex-col gap-7">
             {(showBoth || showOnlyLongest) && (
               <section>
@@ -190,8 +184,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
                       showOnlyFoster ? (
                         <FosterCard
                           key={card.key}
-                          href={card.href} // ← foster profile
-                          petId={card.petId}
+                          href={card.href}
                           title={card.title}
                           description={card.description}
                         >

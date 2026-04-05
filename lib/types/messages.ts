@@ -1,4 +1,4 @@
-export type MessageThreadType = "general" | "adoption";
+type MessageThreadType = "general" | "adoption";
 
 export type MessageThread = {
   id: string;
@@ -40,4 +40,33 @@ export type SentMessageItem = {
   body: string;
   created_at: string;
   receiver: PersonCard;
+};
+
+export type ShelterMailboxFilter =
+  | "inbox"
+  | "contacting_applicant"
+  | "decision"
+  | "final_outcome";
+
+export type CreateMessageThreadInput = {
+  userId: string;
+  shelterId: string;
+  subject: string;
+  body: string;
+  threadType?: MessageThreadType;
+  adoptionRequestId?: string | null;
+  senderSide: "user" | "shelter";
+};
+
+export type ReplyToThreadInput = {
+  threadId: string;
+  body: string;
+  senderSide: "user" | "shelter";
+  senderShelterId?: string;
+};
+
+export type ThreadWithMeta = MessageThread & {
+  adoption_status: string | null;
+  last_message_preview: string | null;
+  unread_count: number;
 };

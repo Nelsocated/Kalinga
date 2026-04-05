@@ -2,34 +2,50 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-
+import BackButton from "@/components/ui/BackButton";
 import Edit from "@/public/buttons/Edit.svg";
-import BackButton from "../ui/BackButton";
-
-import Input from "@/components/ui/Input";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
-import {
-  fetchMyUserProfile,
-  patchMyUserProfile,
-  uploadMyUserAvatar,
-} from "@/lib/services/user/userClient";
-import type { UserUpdatePayload } from "@/lib/services/user/usersService";
 
-export default function EditProfileModal() {
+type Field = {
+  key: string;
+  label: string;
+  type?: string;
+};
+
+type ProfileValues = Record<string, string>;
+
+type SaveProfileValues = {
+  values: ProfileValues;
+  avatarUrl?: string;
+};
+
+type Props = {
+  title: string;
+  triggerLabel?: string;
+  fields: Field[];
+  loadProfile: () => Promise<ProfileValues & { avatarUrl?: string }>;
+  saveProfile: (payload: SaveProfileValues) => Promise<void>;
+  uploadAvatar?: (file: File) => Promise<string>;
+  onSaved?: () => void;
+};
+
+export default function EditProfileModal({
+  title,
+  triggerLabel = "Edit Profile",
+  fields,
+  loadProfile,
+  saveProfile,
+  uploadAvatar,
+  onSaved,
+}: Props) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
-  const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [avatarUrl, setAvatarUrl] = useState(DEFAULT_AVATAR_URL);
-  const [fullName, setFullName] = useState("");
-  const [username, setUsername] = useState("");
-  const [bio, setBio] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-
+  const [values, setValues] = useState<ProfileValues>({});
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -50,46 +66,43 @@ export default function EditProfileModal() {
 
     let cancelled = false;
 
-    async function loadProfile() {
+    async function run() {
       try {
         setLoading(true);
         resetMessages();
 
-        const profile = await fetchMyUserProfile();
+        const profile = await loadProfile();
         if (cancelled) return;
 
-        setAvatarUrl((profile.photo_url ?? "").trim() || DEFAULT_AVATAR_URL);
-        setFullName(profile.full_name ?? "");
-        setUsername(profile.username ?? "");
-        setBio(profile.bio ?? "");
-        setContactEmail(profile.contact_email ?? "");
-      } catch (error: unknown) {
+        setAvatarUrl(profile.avatarUrl?.trim() || DEFAULT_AVATAR_URL);
+
+        const nextValues: ProfileValues = {};
+        for (const field of fields) {
+          nextValues[field.key] = profile[field.key] ?? "";
+        }
+        setValues(nextValues);
+      } catch (error) {
         if (!cancelled) {
           setErrorMsg(
             error instanceof Error ? error.message : "Failed to load profile.",
           );
         }
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     }
 
-    loadProfile();
-
+    run();
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open, fields, loadProfile]);
 
   useEffect(() => {
     if (!open) return;
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        setOpen(false);
-      }
+      if (e.key === "Escape") closeModal();
     }
 
     window.addEventListener("keydown", onKeyDown);
@@ -97,14 +110,16 @@ export default function EditProfileModal() {
   }, [open]);
 
   async function handleAvatarPick(file: File) {
+    if (!uploadAvatar) return;
+
     try {
       resetMessages();
       setSaving(true);
 
-      const publicUrl = await uploadMyUserAvatar(file);
+      const publicUrl = await uploadAvatar(file);
       setAvatarUrl(publicUrl);
       setSuccessMsg("Picture updated.");
-    } catch (error: unknown) {
+    } catch (error) {
       setErrorMsg(
         error instanceof Error ? error.message : "Failed to upload picture.",
       );
@@ -114,23 +129,21 @@ export default function EditProfileModal() {
   }
 
   async function handleSave() {
-    const payload: UserUpdatePayload = {
-      full_name: fullName.trim(),
-      username: username.trim(),
-      bio: bio.trim() || undefined,
-      contact_email: contactEmail.trim() || undefined,
-      photo_url:
-        avatarUrl && avatarUrl !== DEFAULT_AVATAR_URL ? avatarUrl : undefined,
-    };
-
     try {
       resetMessages();
       setSaving(true);
 
-      await patchMyUserProfile(payload);
-      router.refresh();
+      const payload: SaveProfileValues = {
+        values,
+        avatarUrl:
+          avatarUrl && avatarUrl !== DEFAULT_AVATAR_URL ? avatarUrl : undefined,
+      };
+
+      await saveProfile(payload);
+
       setSuccessMsg("Profile saved!");
-    } catch (error: unknown) {
+      onSaved?.();
+    } catch (error) {
       setErrorMsg(
         error instanceof Error ? error.message : "Failed to save profile.",
       );
@@ -144,9 +157,9 @@ export default function EditProfileModal() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex w-fit items-center gap-2 rounded-xl border border-black/50 bg-primary px-4 py-2 text-sm font-semibold hover:brightness-95"
+        className="flex w-fit items-center gap-2 rounded-[15px] border border-black/50 bg-primary px-4 py-1 text-sm font-semibold hover:brightness-95"
       >
-        Edit Profile
+        {triggerLabel}
         <Image src={Edit} alt="edit-button" width={20} height={20} />
       </button>
 
@@ -156,9 +169,7 @@ export default function EditProfileModal() {
           aria-modal="true"
           role="dialog"
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) {
-              closeModal();
-            }
+            if (e.target === e.currentTarget) closeModal();
           }}
         >
           <div className="absolute inset-0 bg-black/40" />
@@ -170,11 +181,7 @@ export default function EditProfileModal() {
             >
               <div className="flex items-center justify-between bg-primary px-3 py-2">
                 <BackButton onClick={closeModal} />
-
-                <div className="text-2xl font-semibold text-black">
-                  Edit Profile
-                </div>
-
+                <div className="text-2xl font-semibold text-black">{title}</div>
                 <div className="w-8" />
               </div>
 
@@ -189,64 +196,49 @@ export default function EditProfileModal() {
                     />
                   </div>
 
-                  <label className="cursor-pointer text-xs font-semibold text-black/70 hover:underline">
-                    Edit Picture
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          void handleAvatarPick(file);
-                        }
-                      }}
-                    />
-                  </label>
+                  {uploadAvatar && (
+                    <label className="cursor-pointer text-xs font-semibold text-black/70 hover:underline">
+                      Edit Picture
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) void handleAvatarPick(file);
+                        }}
+                      />
+                    </label>
+                  )}
                 </div>
 
                 <div className="space-y-3">
-                  <Labeled>
-                    <Labeled.Label>Full Name</Labeled.Label>
-                    <Input
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                    />
-                  </Labeled>
+                  {fields.map((field) => (
+                    <div key={field.key} className="space-y-1">
+                      <div className="text-[11px] font-semibold text-black/70">
+                        {field.label}
+                      </div>
 
-                  <Labeled>
-                    <Labeled.Label>Username</Labeled.Label>
-                    <Input
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                    />
-                  </Labeled>
-
-                  <Labeled>
-                    <Labeled.Label>Bio</Labeled.Label>
-                    <Input
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value)}
-                    />
-                  </Labeled>
-
-                  <Labeled>
-                    <Labeled.Label>Email</Labeled.Label>
-                    <Input
-                      value={contactEmail}
-                      onChange={(e) => setContactEmail(e.target.value)}
-                      type="email"
-                    />
-                  </Labeled>
+                      <input
+                        type={field.type ?? "text"}
+                        value={values[field.key] ?? ""}
+                        onChange={(e) =>
+                          setValues((prev) => ({
+                            ...prev,
+                            [field.key]: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded-[15px] border border-black/10 bg-white px-3 py-2 outline-none"
+                      />
+                    </div>
+                  ))}
                 </div>
 
                 <div className="mt-3 text-xs">
-                  {errorMsg ? (
-                    <div className="text-red-600">{errorMsg}</div>
-                  ) : null}
-                  {successMsg ? (
+                  {errorMsg && <div className="text-red-600">{errorMsg}</div>}
+                  {successMsg && (
                     <div className="text-green-700">{successMsg}</div>
-                  ) : null}
+                  )}
                 </div>
 
                 <div className="mt-3 flex gap-2">
@@ -268,11 +260,11 @@ export default function EditProfileModal() {
                   </button>
                 </div>
 
-                {loading ? (
+                {loading && (
                   <div className="mt-3 text-center text-xs text-black/60">
                     Loading profile...
                   </div>
-                ) : null}
+                )}
               </div>
             </div>
           </div>
@@ -281,13 +273,3 @@ export default function EditProfileModal() {
     </>
   );
 }
-
-function Labeled({ children }: { children: React.ReactNode }) {
-  return <div className="space-y-1">{children}</div>;
-}
-
-Labeled.Label = function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-[11px] font-semibold text-black/70">{children}</div>
-  );
-};

@@ -25,8 +25,7 @@ type PetMediaPhoto = {
   caption: string | null;
 };
 
-export default async function Page({ params, searchParams }: PageProps) {
-  const { id } = await params;
+export default async function Page({ searchParams }: PageProps) {
   const data = await searchParams;
 
   const petId = data.petId ?? "";
@@ -51,7 +50,6 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   return (
     <FosterProfilePage
-      id={id}
       petId={petId}
       name={data.name ?? "Unknown pet"}
       sex={data.sex ?? "unknown"}

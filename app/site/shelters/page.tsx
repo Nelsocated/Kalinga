@@ -1,19 +1,13 @@
 import WebTemplate from "@/components/template/WebTemplate";
 import ShelterCard from "@/components/cards/ShelterCard";
-import { getSheltersWithStats } from "@/lib/services/shelterService";
-import BackButton from "@/components/ui/BackButton";
+import { getSheltersWithStats } from "@/lib/services/shelter/shelterService";
 
 export default async function Explore() {
   const shelters = await getSheltersWithStats().catch(() => []);
 
   return (
     <WebTemplate
-      header={
-        <div className="flex items-center px-5">
-          <h1 className="text-header font-bold text-black">Shelters</h1>
-          <BackButton />
-        </div>
-      }
+      header={<div>Shelters</div>}
       main={
         <main className="pt-2">
           <div className="m-4 flex flex-col gap-3">

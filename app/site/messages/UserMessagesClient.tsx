@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import MessagesTabs from "@/components/tabs/MessagesTabs";
 import ThreadList from "@/components/lists/ThreadList";
 import ThreadView from "@/components/views/ThreadView";
@@ -51,22 +51,25 @@ export default function UserMessagesClient({
   const [mode, setMode] = useState<ViewMode>("inbox");
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
 
-  function enrichThread(thread: ThreadWithMeta): ThreadWithMeta {
-    const shelter =
-      threadShelters.find((item) => item.id === thread.shelter_id) ??
-      likedShelters.find((item) => item.id === thread.shelter_id) ??
-      null;
+  const enrichThread = useCallback(
+    (thread: ThreadWithMeta): ThreadWithMeta => {
+      const shelter =
+        threadShelters.find((item) => item.id === thread.shelter_id) ??
+        likedShelters.find((item) => item.id === thread.shelter_id) ??
+        null;
 
-    return {
-      ...thread,
-      other_party: {
-        id: thread.other_party?.id || thread.shelter_id || "",
-        name: thread.other_party?.name || shelter?.name || "Shelter",
-        image: thread.other_party?.image || shelter?.logo_url || null,
-        subtitle: thread.other_party?.subtitle || shelter?.location || null,
-      },
-    };
-  }
+      return {
+        ...thread,
+        other_party: {
+          id: thread.other_party?.id || thread.shelter_id || "",
+          name: thread.other_party?.name || shelter?.name || "Shelter",
+          image: thread.other_party?.image || shelter?.logo_url || null,
+          subtitle: thread.other_party?.subtitle || shelter?.location || null,
+        },
+      };
+    },
+    [threadShelters, likedShelters],
+  );
 
   const [threads, setThreads] = useState<ThreadWithMeta[]>(() =>
     initialThreads.map(enrichThread),
@@ -104,7 +107,7 @@ export default function UserMessagesClient({
     );
   }, [selectedThread, threadShelters, likedShelters]);
 
-  async function loadThreads() {
+  const loadThreads = useCallback(async (): Promise<ThreadWithMeta[]> => {
     try {
       setLoadingThreads(true);
       setError(null);
@@ -133,81 +136,88 @@ export default function UserMessagesClient({
     } finally {
       setLoadingThreads(false);
     }
-  }
+  }, [userId, enrichThread]);
 
-  async function loadThread(threadId: string) {
-    try {
-      setLoadingThread(true);
-      setError(null);
+  const loadThread = useCallback(
+    async (threadId: string) => {
+      try {
+        setLoadingThread(true);
+        setError(null);
 
-      const res = await fetch(`/api/messages/user/threads/${threadId}`, {
-        method: "GET",
-        cache: "no-store",
-      });
+        const res = await fetch(`/api/messages/user/threads/${threadId}`, {
+          method: "GET",
+          cache: "no-store",
+        });
 
-      const result = await res.json();
+        const result = await res.json();
 
-      if (!res.ok) {
-        throw new Error(result.error || "Failed to load thread");
+        if (!res.ok) {
+          throw new Error(result.error || "Failed to load thread");
+        }
+
+        const data = result.data as ThreadResponse;
+        const loadedThread = enrichThread(data.thread);
+        setSelectedThread(loadedThread);
+
+        const shelterFromLists =
+          threadShelters.find((item) => item.id === loadedThread.shelter_id) ??
+          likedShelters.find((item) => item.id === loadedThread.shelter_id) ??
+          null;
+
+        const shelterCard: PersonCard = {
+          id: loadedThread.other_party?.id || loadedThread.shelter_id || "",
+          name:
+            loadedThread.other_party?.name ||
+            shelterFromLists?.name ||
+            "Shelter",
+          image:
+            loadedThread.other_party?.image ||
+            shelterFromLists?.logo_url ||
+            null,
+          subtitle:
+            loadedThread.other_party?.subtitle ||
+            shelterFromLists?.location ||
+            null,
+        };
+
+        const enrichedMessages: MessageWithSender[] = (data.messages ?? []).map(
+          (message) => {
+            const isUserSender = Boolean(message.sender_user_id);
+
+            return {
+              ...message,
+              sender: isUserSender ? currentUserCard : shelterCard,
+            };
+          },
+        );
+
+        setMessages(enrichedMessages);
+
+        setThreads((prev) =>
+          prev.map((thread) => {
+            if (thread.id !== loadedThread.id) return thread;
+
+            return enrichThread({
+              ...thread,
+              ...loadedThread,
+              last_message_preview:
+                loadedThread.last_message_preview?.trim() ||
+                thread.last_message_preview ||
+                null,
+            });
+          }),
+        );
+      } catch (err) {
+        console.error("[loadThread]", err);
+        setError(err instanceof Error ? err.message : "Failed to load thread");
+      } finally {
+        setLoadingThread(false);
       }
+    },
+    [threadShelters, likedShelters, currentUserCard, enrichThread],
+  );
 
-      const data = result.data as ThreadResponse;
-      const loadedThread = enrichThread(data.thread);
-      setSelectedThread(loadedThread);
-
-      const shelterFromLists =
-        threadShelters.find((item) => item.id === loadedThread.shelter_id) ??
-        likedShelters.find((item) => item.id === loadedThread.shelter_id) ??
-        null;
-
-      const shelterCard: PersonCard = {
-        id: loadedThread.other_party?.id || loadedThread.shelter_id || "",
-        name:
-          loadedThread.other_party?.name || shelterFromLists?.name || "Shelter",
-        image:
-          loadedThread.other_party?.image || shelterFromLists?.logo_url || null,
-        subtitle:
-          loadedThread.other_party?.subtitle ||
-          shelterFromLists?.location ||
-          null,
-      };
-
-      const enrichedMessages: MessageWithSender[] = (data.messages ?? []).map(
-        (message) => {
-          const isUserSender = Boolean(message.sender_user_id);
-
-          return {
-            ...message,
-            sender: isUserSender ? currentUserCard : shelterCard,
-          };
-        },
-      );
-
-      setMessages(enrichedMessages);
-
-      setThreads((prev) =>
-        prev.map((thread) => {
-          if (thread.id !== loadedThread.id) return thread;
-
-          return enrichThread({
-            ...thread,
-            ...loadedThread,
-            last_message_preview:
-              loadedThread.last_message_preview?.trim() ||
-              thread.last_message_preview ||
-              null,
-          });
-        }),
-      );
-    } catch (err) {
-      console.error("[loadThread]", err);
-      setError(err instanceof Error ? err.message : "Failed to load thread");
-    } finally {
-      setLoadingThread(false);
-    }
-  }
-
-  async function loadSentMessages() {
+  const loadSentMessages = useCallback(async () => {
     try {
       setLoadingSent(true);
       setError(null);
@@ -231,25 +241,28 @@ export default function UserMessagesClient({
     } finally {
       setLoadingSent(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    if (initialThreads.length === 0) {
-      void loadThreads();
-    }
-  }, [initialThreads.length, userId]);
+    setThreads(initialThreads.map(enrichThread));
+    setSelectedThreadId((prev) => prev ?? initialThreads[0]?.id ?? null);
+    setSelectedThread(
+      (prev) =>
+        prev ?? (initialThreads[0] ? enrichThread(initialThreads[0]) : null),
+    );
+  }, [initialThreads, enrichThread]);
 
   useEffect(() => {
     if (mode === "inbox" && selectedThreadId) {
       void loadThread(selectedThreadId);
     }
-  }, [mode, selectedThreadId]);
+  }, [mode, selectedThreadId, loadThread]);
 
   useEffect(() => {
     if (mode === "compose") {
       void loadSentMessages();
     }
-  }, [mode]);
+  }, [mode, loadSentMessages]);
 
   async function handleRefreshAfterSend(threadId: string) {
     setMode("inbox");
@@ -274,16 +287,13 @@ export default function UserMessagesClient({
 
   return (
     <div className="relative flex min-h-screen w-full justify-center bg-background py-5 pl-20">
-      <div className="w-full max-w-240 max-h-[94vh] overflow-hidden rounded-[15px] border-2 bg-white">
-        <div className="flex items-center bg-primary px-5">
+      <div className="flex h-[94vh] w-full max-w-240 flex-col overflow-hidden rounded-[15px] border-2 bg-white">
+        <div className="flex shrink-0 items-center bg-primary px-5">
           <h1 className="text-header font-bold text-black">Messages</h1>
           <BackButton />
         </div>
 
-        <div
-          className="grid min-h-0 grid-cols-[320px_1fr]"
-          style={{ height: "calc(100vh - 72px)" }}
-        >
+        <div className="grid min-h-0 flex-1 grid-cols-[320px_1fr] overflow-hidden">
           <div className="flex min-h-0 flex-col border-r bg-white">
             <MessagesTabs mode={mode} setMode={setMode} />
 
@@ -307,7 +317,7 @@ export default function UserMessagesClient({
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-col overflow-hidden bg-white">
+          <div className="min-h-0 overflow-hidden">
             {mode === "inbox" ? (
               <ThreadView
                 selectedThreadId={selectedThreadId}

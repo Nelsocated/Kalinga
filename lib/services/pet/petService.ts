@@ -1,6 +1,13 @@
 import "server-only";
-import { createClientSupabase } from "@/lib/supabase/client";
-import type { Pets, PetFilters, PetRow, Multi } from "@/lib/types/pets";
+import { createServerSupabase } from "@/lib/supabase/server";
+import type {
+  Pets,
+  PetFilters,
+  PetRow,
+  Multi,
+  IPetService,
+  Dashboard,
+} from "@/lib/types/pets";
 
 const PET_SELECT = `
   id,
@@ -42,23 +49,12 @@ const isSpecies = (value: unknown): value is Pets["species"] =>
 const isSize = (value: unknown): value is Pets["size"] =>
   value === "small" || value === "medium" || value === "large";
 
-/** Abstraction */
-interface IPetService {
-  getPets(filters?: PetFilters): Promise<Pets[]>;
-  getPetById(id: string): Promise<Pets | null>;
-  getPetsByIds(ids: string[]): Promise<Pets[]>;
-  getPetsByShelter(shelterId: string): Promise<Pets[]>;
-  getLongestStayPets(limit?: number): Promise<Pets[]>;
-  getAvailablePets(filters?: Omit<PetFilters, "status">): Promise<Pets[]>;
-  fetchSearchPets(filters?: Omit<PetFilters, "status">): Promise<Pets[]>;
-}
-
 /** Abstraction + Inheritance + Polymorphism */
 abstract class BaseSupabaseService<TRow, TDomain> {
   protected abstract normalize(row: TRow): TDomain; // polymorphic hook
 
   protected async getClient() {
-    return createClientSupabase();
+    return createServerSupabase();
   }
 
   protected async runListQuery(
@@ -214,6 +210,20 @@ class PetService
   ): Promise<Pets[]> {
     return this.getAvailablePets(filters);
   }
+
+  async getPetsByShelterDashboard(shelterId: string): Promise<Dashboard[]> {
+    const supabase = await this.getClient();
+
+    const { data, error } = await supabase
+      .from("pets")
+      .select("id, name, photo_url, species")
+      .eq("shelter_id", shelterId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(error.message);
+
+    return data ?? [];
+  }
 }
 
 const petService = new PetService();
@@ -248,4 +258,10 @@ export async function fetchSearchPets(
   filters: Omit<PetFilters, "status"> = {},
 ): Promise<Pets[]> {
   return petService.fetchSearchPets(filters);
+}
+
+export async function getPetsByShelterDashboard(
+  shelterId: string,
+): Promise<Dashboard[]> {
+  return petService.getPetsByShelterDashboard(shelterId);
 }

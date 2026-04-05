@@ -2,6 +2,7 @@ import "server-only";
 import { createClientSupabase } from "@/lib/supabase/client";
 import { createServerSupabase } from "@/lib/supabase/server";
 import type { Users } from "@/lib/types/users";
+import type { UserUpdatePayload } from "@/lib/types/users";
 
 const PROFILES_TABLE = "users";
 const AVATAR_BUCKET = "user_photos";
@@ -18,18 +19,6 @@ const USER_SELECT = `
   updated_at,
   created_at
 `;
-
-export type UserUpdatePayload = Partial<
-  Pick<
-    Users,
-    | "full_name"
-    | "username"
-    | "bio"
-    | "contact_email"
-    | "contact_phone"
-    | "photo_url"
-  >
->;
 
 async function requireCurrentUser() {
   const supabase = await createClientSupabase();

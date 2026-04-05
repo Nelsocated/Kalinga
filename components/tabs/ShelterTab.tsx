@@ -13,10 +13,7 @@ import VideoCard from "@/components/cards/VideoCard";
 import PetCard from "@/components/cards/PetCard";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 
-import type {
-  ShelterVideoMini,
-  ShelterPetMini,
-} from "@/lib/services/shelterService";
+import type { ShelterVideoMini, ShelterPetMini } from "@/lib/types/shelters";
 
 export type TabsKey = "videos" | "pets";
 
@@ -26,9 +23,25 @@ const TAB_META = {
     iconActive: at_play,
     alt: "play",
     altActive: "at-play",
+    label: "Videos",
   },
-  pets: { icon: pet, iconActive: at_pet, alt: "pet", altActive: "at-pet" },
-} satisfies Record<TabsKey, any>;
+  pets: {
+    icon: pet,
+    iconActive: at_pet,
+    alt: "pet",
+    altActive: "at-pet",
+    label: "Photos",
+  },
+} satisfies Record<
+  TabsKey,
+  {
+    icon: typeof play;
+    iconActive: typeof play;
+    alt: string;
+    altActive: string;
+    label: string;
+  }
+>;
 
 const ITEMS_PER_BATCH = 10;
 
@@ -71,13 +84,13 @@ export default function ShelterTopCard({
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [tab]);
 
-  // IMPORTANT: refetch when shelterId changes
-
   const list = useMemo(
     () => (tab === "videos" ? videos : pets),
     [tab, videos, pets],
   );
+
   const hasMore = visibleCount < list.length;
+
   const visibleItems = useMemo(
     () => list.slice(0, visibleCount),
     [list, visibleCount],
@@ -102,21 +115,24 @@ export default function ShelterTopCard({
   return (
     <div className="min-h-0 pr-7">
       <div className="flex min-h-0 flex-col rounded-[15px] bg-white">
-        {/* Tabs */}
         <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center gap-20">
+          <div className="flex items-start gap-12 sm:gap-16">
             {tabs.map((key) => {
               const active = tab === key;
               const meta = TAB_META[key];
+
               return (
                 <TabButton
                   key={key}
                   active={active}
                   onClick={() => setTab(key)}
+                  label={meta.label}
                 >
                   <Image
                     src={active ? meta.iconActive : meta.icon}
                     alt={active ? meta.altActive : meta.alt}
+                    height={60}
+                    width={60}
                   />
                 </TabButton>
               );
@@ -128,7 +144,6 @@ export default function ShelterTopCard({
           <hr className="border-black/10" />
         </div>
 
-        {/* List */}
         <div ref={scrollRef} className="mt-3 min-h-0 flex-1 px-4 pr-1">
           {loading ? (
             <div className="rounded-[15px] border border-black/10 bg-white p-6 text-center text-sm opacity-60">
@@ -137,7 +152,7 @@ export default function ShelterTopCard({
           ) : null}
 
           {visibleItems.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 place-items-center gap-6">
+            <div className="grid grid-cols-1 place-items-center gap-6 sm:grid-cols-3 lg:grid-cols-4">
               {visibleItems.map((x: any) => {
                 if (tab === "videos") {
                   return (
@@ -189,20 +204,36 @@ export default function ShelterTopCard({
 function TabButton({
   active,
   onClick,
+  label,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  label: string;
   children: React.ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={active ? "" : ""}
       aria-pressed={active}
+      className={[
+        "group flex min-w-21 flex-col items-center gap-1 rounded-full px-3",
+        "transition-all duration-200 ease-out",
+      ].join(" ")}
     >
-      {children}
+      <div className="transition-transform duration-200 ease-out group-hover:scale-105">
+        {children}
+      </div>
+
+      <span
+        className={[
+          "text-sm font-medium transition-colors duration-200 ease-out",
+          active ? "text-primary" : "text-black",
+        ].join(" ")}
+      >
+        {label}
+      </span>
     </button>
   );
 }

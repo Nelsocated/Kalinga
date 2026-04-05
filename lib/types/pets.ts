@@ -49,10 +49,27 @@ export type PetRow = {
   created_at: string | null;
 };
 
-export type PetFilters = {
+export interface PetFilters {
   species?: Multi<Pets["species"]>;
   sex?: Multi<Pets["sex"]>;
   age?: Multi<Pets["age"]>;
   size?: Multi<Pets["size"]>;
   status?: Multi<Pets["status"]>;
+}
+
+export interface IPetService {
+  getPets(filters?: PetFilters): Promise<Pets[]>;
+  getPetById(id: string): Promise<Pets | null>;
+  getPetsByIds(ids: string[]): Promise<Pets[]>;
+  getPetsByShelter(shelterId: string): Promise<Pets[]>;
+  getLongestStayPets(limit?: number): Promise<Pets[]>;
+  getAvailablePets(filters?: Omit<PetFilters, "status">): Promise<Pets[]>;
+  fetchSearchPets(filters?: Omit<PetFilters, "status">): Promise<Pets[]>;
+}
+
+export type Dashboard = {
+  id: string;
+  name: string | null;
+  photo_url: string | null;
+  species: string;
 };

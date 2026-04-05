@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import at_play from "@/public/tabs/at_play.svg";
 import at_home from "@/public/tabs/at_home.svg";
@@ -10,34 +10,36 @@ import play from "@/public/tabs/play.svg";
 import home from "@/public/tabs/home.svg";
 import pet from "@/public/tabs/pet.svg";
 
-import type { LikedMiniItem, LikedKind } from "@/lib/services/likeService";
+import type { LikedMiniItem } from "@/lib/types/likes";
 
 import VideoCard from "@/components/cards/VideoCard";
 import PetCard from "@/components/cards/PetCard";
 import ShelterCard from "@/components/cards/ShelterCard";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
-import { param, video } from "framer-motion/client";
 
 export type TabsKey = "videos" | "pets" | "shelters";
-
+type LikedKind = "video" | "pet" | "shelter";
 const TAB_META = {
   videos: {
     icon: play,
     iconActive: at_play,
     alt: "play",
     altActive: "at-play",
+    label: "Videos",
   },
   shelters: {
     icon: home,
     iconActive: at_home,
     alt: "home",
     altActive: "at-home",
+    label: "Shelters",
   },
   pets: {
     icon: pet,
     iconActive: at_pet,
     alt: "pet",
     altActive: "at-pet",
+    label: "Pets",
   },
 } satisfies Record<
   TabsKey,
@@ -46,6 +48,7 @@ const TAB_META = {
     iconActive: typeof play;
     alt: string;
     altActive: string;
+    label: string;
   }
 >;
 
@@ -135,11 +138,11 @@ export default function UserTab() {
     [filtered, visibleCount],
   );
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     setVisibleCount((count) =>
       Math.min(count + ITEMS_PER_BATCH, filtered.length),
     );
-  };
+  }, [filtered.length]);
 
   useEffect(() => {
     if (!hasMore || !scrollRef.current || !loadMoreRef.current) {
@@ -162,13 +165,13 @@ export default function UserTab() {
     observer.observe(loadMoreRef.current);
 
     return () => observer.disconnect();
-  }, [hasMore, filtered.length]);
+  }, [hasMore, filtered.length, loadMore]);
 
   return (
     <div className="min-h-0 pr-7">
       <div className="flex min-h-0 flex-col rounded-[15px] bg-white">
-        <div className="flex flex-col items-center gap-3 p-4">
-          <div className="flex items-center gap-20">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-start gap-12 sm:gap-16">
             {tabs.map((key) => {
               const active = tab === key;
               const meta = TAB_META[key];
@@ -178,10 +181,13 @@ export default function UserTab() {
                   key={key}
                   active={active}
                   onClick={() => setTab(key)}
+                  label={meta.label}
                 >
                   <Image
                     src={active ? meta.iconActive : meta.icon}
                     alt={active ? meta.altActive : meta.alt}
+                    height={60}
+                    width={60}
                   />
                 </TabButton>
               );
@@ -268,15 +274,36 @@ export default function UserTab() {
 function TabButton({
   active,
   onClick,
+  label,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  label: string;
   children: React.ReactNode;
 }) {
   return (
-    <button type="button" onClick={onClick} aria-pressed={active}>
-      {children}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={[
+        "group flex min-w-21 flex-col items-center gap-1 rounded-full px-3",
+        "transition-all duration-200 ease-out",
+      ].join(" ")}
+    >
+      <div className="transition-transform duration-200 ease-out group-hover:scale-105">
+        {children}
+      </div>
+
+      <span
+        className={[
+          "text-sm font-medium transition-colors duration-200 ease-out",
+          active ? "text-primary" : "text-black",
+        ].join(" ")}
+      >
+        {label}
+      </span>
     </button>
   );
 }

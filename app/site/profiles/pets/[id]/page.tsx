@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import PetProfileClient from "./PetProfileClient";
 import { getPetById } from "@/lib/services/pet/petService";
 import { getPetPhotosByPetId } from "@/lib/services/petMediaService";
-import { fetchShelterById } from "@/lib/services/shelterService";
+import { fetchShelterById } from "@/lib/services/shelter/shelterService";
 
 type PageProps = {
   params: Promise<{

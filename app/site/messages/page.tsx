@@ -3,7 +3,7 @@ import UserMessagesClient from "./UserMessagesClient";
 import { getUserId } from "@/lib/utils/getUserId";
 import { getUserInboxThreads } from "@/lib/services/messageService";
 import { getUserById } from "@/lib/services/user/usersService";
-import { fetchShelterById } from "@/lib/services/shelterService";
+import { fetchShelterById } from "@/lib/services/shelter/shelterService";
 import { getLikedIdsByUser } from "@/lib/services/likeService";
 
 type PersonCard = {

@@ -14,8 +14,8 @@ export default function PetProfileTemplate({
     <div className="min-h-screen bg-background px-6 py-5">
       <div className="mx-auto w-full max-w-260">
         <div className="rounded-[15px] bg-primary ml-20 p-10">
-          <div className="flex h-[82vh] min-h-0 w-full flex-col overflow-hidden rounded-[15px] bg-white">
-            <div className="shrink-0 px-5 py-2">
+          <div className="flex h-[82vh] min-h-0 w-full flex-col overflow-hidden rounded-[15px] border-t-0 bg-white">
+            <div className="shrink-0 px-5 py-3">
               <div className="flex items-center justify-between">{top}</div>
             </div>
 

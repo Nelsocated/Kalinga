@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserSentMessages } from "@/lib/services/messageService";
 import { getUserId } from "@/lib/utils/getUserId";
-import { fetchShelterById } from "@/lib/services/shelterService";
+import { fetchShelterById } from "@/lib/services/shelter/shelterService";
 
 export async function GET() {
   try {

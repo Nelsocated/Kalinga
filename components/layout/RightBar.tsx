@@ -1,7 +1,7 @@
 // components/layout/RightBar.tsx
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import ShareButton from "../ui/ShareButton";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 
@@ -9,8 +9,6 @@ import Button from "../ui/Button";
 import LikeButton from "../ui/LikeButton";
 import up_button from "@/public/buttons/Up.svg";
 import down_button from "@/public/buttons/Down.svg";
-
-import { LikeTargetType } from "@/lib/services/likeService";
 
 type FeedNav = {
   next: () => void;
@@ -28,7 +26,7 @@ export type ShelterMini = {
 };
 
 type Props = {
-  type: LikeTargetType;
+  type: "pet" | "shelter" | "video";
   pet_id: string;
   media_id?: string;
   shelter?: ShelterMini | null;

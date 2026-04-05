@@ -3,7 +3,7 @@ import {
   getLongestStayPets,
   getPetsByIds,
 } from "@/lib/services/pet/petService";
-import { getSheltersByIds } from "@/lib/services/shelterService";
+import { getSheltersByIds } from "@/lib/services/shelter/shelterService";
 import { getFosterStories } from "@/lib/services/fosterService";
 
 export const dynamic = "force-dynamic";

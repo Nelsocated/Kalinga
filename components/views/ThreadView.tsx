@@ -1,4 +1,5 @@
 import type { PersonCard, MessageThread, Message } from "@/lib/types/messages";
+import Image from "next/image";
 
 type MessageWithSender = Message & {
   sender: PersonCard;
@@ -49,7 +50,8 @@ export default function ThreadView({
   );
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col border-l bg-white">
+    <div className="flex h-full min-h-0 flex-col border-l bg-white">
+      {/* Header */}
       <div className="shrink-0 border-b px-6 py-2">
         <h2 className="text-subtitle font-bold text-black">
           {selectedThread.subject}
@@ -61,39 +63,41 @@ export default function ThreadView({
         </p>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto scroll-stable pb-20">
+      {/* Scrollable body */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {sortedMessages.length === 0 ? (
           <p className="px-6 py-3 text-sm text-neutral-500">No messages yet.</p>
         ) : (
-          sortedMessages.map((message) => (
-            <article key={message.id} className="border-b px-6 py-2">
-              <div className="flex items-start gap-3">
-                <Avatar
-                  name={message.sender.name}
-                  image={message.sender.image}
-                />
-
-                <div className="min-w-0 flex-1">
-                  <p className="text-description font-semibold text-black">
-                    {message.sender.name}
-                  </p>
-                  <p className="mt-0.5 text-small text-neutral-500">
-                    {formatFullDate(message.created_at)}
-                  </p>
-
-                  <div className="mt-3">
-                    <p className="whitespace-pre-wrap text-description leading-6 text-black">
-                      {message.body}
+          <div className="flex flex-col">
+            {sortedMessages.map((message) => (
+              <article key={message.id} className="border-b px-6 py-2">
+                <div className="flex items-start gap-3">
+                  <Avatar
+                    name={message.sender.name}
+                    image={message.sender.image}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-description font-semibold text-black">
+                      {message.sender.name}
                     </p>
+                    <p className="mt-0.5 text-small text-neutral-500">
+                      {formatFullDate(message.created_at)}
+                    </p>
+                    <div className="mt-3">
+                      <p className="whitespace-pre-wrap text-description leading-6 text-black">
+                        {message.body}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))
+              </article>
+            ))}
+          </div>
         )}
       </div>
 
-      <div className="absolute bottom-7 w-full border-t bg-white px-6 py-2">
+      {/* Reply bar — naturally pinned at bottom via flex */}
+      <div className="shrink-0 border-t bg-white px-5 py-2">
         <button
           type="button"
           onClick={onOpenReplyModal}
@@ -109,7 +113,7 @@ export default function ThreadView({
 function Avatar({ name, image }: { name: string; image: string | null }) {
   if (image) {
     return (
-      <img
+      <Image
         src={image}
         alt={name}
         className="h-10 w-10 rounded-full border object-cover"

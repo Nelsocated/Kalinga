@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import Button from "@/components/ui/Button";
-import { createClientSupabase } from "@/lib/supabase/client";
 import FilterModal from "../modal/FilterModal";
 import MoreModal from "../modal/MoreModal";
 
@@ -17,27 +16,29 @@ import profile_icon from "@/public/icons/user.svg";
 import notif_icon from "@/public/icons/notifications.svg";
 import messages_icon from "@/public/icons/Messages.svg";
 
+import { ClientAuth, type AuthUser } from "@/lib/utils/clientAuth";
+
 export default function Navbar() {
   const router = useRouter();
-  const supabase = createClientSupabase();
 
-  const [userId, setUserId] = useState<string | null>(null);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    async function getUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        setUserId(user.id);
-      }
+    async function loadAuthUser() {
+      const user = await ClientAuth.getAuthUser();
+      setAuthUser(user);
     }
 
-    getUser();
-  }, [supabase]);
+    loadAuthUser();
+  }, []);
 
-  const buttonStyle = "flex border-none gap-3 w-full text-lg";
+  const buttonStyle = "flex w-full gap-3 border-none text-lg";
+
+  function handleProfileClick() {
+    if (!authUser) return;
+
+    router.push(ClientAuth.getProfileRouteByRole(authUser));
+  }
 
   return (
     <aside className="max-w-sm">
@@ -51,7 +52,7 @@ export default function Navbar() {
         />
       </div>
 
-      <nav className="mt-3 text-xl space-y-2 text-black">
+      <nav className="mt-3 space-y-2 text-xl text-black">
         <div className="flex">
           <FilterModal />
         </div>
@@ -86,11 +87,7 @@ export default function Navbar() {
         <Button
           type="button"
           className={buttonStyle}
-          onClick={() => {
-            if (userId) {
-              router.push(`/site/profiles/user/${userId}`);
-            }
-          }}
+          onClick={handleProfileClick}
         >
           <Image src={profile_icon} alt="profile-icon" width={25} height={25} />
           <span>Profile</span>

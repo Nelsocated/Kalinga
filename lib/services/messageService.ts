@@ -4,45 +4,11 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import type {
   Message,
   MessageThread,
-  MessageThreadType,
+  CreateMessageThreadInput,
+  ReplyToThreadInput,
+  ThreadWithMeta,
+  ShelterMailboxFilter,
 } from "@/lib/types/messages";
-
-export type ShelterMailboxFilter =
-  | "inbox"
-  | "contacting_applicant"
-  | "decision"
-  | "final_outcome";
-
-export type CreateMessageThreadInput = {
-  userId: string;
-  shelterId: string;
-  subject: string;
-  body: string;
-  threadType?: MessageThreadType;
-  adoptionRequestId?: string | null;
-  senderSide: "user" | "shelter";
-};
-
-export type ReplyToThreadInput = {
-  threadId: string;
-  body: string;
-  senderSide: "user" | "shelter";
-  senderShelterId?: string;
-};
-
-export type SentMessageItem = {
-  id: string;
-  subject: string;
-  body: string;
-  created_at: string;
-  shelter_id: string;
-};
-
-export type ThreadWithMeta = MessageThread & {
-  adoption_status: string | null;
-  last_message_preview: string | null;
-  unread_count: number;
-};
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
@@ -70,7 +36,7 @@ async function getOwnedShelterIds(authUserId: string): Promise<string[]> {
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
-    .from("shelters")
+    .from("shelter")
     .select("id")
     .eq("user_id", authUserId);
 

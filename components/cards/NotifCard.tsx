@@ -2,12 +2,11 @@ import type { NotificationItem } from "@/app/site/notification/page";
 
 type Props = {
   item: NotificationItem;
-  isActive?: boolean;
   onSelect?: () => void;
   onOpenDetails?: () => void;
 };
 
-export default function NotifCard({ item, isActive = false, onSelect }: Props) {
+export default function NotifCard({ item, onSelect }: Props) {
   return (
     <button
       type="button"

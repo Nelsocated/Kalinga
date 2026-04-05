@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 
 type Media = {
   id: string;
@@ -75,7 +76,7 @@ export default function PhotoView({ name, photo_url, pet_media = [] }: Props) {
     <div>
       <div className="mb-4 overflow-hidden rounded-[15px] bg-black/5">
         {selectedPhoto?.url ? (
-          <img
+          <Image
             src={selectedPhoto.url}
             alt={selectedPhoto.caption ?? `${name} photo`}
             className="h-60 w-full object-cover"
@@ -105,7 +106,7 @@ export default function PhotoView({ name, photo_url, pet_media = [] }: Props) {
                       : "opacity-90 hover:opacity-100",
                   ].join(" ")}
                 >
-                  <img
+                  <Image
                     src={photo.url}
                     alt={photo.caption ?? "Pet photo"}
                     className="aspect-3/4 w-full object-cover shadow-sm"

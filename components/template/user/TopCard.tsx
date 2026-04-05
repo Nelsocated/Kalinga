@@ -28,21 +28,21 @@ export default function TopCard({
   className = "",
 }: TopCardProps) {
   return (
-    <div className={`rounded-3xl ${className}`}>
-      {leftSlot ? <div className="absolute -left-3">{leftSlot}</div> : null}
+    <div className="flex w-full justify-between items-center">
+      <div className={`rounded-3xl ${className}`}>
+        {leftSlot ? <div className="absolute -left-3">{leftSlot}</div> : null}
 
-      <ProfileHeader
-        title={title}
-        subtitle={subtitle}
-        location={location}
-        imageUrl={imageUrl}
-        actions={actions}
-        rightSlot={rightSlot}
-        titleClassName="text-4xl md:text-5xl font-bold"
-        avatarClassName="rounded-full"
-      />
+        <ProfileHeader
+          title={title}
+          subtitle={subtitle}
+          location={location}
+          imageUrl={imageUrl}
+          actions={actions}
+          rightSlot={rightSlot}
+        />
 
-      {belowHeader ? <div>{belowHeader}</div> : null}
+        {belowHeader ? <div>{belowHeader}</div> : null}
+      </div>
     </div>
   );
 }

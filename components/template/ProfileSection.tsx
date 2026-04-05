@@ -5,9 +5,11 @@ import type { ReactNode } from "react";
 export default function ProfileSection({
   title,
   children,
+  className,
 }: {
   title?: string;
   children: ReactNode;
+  className?: string;
 }) {
   return (
     <section className="p-2">
@@ -17,7 +19,9 @@ export default function ProfileSection({
         </div>
       )}
 
-      <div className="pt-1 pr-4 whitespace-pre-line leading-5 wrap-break-words *:m-0">
+      <div
+        className={`pr-4 whitespace-pre-line leading-5 wrap-break-words flex flex-col *:m-0 ${className}`}
+      >
         {children}
       </div>
     </section>

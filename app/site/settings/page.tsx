@@ -5,23 +5,12 @@ import Image from "next/image";
 import ChangePasswordView from "@/components/views/ChangePasswordView";
 import DeleteAccountView from "@/components/views/DeleteAccountView";
 import WebTemplate from "@/components/template/WebTemplate";
-import BackButton from "@/components/ui/BackButton";
 
 import CheckUser from "@/public/icons/CheckUser.svg";
 import Setting from "@/public/icons/Setting.svg";
 
 export default function SettingsPage() {
-  return (
-    <WebTemplate
-      header={
-        <div className="flex items-center px-5">
-          <h1 className="text-header font-bold text-black">Settings</h1>
-          <BackButton />
-        </div>
-      }
-      main={SettingsTabsView()}
-    />
-  );
+  return <WebTemplate header={<div>Settings</div>} main={SettingsTabsView()} />;
 }
 
 type TabKey = "change-password" | "delete-account";
@@ -29,7 +18,7 @@ type TabKey = "change-password" | "delete-account";
 function SettingsTabsView() {
   const [activeTab, setActiveTab] = useState<TabKey>("change-password");
 
-  const buttonStyle = `text-lg font-semibold flex items-center rounded-[15px] pl-6 ml-7 border px-2 py-1 border-l-0`;
+  const buttonStyle = `text-lg font-semibold hover:bg-primary flex items-center rounded-[15px] pl-6 ml-7 border px-2 py-1 border-l-0`;
 
   return (
     <div className="overflow-y-auto scroll-stable">

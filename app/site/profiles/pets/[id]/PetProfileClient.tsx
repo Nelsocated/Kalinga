@@ -168,7 +168,7 @@ export default function PetProfileClient({
           <LikeButton
             targetType="pet"
             targetId={id}
-            className="text-primary h-15"
+            className="text-primary h-12"
           />
         </>
       }
