@@ -5,7 +5,6 @@ export interface Pets {
   description: string;
   breed: string;
   age: "kitten/puppy" | "young_adult" | "adult" | "senior";
-  personality: string;
   status: "available" | "pending" | "adopted";
   sex: "male" | "female";
   species: "dog" | "cat";
@@ -35,7 +34,6 @@ export type PetRow = {
   description: string | null;
   breed: string | null;
   age: string | null;
-  personality: string | null;
   status: string | null;
   sex: string | null;
   species: string | null;
@@ -72,4 +70,25 @@ export type Dashboard = {
   name: string | null;
   photo_url: string | null;
   species: string;
+};
+
+export type CreatePetInput = {
+  shelter_id: string;
+  name: string;
+
+  description?: string | null;
+  breed?: string | null;
+
+  age: "kitten/puppy" | "young_adult" | "adult" | "senior";
+  sex: "male" | "female";
+  species: "dog" | "cat";
+  size: "small" | "medium" | "large";
+
+  status?: "available" | "pending" | "adopted";
+
+  vaccinated?: boolean;
+  spayed_neutered?: boolean;
+
+  photo_url?: string | null;
+  years_inShelter?: number | null;
 };

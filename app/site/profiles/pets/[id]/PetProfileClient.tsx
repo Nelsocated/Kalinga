@@ -37,7 +37,6 @@ type PetProfile = {
   description: string | null;
   age_label?: string | null;
   breed: string | null;
-  personality: string | null;
   species: string | null;
   photo_url: string | null;
   vaccinated: boolean;

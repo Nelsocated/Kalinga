@@ -7,7 +7,16 @@ import type {
   Multi,
   IPetService,
   Dashboard,
+  CreatePetInput,
 } from "@/lib/types/pets";
+
+type ServiceResult<T> = {
+  ok: boolean;
+  status: number;
+  data?: T;
+  error?: string;
+  details?: unknown;
+};
 
 const PET_SELECT = `
   id,
@@ -16,7 +25,6 @@ const PET_SELECT = `
   description,
   breed,
   age,
-  personality,
   status,
   sex,
   species,
@@ -100,7 +108,6 @@ class PetService
       description: String(row.description ?? ""),
       breed: String(row.breed ?? ""),
       age: isAge(row.age) ? row.age : "adult",
-      personality: String(row.personality ?? ""),
       status: isStatus(row.status) ? row.status : "available",
       sex: isSex(row.sex) ? row.sex : "male",
       species: isSpecies(row.species) ? row.species : "dog",
@@ -224,6 +231,56 @@ class PetService
 
     return data ?? [];
   }
+
+  async createPet(
+    input: CreatePetInput,
+  ): Promise<ServiceResult<{ id: string }>> {
+    const supabase = await createServerSupabase();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    console.log("[createPet] auth.uid:", user?.id, "authError:", authError);
+
+    const payload = {
+      shelter_id: input.shelter_id,
+      name: input.name,
+      description: input.description ?? null,
+      breed: input.breed ?? null,
+      species: input.species,
+      sex: input.sex,
+      age: input.age,
+      size: input.size,
+      status: input.status ?? "available",
+      vaccinated: input.vaccinated ?? false,
+      spayed_neutered: input.spayed_neutered ?? false,
+      photo_url: input.photo_url ?? null,
+      year_inShelter: input.years_inShelter ?? null,
+    };
+
+    const { data, error } = await supabase
+      .from("pets")
+      .insert(payload)
+      .select("id")
+      .single();
+
+    console.log("[createPet] insert error:", JSON.stringify(error, null, 2)); // ← add this
+
+    if (error || !data) {
+      return {
+        ok: false,
+        status: 500,
+        error: "Failed to create pet",
+        details: error,
+      };
+    }
+
+    return {
+      ok: true,
+      status: 201,
+      data,
+    };
+  }
 }
 
 const petService = new PetService();
@@ -264,4 +321,9 @@ export async function getPetsByShelterDashboard(
   shelterId: string,
 ): Promise<Dashboard[]> {
   return petService.getPetsByShelterDashboard(shelterId);
+}
+export async function createPet(
+  input: CreatePetInput,
+): Promise<ServiceResult<{ id: string }>> {
+  return petService.createPet(input);
 }

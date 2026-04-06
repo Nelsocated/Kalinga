@@ -16,6 +16,7 @@ type InputProps = {
   hint?: string;
   className?: string;
   inputClassName?: string;
+  labelClassName?: string;
   icon?: React.ReactNode;
   iconPosition?: "left" | "right";
 
@@ -38,6 +39,7 @@ export default function Input({
   icon,
   iconPosition = "left",
   inputClassName = "",
+  labelClassName = "",
   onChange,
   onBlur,
 }: InputProps) {
@@ -53,7 +55,7 @@ export default function Input({
         </div>
       )}
 
-      <label className="leading-7">{label}</label>
+      <label className={`leading-7 ${labelClassName}`}>{label}</label>
       <input
         id={id}
         name={name}

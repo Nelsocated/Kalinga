@@ -28,14 +28,13 @@ export default async function PetProfilePage({ params }: PageProps) {
     id: pet.id,
     name: pet.pet_name || "Unknown Pet",
     description: pet.description || null,
-    age_label: pet.age || null,
-    breed: pet.breed || "Unknown Breed",
-    personality: pet.personality || "No personality listed",
-    species: pet.species || "Unknown Species",
+    age_label: formatLabel(pet.age, pet.species) || null,
+    breed: formatLabel(pet.breed) || "Unknown Breed",
+    species: formatLabel(pet.species) || "Unknown Species",
     vaccinated: pet.vaccinated,
     spayed_neutered: pet.spayed_neutered,
     sex: pet.sex ?? null,
-    size: pet.size || null,
+    size: formatLabel(pet.size) || null,
     photo_url: pet.photo_url || null,
     shelter: shelter
       ? {
@@ -54,4 +53,16 @@ export default async function PetProfilePage({ params }: PageProps) {
   };
 
   return <PetProfileClient id={id} initialPet={mappedPet} />;
+}
+
+function formatLabel(value: string | null, species?: string | null): string {
+  if (!value) return "Unknown";
+
+  // Handle age: puppy_kitten → based on species
+  if (value === "kitten/puppy") {
+    return species === "cat" ? "Kitten" : "Puppy";
+  }
+
+  // Capitalize first letter, replace underscores with spaces
+  return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }

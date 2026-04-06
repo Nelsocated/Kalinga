@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Caption from "./Caption";
 import playIcon from "@/public/icons/Play-icon.svg";
 import type { FeedItem } from "@/lib/types/feed";
@@ -28,7 +28,7 @@ export default function ViewPort({ item }: PetCardProps) {
   const caption = videoMedia?.caption ?? null;
   const shelterName = item.shelter?.shelter_name ?? "Unknown shelter";
 
-  async function recordView() {
+  const recordView = useCallback(async () => {
     if (!mediaId || hasRecordedViewRef.current) return;
 
     hasRecordedViewRef.current = true;
@@ -52,24 +52,22 @@ export default function ViewPort({ item }: PetCardProps) {
     } catch (error) {
       console.error("Failed to record view", error);
     }
-  }
+  }, [mediaId]);
 
-  function clearViewTimer() {
+  const clearViewTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-  }
+  }, []);
 
-  function startViewTimer() {
+  const startViewTimer = useCallback(() => {
     if (!mediaId || hasRecordedViewRef.current) return;
-
     clearViewTimer();
-
     timerRef.current = setTimeout(() => {
       void recordView();
     }, 3000);
-  }
+  }, [mediaId, clearViewTimer, recordView]);
 
   async function togglePlay() {
     const video = videoRef.current;
@@ -92,7 +90,7 @@ export default function ViewPort({ item }: PetCardProps) {
   useEffect(() => {
     hasRecordedViewRef.current = false;
     clearViewTimer();
-  }, [mediaId]);
+  }, [mediaId, clearViewTimer]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -120,7 +118,7 @@ export default function ViewPort({ item }: PetCardProps) {
       video.removeEventListener("pause", handlePause);
       clearViewTimer();
     };
-  }, [mediaId]);
+  }, [mediaId, startViewTimer, clearViewTimer]);
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-black">

@@ -74,12 +74,14 @@ export default function PhotoView({ name, photo_url, pet_media = [] }: Props) {
 
   return (
     <div>
-      <div className="mb-4 overflow-hidden rounded-[15px] bg-black/5">
+      <div className="mb-4 relative overflow-hidden rounded-[15px] bg-black/5 h-60">
         {selectedPhoto?.url ? (
           <Image
             src={selectedPhoto.url}
             alt={selectedPhoto.caption ?? `${name} photo`}
-            className="h-60 w-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 600px" // ← tune to your layout
           />
         ) : (
           <div className="flex h-60 items-center justify-center text-description opacity-70">

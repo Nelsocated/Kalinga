@@ -13,8 +13,8 @@ export type PetCardProps = {
   imageUrl?: string | null;
   petName: string;
   sex?: PetGender;
-  shelterName: string;
-  shelterLogo: string;
+  shelterName?: string;
+  shelterLogo?: string;
   className?: string;
   year_inShelter?: number;
   title?: string | null;
@@ -87,8 +87,8 @@ export default function PetCard({
 
         <div className="flex items-center text-[10px] leading-none">
           <Image
-            src={shelterLogo}
-            alt={shelterName}
+            src={shelterLogo ?? ""}
+            alt={shelterName ?? ""}
             width={18}
             height={18}
             className="rounded-full"
