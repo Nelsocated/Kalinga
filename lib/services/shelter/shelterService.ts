@@ -9,7 +9,8 @@ import type {
   PetStatusRow,
   ShelterUpdatePayload,
   ShelterServiceResult,
-  ShelterProfile, PetCardProps
+  ShelterProfile,
+  PetCardProps,
 } from "@/lib/types/shelters";
 import type {
   ShelterProfileUI,
@@ -157,7 +158,7 @@ class ShelterService {
       age: p.age,
       sex: p.sex,
       species: p.species,
-      size: p.size
+      size: p.size,
     }));
   }
 
@@ -171,6 +172,7 @@ class ShelterService {
       thumbnailUrl: row.pets?.photo_url ?? null,
       title: row.pets?.name ?? null,
       caption: row.caption ?? null,
+      petId: row.pet_id ?? null,
       petName: row.pets?.name ?? null,
       subtitle: row.caption ?? null,
     }));
@@ -505,6 +507,8 @@ export async function getShelterPetProps(
   return shelterService.getShelterPetProps(id);
 }
 
-export async function getShelterPets(shelterId: string): Promise<PetCardProps[]> {
-  return shelterService.getShelterPets(shelterId)
+export async function getShelterPets(
+  shelterId: string,
+): Promise<PetCardProps[]> {
+  return shelterService.getShelterPets(shelterId);
 }
