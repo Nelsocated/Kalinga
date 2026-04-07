@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Caption from "./Caption";
 import playIcon from "@/public/icons/Play-icon.svg";
-import type { FeedItem } from "@/lib/types/feed";
+import type { FeedItem } from "@/lib/services/feedService";
 import { getViewSessionId } from "@/lib/session/getViewSessionId";
 
 type PetCardProps = {

@@ -3,7 +3,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
 
 export type FeedItem = {
   id: string;
-  type: string | null;
+  name: string;
   created_at: string | null;
   shelter?: {
     id: string;
