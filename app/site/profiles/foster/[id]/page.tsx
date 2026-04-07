@@ -1,5 +1,6 @@
 import FosterProfilePage from "./FosterProfilePage";
 import { getPetPhotosByPetId } from "@/lib/services/petMediaService";
+import { PetGender } from "@/lib/types/shelters";
 
 type PageProps = {
   params: Promise<{
@@ -8,7 +9,7 @@ type PageProps = {
   searchParams: Promise<{
     petId?: string;
     name?: string;
-    sex?: string;
+    sex?: PetGender;
     shelter_name?: string;
     logo_url?: string;
     location?: string;
