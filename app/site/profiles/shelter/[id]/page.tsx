@@ -37,7 +37,7 @@ export default async function Page({ params }: PageProps) {
     created_at: shelter.created_at ?? null,
     pets: pets.map((pet) => ({
       id: pet.id,
-      name: pet.name ?? "Unknown Pet",
+      name: pet.petName ?? "Unknown Pet",
       sex: pet.gender ?? "unknown",
       photo_url: pet.imageUrl ?? null,
     })),

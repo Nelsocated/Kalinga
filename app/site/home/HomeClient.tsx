@@ -23,9 +23,10 @@ type ActiveItem = {
 
 type Props = {
   isShelter: boolean;
+  initialMediaId?: string | null;
 };
 
-export default function HomeClient({ isShelter }: Props) {
+export default function HomeClient({ isShelter, initialMediaId }: Props) {
   const [nav, setNav] = useState<FeedNavType | null>(null);
   const [active, setActive] = useState<ActiveItem | null>(null);
   const [showCreationPage, setShowCreationPage] = useState(false);
@@ -53,7 +54,11 @@ export default function HomeClient({ isShelter }: Props) {
               </>
             ) : (
               <>
-                <Feed onActiveChange={setActive} onNavChange={setNav} />
+                <Feed
+                  onActiveChange={setActive}
+                  onNavChange={setNav}
+                  initialMediaId={initialMediaId}
+                />
 
                 <div>
                   {active ? (

@@ -29,17 +29,18 @@ export interface ShelterVideoMini {
   thumbnailUrl?: string | null;
   title?: string | null;
   caption?: string | null;
+  petId: string;
   petName?: string | null;
   subtitle?: string | null;
 }
 
+export type PetGender = "male" | "female" | "unknown";
 export interface ShelterPetMini {
   id: string;
   href?: string;
   imageUrl?: string | null;
-  name?: string | null;
   petName?: string | null;
-  gender?: string | null;
+  gender: PetGender;
   shelterName?: string | null;
   shelterLogo?: string | null;
 }
@@ -95,3 +96,11 @@ type ShelterServiceError = {
 };
 
 export type ShelterServiceResult = ShelterServiceSuccess | ShelterServiceError;
+
+export type PetCardProps = ShelterPetMini & {
+  breed?: string | null;
+  age: "kitten/puppy" | "young_adult" | "adult" | "senior";
+  sex: "male" | "female";
+  species: "dog" | "cat";
+  size: "small" | "medium" | "large";
+};

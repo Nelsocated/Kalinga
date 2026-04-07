@@ -1,8 +1,7 @@
-// components/profile/ProfileTabsCardShelter.tsx
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import at_play from "@/public/tabs/at_play.svg";
 import at_pet from "@/public/tabs/at_pet.svg";
@@ -50,11 +49,12 @@ function buildVideoHref(videoId: string, petId?: string | null) {
 
   if (petId) {
     params.set("pets", petId);
-    return `/site/profiles/pets/?${params.toString()}`;
   }
 
-  params.set("media", videoId);
-  return `/site/home/?${params.toString()}`;
+  const query = params.toString();
+  return query
+    ? `/site/home/pet/${videoId}?${query}`
+    : `/site/home/pet/${videoId}`;
 }
 
 type Props = {
@@ -63,11 +63,7 @@ type Props = {
   initialPets: ShelterPetMini[];
 };
 
-export default function ShelterTopCard({
-  shelterId,
-  initialVideos,
-  initialPets,
-}: Props) {
+export default function ShelterTopCard({ initialVideos, initialPets }: Props) {
   const tabs: TabsKey[] = ["videos", "pets"];
   const [tab, setTab] = useState<TabsKey>("videos");
 
@@ -79,10 +75,14 @@ export default function ShelterTopCard({
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
+  function handleTabChange(nextTab: TabsKey) {
+    setTab(nextTab);
     setVisibleCount(ITEMS_PER_BATCH);
-    if (scrollRef.current) scrollRef.current.scrollTop = 0;
-  }, [tab]);
+
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }
 
   const list = useMemo(
     () => (tab === "videos" ? videos : pets),
@@ -96,21 +96,26 @@ export default function ShelterTopCard({
     [list, visibleCount],
   );
 
-  const loadMore = () =>
+  const loadMore = useCallback(() => {
     setVisibleCount((c) => Math.min(c + ITEMS_PER_BATCH, list.length));
+  }, [list.length]);
 
   useEffect(() => {
     if (!hasMore) return;
     if (!scrollRef.current || !loadMoreRef.current) return;
 
     const observer = new IntersectionObserver(
-      (entries) => entries[0]?.isIntersecting && loadMore(),
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          loadMore();
+        }
+      },
       { root: scrollRef.current, rootMargin: "200px", threshold: 0 },
     );
 
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [hasMore, list.length]);
+  }, [hasMore, loadMore]);
 
   return (
     <div className="min-h-0 pr-7">
@@ -125,7 +130,7 @@ export default function ShelterTopCard({
                 <TabButton
                   key={key}
                   active={active}
-                  onClick={() => setTab(key)}
+                  onClick={() => handleTabChange(key)}
                   label={meta.label}
                 >
                   <Image
@@ -153,31 +158,27 @@ export default function ShelterTopCard({
 
           {visibleItems.length > 0 ? (
             <div className="grid grid-cols-1 place-items-center gap-6 sm:grid-cols-3 lg:grid-cols-4">
-              {visibleItems.map((x: any) => {
-                if (tab === "videos") {
-                  return (
+              {tab === "videos"
+                ? (visibleItems as ShelterVideoMini[]).map((x) => (
                     <VideoCard
                       key={`posted-video-${x.id}`}
-                      href={buildVideoHref(x.id, x.petId ?? x.pet?.id)}
+                      href={buildVideoHref(x.id, x.petId)}
                       thumbnailUrl={x.thumbnailUrl ?? x.imageUrl}
                       subtitle={x.subtitle ?? x.caption ?? "Your shelter"}
                       petName={x.petName ?? x.title ?? "Untitled"}
                     />
-                  );
-                }
-
-                return (
-                  <PetCard
-                    key={`posted-pet-${x.id}`}
-                    href={`/site/profiles/pets/${x.id}`}
-                    imageUrl={x.imageUrl}
-                    petName={x.petName ?? x.name ?? "Unnamed Pet"}
-                    sex={x.sex ?? "unknown"}
-                    shelterName={x.shelterName ?? "Your shelter"}
-                    shelterLogo={x.shelterLogo ?? DEFAULT_AVATAR_URL}
-                  />
-                );
-              })}
+                  ))
+                : (visibleItems as ShelterPetMini[]).map((x) => (
+                    <PetCard
+                      key={`posted-pet-${x.id}`}
+                      href={`/site/profiles/pets/${x.id}`}
+                      imageUrl={x.imageUrl}
+                      petName={x.petName ?? "Unnamed Pet"}
+                      sex={x.gender ?? "unknown"}
+                      shelterName={x.shelterName ?? "Your shelter"}
+                      shelterLogo={x.shelterLogo ?? DEFAULT_AVATAR_URL}
+                    />
+                  ))}
             </div>
           ) : null}
 

@@ -28,8 +28,8 @@ export default function CharacteristicChip({
     <div
       className={`flex items-center gap-3 px-3 py-1 rounded-[15px] text-sm font-medium ${classes}`}
     >
-      <span className="opacity-70">{label}:</span>
-      <span className="font-semibold">{displayValue}</span>
+      <span className="opacity-70 capitalize">{label}:</span>
+      <span className="font-semibold capitalize">{displayValue}</span>
     </div>
   );
 }

@@ -17,6 +17,7 @@ import AdoptModal from "@/components/modal/AdoptModal";
 import Male_Icon from "@/public/icons/male-icon.svg";
 import Female_Icon from "@/public/icons/female-icon.svg";
 
+export type PetGender = "male" | "female" | "unknown";
 type Media = {
   id: string;
   type: "photo" | "video";
@@ -41,7 +42,7 @@ type PetProfile = {
   photo_url: string | null;
   vaccinated: boolean;
   spayed_neutered: boolean;
-  sex?: string | null;
+  sex: PetGender;
   size?: string | null;
   shelter: ShelterMini | null;
   pet_media?: Media[];
@@ -52,15 +53,14 @@ type PetProfileClientProps = {
   initialPet: PetProfile;
 };
 
-export function getSexIcon(sex?: string | null) {
+export function getSexIcon(sex: PetGender, className?: number) {
   if (sex === "male") {
     return (
       <Image
         src={Male_Icon}
         alt="male-icon"
-        width={40}
-        height={40}
-        className="text-male"
+        width={className ? className : 40}
+        height={className ? className : 40}
       />
     );
   }
@@ -70,9 +70,8 @@ export function getSexIcon(sex?: string | null) {
       <Image
         src={Female_Icon}
         alt="female-icon"
-        width={40}
-        height={40}
-        className="text-female"
+        width={className ? className : 40}
+        height={className ? className : 40}
       />
     );
   }

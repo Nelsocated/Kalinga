@@ -236,11 +236,6 @@ class PetService
     input: CreatePetInput,
   ): Promise<ServiceResult<{ id: string }>> {
     const supabase = await createServerSupabase();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    console.log("[createPet] auth.uid:", user?.id, "authError:", authError);
 
     const payload = {
       shelter_id: input.shelter_id,
@@ -263,8 +258,6 @@ class PetService
       .insert(payload)
       .select("id")
       .single();
-
-    console.log("[createPet] insert error:", JSON.stringify(error, null, 2)); // ← add this
 
     if (error || !data) {
       return {

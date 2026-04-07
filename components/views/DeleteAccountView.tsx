@@ -28,7 +28,7 @@ export default function DeleteAccountView() {
         return;
       }
 
-      router.replace("/auth/login");
+      router.replace("/login");
       router.refresh();
     } catch {
       setError("Something went wrong while deleting your account.");

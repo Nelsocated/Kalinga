@@ -13,7 +13,7 @@ type LogoutButtonProps = {
 };
 
 export default function LogoutButton({
-  redirectTo = "/auth/login",
+  redirectTo = "/login",
   className = "",
   withIcon = true,
 }: LogoutButtonProps) {

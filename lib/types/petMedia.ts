@@ -42,3 +42,18 @@ export type VideoRow = {
   created_at: string;
   pets: PetMini | PetMini[] | null;
 };
+
+export type CreateVideoInput = {
+  petId: string;
+  title?: string | null;
+  file: File;
+};
+
+export type ServiceResult<T> = {
+  ok: boolean;
+  status: number;
+  message?: string;
+  error?: string;
+  details?: unknown;
+  data?: T;
+};

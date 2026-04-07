@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import ViewPort from "./ViewPort";
-import type { FeedItem } from "@/lib/types/feed";
+import type { FeedItem } from "@/lib/services/feedService";
 import type { ShelterMini } from "@/components/layout/RightBar";
 
 type FeedNav = {
@@ -15,6 +16,7 @@ type FeedNav = {
 };
 
 type FeedProps = {
+  initialMediaId?: string | null;
   onActiveChange?: (
     item: {
       pet_id: string;
@@ -25,7 +27,15 @@ type FeedProps = {
   onNavChange?: (nav: FeedNav | null) => void;
 };
 
-export default function Feed({ onActiveChange, onNavChange }: FeedProps) {
+export default function Feed({
+  initialMediaId,
+  onActiveChange,
+  onNavChange,
+}: FeedProps) {
+  const searchParams = useSearchParams();
+  const queryMediaId = searchParams.get("media");
+  const targetMediaId = initialMediaId ?? queryMediaId;
+
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +47,11 @@ export default function Feed({ onActiveChange, onNavChange }: FeedProps) {
         setLoading(true);
         setError(null);
 
-        const res = await fetch("/api/feed?limit=10", {
+        const url = targetMediaId
+          ? `/api/feed?limit=10&media=${encodeURIComponent(targetMediaId)}`
+          : "/api/feed?limit=10";
+
+        const res = await fetch(url, {
           method: "GET",
           cache: "no-store",
         });
@@ -48,7 +62,18 @@ export default function Feed({ onActiveChange, onNavChange }: FeedProps) {
           throw new Error(result.error || "Failed to fetch feed");
         }
 
-        setItems(result.items ?? []);
+        const nextItems = (result.items ?? []) as FeedItem[];
+        setItems(nextItems);
+
+        const foundIndex = targetMediaId
+          ? nextItems.findIndex((item) =>
+              item.pet_media?.some(
+                (media) => media.type === "video" && media.id === targetMediaId,
+              ),
+            )
+          : 0;
+
+        setCurrentIndex(foundIndex >= 0 ? foundIndex : 0);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch feed");
       } finally {
@@ -57,7 +82,7 @@ export default function Feed({ onActiveChange, onNavChange }: FeedProps) {
     }
 
     loadFeed();
-  }, []);
+  }, [targetMediaId]);
 
   useEffect(() => {
     if (!items.length) {
@@ -104,7 +129,7 @@ export default function Feed({ onActiveChange, onNavChange }: FeedProps) {
   if (!items.length) return <div>No feed items found.</div>;
 
   return (
-    <div className="h-[95svh] aspect-9/16 w-full max-w-[55svh] rounded-2xl border-2 overflow-hidden bg-black">
+    <div className="h-[95svh] aspect-9/16 w-full max-w-[55svh] overflow-hidden rounded-2xl border-2 bg-black">
       <ViewPort item={items[currentIndex]} />
     </div>
   );

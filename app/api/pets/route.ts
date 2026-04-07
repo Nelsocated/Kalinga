@@ -9,9 +9,6 @@ export async function POST(req: NextRequest) {
     const auth = await requireShelter();
     const shelterId = await getShelterIdByOwnerId(auth.id);
 
-    console.log("[POST /api/pets] auth.id:", auth.id);
-    console.log("[POST /api/pets] shelterId:", shelterId);
-
     if (!shelterId) {
       return NextResponse.json(
         { error: "Shelter profile not found" },

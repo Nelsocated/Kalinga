@@ -9,7 +9,7 @@ import type {
   PetStatusRow,
   ShelterUpdatePayload,
   ShelterServiceResult,
-  ShelterProfile,
+  ShelterProfile, PetCardProps
 } from "@/lib/types/shelters";
 import type {
   ShelterProfileUI,
@@ -133,11 +133,31 @@ class ShelterService {
       id: p.id,
       href: `/site/profiles/pet/${p.id}`,
       imageUrl: p.photo_url ?? null,
-      name: p.pet_name ?? null,
       petName: p.pet_name ?? null,
       gender: p.sex ?? "unknown",
       shelterName: shelter?.shelter_name ?? null,
       shelterLogo: shelter?.logo_url ?? null,
+    }));
+  }
+
+  async getShelterPets(shelterId: string): Promise<PetCardProps[]> {
+    const [pets, shelter] = await Promise.all([
+      getPetsByShelter(shelterId),
+      this.fetchShelterById(shelterId),
+    ]);
+
+    return pets.map((p) => ({
+      id: p.id,
+      imageUrl: p.photo_url ?? null,
+      petName: p.pet_name ?? null,
+      gender: p.sex ?? "unknown",
+      shelterName: shelter?.shelter_name ?? null,
+      shelterLogo: shelter?.logo_url ?? null,
+      breed: p.breed,
+      age: p.age,
+      sex: p.sex,
+      species: p.species,
+      size: p.size
     }));
   }
 
@@ -483,4 +503,8 @@ export async function getShelterPetProps(
   id: string,
 ): Promise<ShelterProfileUI | null> {
   return shelterService.getShelterPetProps(id);
+}
+
+export async function getShelterPets(shelterId: string): Promise<PetCardProps[]> {
+  return shelterService.getShelterPets(shelterId)
 }

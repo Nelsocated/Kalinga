@@ -5,7 +5,10 @@ import type {
   VideoWithPet,
   VideoWithShelterPet,
   VideoRow,
+  ServiceResult,
+  CreateVideoInput,
 } from "@/lib/types/petMedia";
+import { randomUUID } from "crypto";
 
 class PetMediaService {
   private supabase: Awaited<ReturnType<typeof createServerSupabase>> | null =
@@ -89,19 +92,19 @@ class PetMediaService {
       .from("pet_media")
       .select(
         `
-    id,
-    pet_id,
-    type,
-    url,
-    caption,
-    created_at,
-    pets!inner (
-      id,
-      name,
-      photo_url,
-      shelter_id
-    )
-  `,
+        id,
+        pet_id,
+        type,
+        url,
+        caption,
+        created_at,
+        pets!inner (
+          id,
+          name,
+          photo_url,
+          shelter_id
+        )
+      `,
       )
       .eq("type", "video")
       .eq("pets.shelter_id", shelterId) // now this actually filters
@@ -123,6 +126,126 @@ class PetMediaService {
       pets: Array.isArray(row.pets) ? (row.pets[0] ?? null) : row.pets,
     }));
   }
+
+  async createVideo(input: CreateVideoInput): Promise<ServiceResult<VideoRow>> {
+    try {
+      const { petId, title, file } = input;
+
+      if (!petId.trim()) {
+        return {
+          ok: false,
+          status: 400,
+          error: "Pet ID is required",
+        };
+      }
+
+      if (!file) {
+        return {
+          ok: false,
+          status: 400,
+          error: "Video file is required",
+        };
+      }
+
+      if (!file.type.startsWith("video/")) {
+        return {
+          ok: false,
+          status: 400,
+          error: "Only video files are allowed",
+        };
+      }
+
+      const maxSizeMb = 100;
+      const maxBytes = maxSizeMb * 1024 * 1024;
+
+      if (file.size > maxBytes) {
+        return {
+          ok: false,
+          status: 400,
+          error: `Video must be ${maxSizeMb}MB or less`,
+        };
+      }
+
+      const supabase = await createServerSupabase();
+
+      const ext = file.name.split(".").pop()?.toLowerCase() || "mp4";
+      const fileName = `${randomUUID()}.${ext}`;
+      const filePath = `pets/${petId}/${fileName}`;
+
+      console.log("[createVideo] petId:", petId);
+      console.log("[createVideo] title:", title);
+      console.log("[createVideo] filePath:", filePath);
+      console.log("[createVideo] file type:", file.type);
+      console.log("[createVideo] file size:", file.size);
+
+      const { error: uploadError } = await supabase.storage
+        .from("pet-videos")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type,
+        });
+
+      if (uploadError) {
+        console.error("[createVideo] uploadError:", uploadError);
+
+        return {
+          ok: false,
+          status: 500,
+          error: "Failed to upload video",
+          details: uploadError.message,
+        };
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("pet-videos")
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicUrlData.publicUrl;
+
+      console.log("[createVideo] publicUrl:", publicUrl);
+
+      const { data, error: insertError } = await supabase
+        .from("pet_media")
+        .insert({
+          pet_id: petId,
+          type: "video",
+          url: publicUrl,
+          caption: title?.trim() || null,
+        })
+        .select("id, pet_id, type, url, caption, created_at")
+        .single();
+
+      if (insertError) {
+        console.error("[createVideo] insertError:", insertError);
+
+        await supabase.storage.from("pet-videos").remove([filePath]);
+
+        return {
+          ok: false,
+          status: 500,
+          error: "Failed to save video metadata",
+          details: insertError.message,
+        };
+      }
+
+      return {
+        ok: true,
+        status: 201,
+        message: "Video uploaded successfully",
+        data: data as VideoRow,
+      };
+    } catch (error) {
+      console.error("[VideoService.createVideo]", error);
+
+      return {
+        ok: false,
+        status: 500,
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
 }
 
 export const petMediaService = new PetMediaService();
@@ -141,4 +264,10 @@ export async function getPetVideosByShelterId(
   shelterId: string,
 ): Promise<VideoWithShelterPet[]> {
   return petMediaService.getPetVideosByShelterId(shelterId);
+}
+
+export async function createVideo(
+  input: CreateVideoInput,
+): Promise<ServiceResult<VideoRow>> {
+  return petMediaService.createVideo(input);
 }

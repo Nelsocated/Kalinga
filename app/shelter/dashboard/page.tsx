@@ -23,7 +23,7 @@ async function getRequiredShelterUser(): Promise<AuthUser> {
   try {
     return await requireShelter();
   } catch {
-    redirect("/auth/login");
+    redirect("/login");
   }
 }
 

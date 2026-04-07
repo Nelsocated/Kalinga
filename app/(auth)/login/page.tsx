@@ -1,45 +1,38 @@
-// app/signup/page.tsx
+// app/login/page.tsx
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import kalinga_logo from "@/public/kalinga_logo.svg";
 import Image from "next/image";
 
-export default function SignupPage() {
+export default function LoginPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setName] = useState("");
-  const [username, setUsername] = useState("");
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setloading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
-    setLoading(true);
+    setloading(true);
 
     try {
-      const res = await fetch("/api/auth/signup", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-          full_name: fullName,
-          username,
-        }),
+        body: JSON.stringify({ email, password }),
       });
 
       const json = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setFormError(json?.error ?? "Signup failed.");
+        setFormError(json?.error ?? "Login failed.");
         return;
       }
 
@@ -47,40 +40,36 @@ export default function SignupPage() {
     } catch {
       setFormError("Network error. Try again.");
     } finally {
-      setLoading(false);
+      setloading(false);
     }
   }
 
   return (
-    <div className="h-svh overflow-hidden bg-primary p-3 sm:p-4 lg:p-6">
-      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-center rounded-[15px] bg-background shadow-lg">
-        <main className="flex h-full w-full items-center justify-center p-3 sm:p-4 lg:p-6">
-          <div className="grid h-full w-full max-w-6xl items-center gap-6 lg:grid-cols-2 lg:gap-12">
-            <div className="hidden h-full min-h-0 flex-col items-center justify-center lg:flex">
+    <div className="min-h-screen bg-primary px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <div className="mx-auto grid min-h-[calc(100svh-2rem)] w-full max-w-7xl rounded-[15px] bg-background shadow-lg sm:min-h-[calc(100svh-3rem)]">
+        <div className="col-start-1 row-start-1 z-10 justify-self-end self-start p-6 sm:p-6">
+          <Button onClick={() => router.push("/site/about")}>About Us</Button>
+        </div>
+
+        <main className="col-start-1 row-start-1 flex min-h-0 items-center justify-center p-4 pt-20 sm:p-6 sm:pt-24 lg:p-10">
+          <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-16">
+            <div className="hidden min-h-0 flex-col items-center justify-center lg:flex">
               <Image
                 src={kalinga_logo}
                 alt="kalinga-logo"
-                width={260}
-                height={260}
+                width={300}
+                height={300}
                 priority
-                className="h-auto w-full max-w-55 xl:max-w-65"
               />
-              <h1 className="mt-4 text-center text-2xl font-medium text-black xl:text-3xl">
+              <h1 className="mt-4 text-center text-2xl font-medium text-black sm:text-3xl">
                 Will you help us find
                 <br />
                 our fur-ever homes?
               </h1>
             </div>
 
-            <div className="mx-auto w-full max-w-md rounded-[15px] border-2 bg-white p-4 shadow-sm sm:p-5">
-              <h1 className="flex justify-center text-subtitle font-bold text-black">
-                Create an Account
-              </h1>
-              <p className="mt-1 text-center text-description text-black">
-                Get started on Kalinga!
-              </p>
-
-              <form onSubmit={onSubmit} className="mt-2 space-y-3">
+            <div className="mx-auto w-full max-w-md rounded-[15px] border-2 bg-white p-5 shadow-sm sm:p-6">
+              <form onSubmit={onSubmit} className="space-y-4">
                 <Input
                   label="Email"
                   type="email"
@@ -97,23 +86,7 @@ export default function SignupPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 6 characters"
-                  autoComplete="new-password"
-                  required
-                />
-
-                <Input
-                  label="Fullname"
-                  value={fullName}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Fullname"
-                  required
-                />
-
-                <Input
-                  label="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Username"
+                  autoComplete="current-password"
                   required
                 />
 
@@ -122,17 +95,14 @@ export default function SignupPage() {
                 ) : null}
 
                 <Button type="submit" loading={loading} className="w-full">
-                  Submit
+                  Log in
                 </Button>
               </form>
 
               <hr className="mx-auto my-3 w-full border-black/50" />
 
-              <Button
-                onClick={() => router.push("/auth/login")}
-                className="w-full"
-              >
-                Log in
+              <Button onClick={() => router.push("/signup")} className="w-full">
+                Sign up
               </Button>
 
               <p className="mt-4 text-sm text-black">

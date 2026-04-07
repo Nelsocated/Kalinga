@@ -59,11 +59,12 @@ function buildVideoHref(videoId: string, petId?: string | null) {
 
   if (petId) {
     params.set("pets", petId);
-    return `/site/profiles/pets/?${params.toString()}`;
   }
 
-  params.set("media", videoId);
-  return `/site/home/?${params.toString()}`;
+  const query = params.toString();
+  return query
+    ? `/site/home/pet/${videoId}?${query}`
+    : `/site/home/pet/${videoId}`;
 }
 
 function toPetGender(value?: string | null): "male" | "female" {

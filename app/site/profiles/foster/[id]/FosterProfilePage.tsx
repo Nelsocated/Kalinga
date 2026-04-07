@@ -10,6 +10,7 @@ import Button from "@/components/ui/Button";
 import PhotoView from "@/components/views/PhotoView";
 import LikeButton from "@/components/ui/LikeButton";
 import { getSexIcon } from "../../pets/[id]/PetProfileClient";
+import { PetGender } from "@/lib/types/shelters";
 
 type Media = {
   id: string;
@@ -21,7 +22,7 @@ type Media = {
 type FosterProfileProps = {
   petId: string;
   name: string;
-  sex: string;
+  sex: PetGender;
   shelter_name?: string | null;
   logo_url?: string | null;
   location?: string | null;
