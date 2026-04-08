@@ -13,7 +13,8 @@ body {
   --color-female: #f8c8dc;
   --color-border: #f3be0f;
 
-  --font-sans: var(--font-outfit);
+  --font-sans:
+    "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --color-submitted: black;
   --color-under_review: #1b48a1;

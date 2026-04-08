@@ -1,6 +1,12 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  Suspense,
+  type FormEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Input from "@/components/ui/Input";
@@ -59,7 +65,7 @@ function UploadField({
   );
 }
 
-export default function ShelterSignupPage() {
+function ShelterSignupPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -429,5 +435,13 @@ export default function ShelterSignupPage() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+export default function ShelterSignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <ShelterSignupPageContent />
+    </Suspense>
   );
 }
