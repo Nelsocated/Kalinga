@@ -96,6 +96,7 @@ export interface IAuthService {
   submitShelterApplication(input: unknown): Promise<
     ServiceResult<{
       user: unknown;
+      session: unknown;
       application_status: "pending";
     }>
   >;
@@ -380,6 +381,7 @@ class AuthService implements IAuthService {
   async submitShelterApplication(input: unknown): Promise<
     ServiceResult<{
       user: unknown;
+      session: unknown;
       application_status: "pending";
     }>
   > {
@@ -443,6 +445,7 @@ class AuthService implements IAuthService {
         ok: true,
         data: {
           user,
+          session: null,
           application_status: "pending",
         },
       };

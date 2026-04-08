@@ -46,7 +46,7 @@ export async function POST(req: Request) {
   return NextResponse.json(
     {
       user: result.data.user,
-      session: result.data.session,
+      session: "session" in result.data ? result.data.session : null,
       application_status: result.data.application_status,
     },
     { status: 201 },
