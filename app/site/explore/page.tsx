@@ -4,7 +4,7 @@ import {
   getPetsByIds,
 } from "@/lib/services/pet/petService";
 import { getSheltersByIds } from "@/lib/services/shelter/shelterService";
-import { getFosterStories } from "@/lib/services/fosterService";
+import { getAll } from "@/lib/services/fosterService";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +37,7 @@ export type FosterStory = {
 
 export default async function Page() {
   const longestBase = await getLongestStayPets(10);
-  const fosterBase = await getFosterStories(20);
+  const fosterBase = await getAll(20);
 
   const longestShelterIds = [
     ...new Set(

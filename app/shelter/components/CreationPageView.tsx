@@ -22,7 +22,7 @@ const actions = [
   {
     label: "Write a Foster Story",
     icon: Foster,
-    href: "/shelter/creation/fosterStory",
+    href: "/shelter/creation/writeFoster",
   },
 ];
 

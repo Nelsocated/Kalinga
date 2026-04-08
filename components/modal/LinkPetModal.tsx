@@ -25,7 +25,7 @@ export default function LinkPetModal({ open, pets, onClose, onSelect }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
-      <div className="w-full max-w-170 overflow-hidden rounded-[15px] border bg-white shadow-2xl">
+      <div className="w-full max-w-2xl overflow-hidden rounded-[15px] border bg-white shadow-2xl">
         <div className="flex items-center justify-center bg-primary px-6 py-3">
           <h2 className="text-subtitle font-extrabold text-black">
             Link a Pet Profile
@@ -33,9 +33,9 @@ export default function LinkPetModal({ open, pets, onClose, onSelect }: Props) {
           <BackButton onClick={onClose} />
         </div>
 
-        <div className="md:p-4">
+        <div className="md:p-2">
           {pets.length > 0 ? (
-            <div className="max-h-[70vh] min-h-[40vh] overflow-y-auto scroll-stable">
+            <div className="h-full max-h-3xl py-3 px-2 overflow-y-auto scroll-stable">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {pets.map((pet) => (
                   <button

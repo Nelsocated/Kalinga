@@ -1,16 +1,14 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Image from "next/image";
-import { ChangeEvent, FormEvent, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
-
-import { getSexIcon } from "@/app/site/profiles/pets/[id]/PetProfileClient";
-import WebTemplate from "@/components/template/WebTemplate";
-import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
 import CharacteristicChip from "@/components/template/pet/CharacteristicChip";
 import LinkPetModal from "@/components/modal/LinkPetModal";
+import WebTemplate from "@/components/template/WebTemplate";
+import { getSexIcon } from "@/app/site/profiles/pets/[id]/PetProfileClient";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 import type { PetCardProps } from "@/lib/types/shelters";
 
 type Props = {
@@ -25,29 +23,22 @@ type FormState = {
   adoptionStatus: "available" | "not_available" | "";
 };
 
-export default function PostVideoClient({ pets, initialError }: Props) {
-  const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const [form, setForm] = useState<FormState>({
-    title: "",
-    description: "",
-    petId: "",
-    adoptionStatus: "",
-  });
-
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+export default function WriteFosterClient({ pets, initialError }: Props) {
+  const [petId, setPetId] = useState<string>("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [adoptionStatus, setAdoptionStatus] = useState<
+    "available" | "not_available" | ""
+  >("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
-  const [showPetPicker, setShowPetPicker] = useState(false);
+  const [openPetModal, setOpenPetModal] = useState(false);
 
   const selectedPet = useMemo(
-    () => pets.find((pet) => pet.id === form.petId) ?? null,
-    [pets, form.petId],
+    () => pets.find((pet) => pet.id === petId) ?? null,
+    [pets, petId],
   );
 
-  // Map PetCardProps to ShelterPetMini for LinkPetModal
   const modalPets = useMemo(
     () =>
       pets.map((pet) => ({
@@ -61,154 +52,107 @@ export default function PostVideoClient({ pets, initialError }: Props) {
     [pets],
   );
 
+  const [form, setForm] = useState<FormState>({
+    title: "",
+    description: "",
+    petId: "",
+    adoptionStatus: "",
+  });
+
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null;
-    setError(null);
-
-    if (!file) {
-      setSelectedFile(null);
-      setPreviewUrl("");
-      return;
-    }
-
-    if (!file.type.startsWith("video/")) {
-      setError("Please upload a video file.");
-      e.target.value = "";
-      return;
-    }
-
-    const maxSizeMb = 100;
-    if (file.size > maxSizeMb * 1024 * 1024) {
-      setError(`Video must be ${maxSizeMb}MB or smaller.`);
-      e.target.value = "";
-      return;
-    }
-
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-  }
-
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
-    if (!selectedFile) return setError("Video file is required.");
-    if (!form.title.trim()) return setError("Video title is required.");
-    if (!form.description.trim()) return setError("Description is required.");
-    if (!form.petId.trim()) return setError("Please link a pet profile.");
+    if (!petId) {
+      setError("Please select a pet.");
+      return;
+    }
 
-    setSubmitting(true);
+    if (!title.trim()) {
+      setError("Title is required.");
+      return;
+    }
+
+    if (!description.trim()) {
+      setError("Story is required.");
+      return;
+    }
 
     try {
-      const body = new FormData();
-      body.append("file", selectedFile);
-      body.append("petId", form.petId);
-      body.append("title", form.title.trim());
-      body.append("description", form.description.trim());
-      body.append("adoptionStatus", form.adoptionStatus);
+      setLoading(true);
 
-      const res = await fetch("/api/videos", { method: "POST", body });
-      const result = await res.json().catch(() => null);
+      const res = await fetch("/api/foster", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          petId,
+          title: title.trim(),
+          description: description.trim(),
+          adoptionStatus,
+        }),
+      });
 
-      if (!res.ok) throw new Error(result?.error || "Failed to upload video.");
+      const result = await res.json();
 
-      router.push("/shelter/profiles/shelter");
-      router.refresh();
+      if (!res.ok) {
+        throw new Error(result.error || "Failed to create foster story");
+      }
+
+      setTitle("");
+      setDescription("");
+      setPetId("");
+      setAdoptionStatus("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to upload video.");
+      setError(
+        err instanceof Error ? err.message : "Failed to create foster story",
+      );
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   }
 
   return (
     <>
       <WebTemplate
-        header="Add Video"
+        header="Write Foster Story"
         main={
           <div className="px-4 py-6">
             <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-4">
-                <div className="flex justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="relative flex h-100 aspect-9/16 overflow-hidden flex-col items-center justify-center rounded-[15px] border bg-white px-3 py-4 text-center transition hover:bg-primary/10"
-                  >
-                    {previewUrl ? (
-                      <video
-                        src={previewUrl}
-                        className="h-full w-full object-cover"
-                        muted
-                        playsInline
-                      />
-                    ) : (
-                      <>
-                        <span className="text-2xl leading-none">+</span>
-                        <span className="text-sm font-semibold">
-                          Upload Video
-                        </span>
-                      </>
-                    )}
-                  </button>
-
-                  <div className="relative h-100 aspect-9/16 overflow-hidden rounded-[15px] bg-primary">
-                    {previewUrl ? (
-                      <video
-                        src={previewUrl}
-                        className="h-full w-full object-cover"
-                        autoPlay
-                        loop
-                        playsInline
-                        controls
-                      />
-                    ) : null}
-                  </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="video/*"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                </div>
-
                 <Input
-                  label="Video Title"
-                  value={form.title}
-                  onChange={(e) => updateField("title", e.target.value)}
-                  placeholder="Video Title"
+                  label="Title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Title"
                   labelClassName="text-subtitle font-semibold"
                   required
                 />
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-subtitle font-semibold">Caption</label>
+                  <label className="text-subtitle font-semibold">Story</label>
                   <textarea
-                    value={form.description}
-                    onChange={(e) => updateField("description", e.target.value)}
-                    placeholder="Description"
-                    rows={3}
-                    className="resize-none rounded-[10px] border bg-white px-3 py-2 outline-none"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Story"
+                    rows={6}
+                    className="resize-none rounded-[10px] border border-primary bg-white px-3 py-2 outline-none"
                     required
                   />
                 </div>
-
-                {/* Link pet */}
                 <Button
                   type="button"
-                  onClick={() => setShowPetPicker(true)}
+                  onClick={() => setOpenPetModal(true)}
                   className="bg-primary px-3 py-2 text-lg"
                 >
                   Link Pet Profile
                 </Button>
 
-                {/* Selected pet preview */}
                 <div className="min-h-28 rounded-[15px] border bg-white p-2">
                   {selectedPet ? (
                     <div className="flex gap-3">
@@ -345,10 +289,10 @@ export default function PostVideoClient({ pets, initialError }: Props) {
                 <div className="flex justify-center pt-2">
                   <Button
                     type="submit"
-                    disabled={submitting}
+                    disabled={loading}
                     className="w-full max-w-40"
                   >
-                    {submitting ? "Posting..." : "Post"}
+                    {loading ? "Posting..." : "Post"}
                   </Button>
                 </div>
               </div>
@@ -356,13 +300,14 @@ export default function PostVideoClient({ pets, initialError }: Props) {
           </div>
         }
       />
+
       <LinkPetModal
-        open={showPetPicker}
+        open={openPetModal}
         pets={modalPets}
-        onClose={() => setShowPetPicker(false)}
+        onClose={() => setOpenPetModal(false)}
         onSelect={(pet) => {
-          updateField("petId", pet.id);
-          setShowPetPicker(false);
+          setPetId(pet.id);
+          setOpenPetModal(false);
         }}
       />
     </>
