@@ -64,7 +64,7 @@ export default function MoreModal() {
         <div className="space-y-1 p-2 text-lg text-black flex flex-col">
           <Button
             type="button"
-            onClick={() => router.push("/createShelter")}
+            onClick={() => router.push("/shelterSignup")}
             className={buttonStyle}
           >
             <Image src={Home} alt="home-icon" width={25} height={25} />

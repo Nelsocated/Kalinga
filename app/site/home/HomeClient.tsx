@@ -63,7 +63,6 @@ export default function HomeClient({ isShelter, initialMediaId }: Props) {
                 <div>
                   {active ? (
                     <RightBar
-                      pet_id={active.pet_id}
                       media_id={active.media_id ?? ""}
                       shelter={active.shelter}
                     />

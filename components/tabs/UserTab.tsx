@@ -54,17 +54,8 @@ const TAB_META = {
 
 const ITEMS_PER_BATCH = 10;
 
-function buildVideoHref(videoId: string, petId?: string | null) {
-  const params = new URLSearchParams();
-
-  if (petId) {
-    params.set("pets", petId);
-  }
-
-  const query = params.toString();
-  return query
-    ? `/site/home/pet/${videoId}?${query}`
-    : `/site/home/pet/${videoId}`;
+function buildVideoHref(videoId: string) {
+  return `/site/home/pet/${videoId}`;
 }
 
 function toPetGender(value?: string | null): "male" | "female" {
@@ -213,7 +204,7 @@ export default function UserTab() {
                 tab === "videos" ? (
                   <VideoCard
                     key={`video-${item.id}`}
-                    href={buildVideoHref(item.id, item.petId)}
+                    href={buildVideoHref(item.id)}
                     thumbnailUrl={item.thumbnailUrl ?? item.imageUrl}
                     subtitle={
                       item.subtitle ?? item.caption ?? "Unknown Shelter"

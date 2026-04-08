@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import BackButton from "@/components/ui/BackButton";
+import Input from "@/components/ui/Input";
 import Edit from "@/public/buttons/Edit.svg";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 
@@ -51,15 +52,15 @@ export default function EditProfileModal({
 
   const canSave = useMemo(() => !loading && !saving, [loading, saving]);
 
-  function resetMessages() {
+  const resetMessages = useCallback(() => {
     setErrorMsg(null);
     setSuccessMsg(null);
-  }
+  }, []);
 
-  function closeModal() {
+  const closeModal = useCallback(() => {
     setOpen(false);
     resetMessages();
-  }
+  }, [resetMessages]);
 
   useEffect(() => {
     if (!open) return;
@@ -96,7 +97,7 @@ export default function EditProfileModal({
     return () => {
       cancelled = true;
     };
-  }, [open, fields, loadProfile]);
+  }, [open, fields, loadProfile, resetMessages]);
 
   useEffect(() => {
     if (!open) return;
@@ -107,7 +108,7 @@ export default function EditProfileModal({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [open, closeModal]);
 
   async function handleAvatarPick(file: File) {
     if (!uploadAvatar) return;
@@ -164,107 +165,113 @@ export default function EditProfileModal({
       </button>
 
       {open && (
-        <div
-          className="fixed inset-0 z-50"
-          aria-modal="true"
-          role="dialog"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) closeModal();
-          }}
-        >
-          <div className="absolute inset-0 bg-black/40" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
 
-          <div className="absolute inset-0 flex items-center justify-center p-4">
-            <div
-              ref={dialogRef}
-              className="min-w-[70svh] overflow-hidden rounded-[15px] border-2 bg-background shadow-xl"
-            >
-              <div className="flex items-center justify-between bg-primary px-3 py-2">
+          {/* Modal */}
+          <div
+            ref={dialogRef}
+            className="relative z-10 w-125 max-w-[90%] rounded-[15px] border-2 bg-white shadow-2xl"
+            aria-modal="true"
+            role="dialog"
+          >
+            {/* Header — matches DonationModal exactly */}
+            <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-2 ">
+              <div className="pl-4">
                 <BackButton onClick={closeModal} />
-                <div className="text-2xl font-semibold text-black">{title}</div>
-                <div className="w-8" />
+              </div>
+              <div className="text-center text-xl font-bold text-white">
+                {title}
+              </div>
+              <div />
+            </div>
+
+            {/* Body */}
+            <div className="max-h-[75vh] overflow-y-auto scroll-stable p-2 px-5">
+              {/* Avatar */}
+              <div className="flex flex-col items-center gap-2 ">
+                <div className="relative h-16 w-16 overflow-hidden rounded-full bg-black/10">
+                  <Image
+                    src={avatarUrl}
+                    alt="Profile picture"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+
+                {uploadAvatar && (
+                  <label className="cursor-pointer text-description font-semibold text-black/70 hover:underline">
+                    Edit Picture
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) void handleAvatarPick(file);
+                      }}
+                    />
+                  </label>
+                )}
               </div>
 
-              <div className="p-4">
-                <div className="flex flex-col items-center gap-2 pb-3">
-                  <div className="relative h-16 w-16 overflow-hidden rounded-full bg-black/10">
-                    <Image
-                      src={avatarUrl}
-                      alt="Profile picture"
-                      fill
-                      className="object-cover"
+              {/* Fields */}
+              <div>
+                {fields.map((field) => (
+                  <div key={field.key}>
+                    <Input
+                      type={field.type ?? "text"}
+                      label={field.label}
+                      placeholder={field.label}
+                      labelClassName="text-description font-medium"
+                      value={values[field.key] ?? ""}
+                      onChange={(e) =>
+                        setValues((prev) => ({
+                          ...prev,
+                          [field.key]: e.target.value,
+                        }))
+                      }
+                      className=""
                     />
                   </div>
+                ))}
+              </div>
 
-                  {uploadAvatar && (
-                    <label className="cursor-pointer text-xs font-semibold text-black/70 hover:underline">
-                      Edit Picture
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) void handleAvatarPick(file);
-                        }}
-                      />
-                    </label>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  {fields.map((field) => (
-                    <div key={field.key} className="space-y-1">
-                      <div className="text-[11px] font-semibold text-black/70">
-                        {field.label}
-                      </div>
-
-                      <input
-                        type={field.type ?? "text"}
-                        value={values[field.key] ?? ""}
-                        onChange={(e) =>
-                          setValues((prev) => ({
-                            ...prev,
-                            [field.key]: e.target.value,
-                          }))
-                        }
-                        className="w-full rounded-[15px] border border-black/10 bg-white px-3 py-2 outline-none"
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-3 text-xs">
+              {/* Messages */}
+              {(errorMsg || successMsg) && (
+                <div className="text-xs">
                   {errorMsg && <div className="text-red-600">{errorMsg}</div>}
                   {successMsg && (
                     <div className="text-green-700">{successMsg}</div>
                   )}
                 </div>
+              )}
 
-                <div className="mt-3 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="flex-1 rounded-[15px] border border-black/10 bg-white px-3 py-2 text-sm font-semibold"
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={!canSave}
-                    className="flex-1 rounded-[15px] bg-primary px-3 py-2 text-sm font-semibold"
-                  >
-                    {saving ? "Saving..." : "Save"}
-                  </button>
+              {loading && (
+                <div className="text-center text-xs text-black/60">
+                  Loading profile...
                 </div>
+              )}
 
-                {loading && (
-                  <div className="mt-3 text-center text-xs text-black/60">
-                    Loading profile...
-                  </div>
-                )}
+              {/* Actions */}
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 rounded-[15px] border border-black/10 bg-white px-3 py-2 text-sm font-semibold"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={!canSave}
+                  className="flex-1 rounded-[15px] bg-primary px-3 py-2 text-sm font-semibold disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : "Save"}
+                </button>
               </div>
             </div>
           </div>

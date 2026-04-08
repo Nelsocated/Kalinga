@@ -10,6 +10,7 @@ export interface Shelters {
   photo_url: string;
   cert_url: string;
   id_url: string;
+  lease_url: string;
   created_at: string;
 }
 
@@ -69,6 +70,7 @@ export type ShelterProfile = {
   contact_phone: string | null;
   cert_url?: string | null;
   id_url?: string | null;
+  lease_url?: string | null;
   created_at?: string | null;
 };
 

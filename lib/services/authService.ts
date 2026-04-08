@@ -38,6 +38,46 @@ const ChangePasswordSchema = z
     path: ["newPassword"],
   });
 
+const FileSchema = z.custom<File>(
+  (value) => typeof File !== "undefined" && value instanceof File,
+  "File is required",
+);
+
+const ShelterSignupSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  username: z.string().min(3),
+  full_name: z.string().min(4),
+  shelter_name: z.string().trim().min(2, "Shelter name is required"),
+  complete_address: z.string().trim().min(10, "Complete address is required"),
+  registration_certificate: FileSchema,
+  owner_valid_id: FileSchema,
+  lease_contract: FileSchema,
+  shelter_photo: FileSchema,
+});
+
+const ShelterApplicationSchema = z.object({
+  shelter_name: z.string().trim().min(2, "Shelter name is required"),
+  complete_address: z.string().trim().min(10, "Complete address is required"),
+  registration_certificate: FileSchema,
+  owner_valid_id: FileSchema,
+  lease_contract: FileSchema,
+  shelter_photo: FileSchema,
+});
+
+const SHELTER_APPLICATION_BUCKET = "shelter_photos";
+
+type ShelterApplicationDocumentKey =
+  | "registration_certificate"
+  | "owner_valid_id"
+  | "lease_contract"
+  | "shelter_photo";
+
+type ShelterApplicationUploadMap = Record<
+  ShelterApplicationDocumentKey,
+  string
+>;
+
 export type ServiceResult<T> =
   | { ok: true; data: T }
   | { ok: false; status: number; error: string; details?: unknown };
@@ -46,6 +86,19 @@ export interface IAuthService {
   signup(
     input: unknown,
   ): Promise<ServiceResult<{ user: unknown; session: unknown }>>;
+  signupShelter(input: unknown): Promise<
+    ServiceResult<{
+      user: unknown;
+      session: unknown;
+      application_status: "pending";
+    }>
+  >;
+  submitShelterApplication(input: unknown): Promise<
+    ServiceResult<{
+      user: unknown;
+      application_status: "pending";
+    }>
+  >;
   login(
     input: unknown,
   ): Promise<ServiceResult<{ user: unknown; session: unknown }>>;
@@ -56,6 +109,144 @@ export interface IAuthService {
 }
 
 class AuthService implements IAuthService {
+  private getFileExtension(file: File) {
+    const extension = file.name.split(".").pop()?.trim().toLowerCase();
+
+    return extension || "bin";
+  }
+
+  private async uploadShelterApplicationFile(
+    userId: string,
+    file: File,
+    label: ShelterApplicationDocumentKey,
+  ) {
+    const supabaseAdmin = createAdminClient();
+    const extension = this.getFileExtension(file);
+    const path = `applications/${userId}/${Date.now()}-${label}.${extension}`;
+    const arrayBuffer = await file.arrayBuffer();
+
+    const { error } = await supabaseAdmin.storage
+      .from(SHELTER_APPLICATION_BUCKET)
+      .upload(path, arrayBuffer, {
+        upsert: true,
+        contentType: file.type || undefined,
+      });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const { data } = supabaseAdmin.storage
+      .from(SHELTER_APPLICATION_BUCKET)
+      .getPublicUrl(path);
+
+    if (!data.publicUrl) {
+      throw new Error("Failed to create document URL");
+    }
+
+    return data.publicUrl;
+  }
+
+  private async createUserProfile(input: {
+    id: string;
+    email: string;
+    username: string;
+    full_name: string;
+  }) {
+    const supabaseAdmin = createAdminClient();
+
+    const { error } = await supabaseAdmin.from("users").upsert(
+      {
+        id: input.id,
+        username: input.username,
+        full_name: input.full_name,
+        contact_email: input.email,
+        role: "user",
+      },
+      {
+        onConflict: "id",
+      },
+    );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  private async saveShelterApplication(input: {
+    userId: string;
+    email: string;
+    username: string;
+    full_name: string;
+    shelter_name: string;
+    complete_address: string;
+    registration_certificate: File;
+    owner_valid_id: File;
+    lease_contract: File;
+    shelter_photo: File;
+  }) {
+    const supabaseAdmin = createAdminClient();
+    const uploadedFiles = {} as ShelterApplicationUploadMap;
+    const uploadEntries: Array<[ShelterApplicationDocumentKey, File]> = [
+      ["registration_certificate", input.registration_certificate],
+      ["owner_valid_id", input.owner_valid_id],
+      ["lease_contract", input.lease_contract],
+      ["shelter_photo", input.shelter_photo],
+    ];
+
+    for (const [key, file] of uploadEntries) {
+      uploadedFiles[key] = await this.uploadShelterApplicationFile(
+        input.userId,
+        file,
+        key,
+      );
+    }
+
+    const { error: shelterError } = await supabaseAdmin.from("shelter").upsert(
+      {
+        owner_id: input.userId,
+        shelter_name: input.shelter_name,
+        location: input.complete_address,
+        contact_email: input.email,
+        cert_url: uploadedFiles.registration_certificate,
+        id_url: uploadedFiles.owner_valid_id,
+        lease_url: uploadedFiles.lease_contract,
+        photo_url: uploadedFiles.shelter_photo,
+      },
+      {
+        onConflict: "owner_id",
+      },
+    );
+
+    if (shelterError) {
+      throw new Error(shelterError.message);
+    }
+
+    const { error: metadataError } =
+      await supabaseAdmin.auth.admin.updateUserById(input.userId, {
+        user_metadata: {
+          username: input.username,
+          full_name: input.full_name,
+          requested_role: "shelter",
+          shelter_application_status: "pending",
+          shelter_application: {
+            shelter_name: input.shelter_name,
+            complete_address: input.complete_address,
+            registration_certificate_url:
+              uploadedFiles.registration_certificate,
+            owner_valid_id_url: uploadedFiles.owner_valid_id,
+            lease_contract_url: uploadedFiles.lease_contract,
+            shelter_photo_url: uploadedFiles.shelter_photo,
+            submitted_at: new Date().toISOString(),
+          },
+        },
+      });
+
+    if (metadataError) {
+      throw new Error(metadataError.message);
+    }
+  }
+
   async signup(
     input: unknown,
   ): Promise<ServiceResult<{ user: unknown; session: unknown }>> {
@@ -90,6 +281,181 @@ class AuthService implements IAuthService {
     }
 
     return { ok: true, data: { user: data.user, session: data.session } };
+  }
+
+  async signupShelter(input: unknown): Promise<
+    ServiceResult<{
+      user: unknown;
+      session: unknown;
+      application_status: "pending";
+    }>
+  > {
+    const parsed = ShelterSignupSchema.safeParse(input);
+
+    if (!parsed.success) {
+      const firstError = parsed.error.issues?.[0]?.message || "Invalid input";
+
+      return {
+        ok: false,
+        status: 400,
+        error: firstError,
+        details: parsed.error.flatten(),
+      };
+    }
+
+    const supabase = await createServerSupabase();
+
+    const { data, error } = await supabase.auth.signUp({
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: {
+        data: {
+          username: parsed.data.username,
+          full_name: parsed.data.full_name,
+          requested_role: "shelter",
+          shelter_application_status: "pending",
+        },
+      },
+    });
+
+    if (error) {
+      return { ok: false, status: 400, error: error.message };
+    }
+
+    const createdUser = data.user;
+
+    if (!createdUser) {
+      return {
+        ok: false,
+        status: 400,
+        error: "Failed to create shelter account",
+      };
+    }
+
+    const supabaseAdmin = createAdminClient();
+
+    try {
+      await this.createUserProfile({
+        id: createdUser.id,
+        email: parsed.data.email,
+        username: parsed.data.username,
+        full_name: parsed.data.full_name,
+      });
+
+      await this.saveShelterApplication({
+        userId: createdUser.id,
+        email: parsed.data.email,
+        username: parsed.data.username,
+        full_name: parsed.data.full_name,
+        shelter_name: parsed.data.shelter_name,
+        complete_address: parsed.data.complete_address,
+        registration_certificate: parsed.data.registration_certificate,
+        owner_valid_id: parsed.data.owner_valid_id,
+        lease_contract: parsed.data.lease_contract,
+        shelter_photo: parsed.data.shelter_photo,
+      });
+
+      return {
+        ok: true,
+        data: {
+          user: data.user,
+          session: data.session,
+          application_status: "pending",
+        },
+      };
+    } catch (signupError) {
+      await supabaseAdmin.auth.admin.deleteUser(createdUser.id, false);
+
+      return {
+        ok: false,
+        status: 400,
+        error:
+          signupError instanceof Error
+            ? signupError.message
+            : "Failed to submit shelter application",
+      };
+    }
+  }
+
+  async submitShelterApplication(input: unknown): Promise<
+    ServiceResult<{
+      user: unknown;
+      application_status: "pending";
+    }>
+  > {
+    const parsed = ShelterApplicationSchema.safeParse(input);
+
+    if (!parsed.success) {
+      const firstError = parsed.error.issues?.[0]?.message || "Invalid input";
+
+      return {
+        ok: false,
+        status: 400,
+        error: firstError,
+        details: parsed.error.flatten(),
+      };
+    }
+
+    const supabase = await createServerSupabase();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        ok: false,
+        status: 401,
+        error: authError?.message || "Unauthorized",
+      };
+    }
+
+    const supabaseAdmin = createAdminClient();
+    const { data: userRow, error: userError } = await supabaseAdmin
+      .from("users")
+      .select("username, full_name, contact_email")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (userError || !userRow) {
+      return {
+        ok: false,
+        status: 400,
+        error: userError?.message || "User profile not found",
+      };
+    }
+
+    try {
+      await this.saveShelterApplication({
+        userId: user.id,
+        email: userRow.contact_email || user.email || "",
+        username: userRow.username || user.user_metadata.username || "",
+        full_name: userRow.full_name || user.user_metadata.full_name || "",
+        shelter_name: parsed.data.shelter_name,
+        complete_address: parsed.data.complete_address,
+        registration_certificate: parsed.data.registration_certificate,
+        owner_valid_id: parsed.data.owner_valid_id,
+        lease_contract: parsed.data.lease_contract,
+        shelter_photo: parsed.data.shelter_photo,
+      });
+
+      return {
+        ok: true,
+        data: {
+          user,
+          application_status: "pending",
+        },
+      };
+    } catch (applicationError) {
+      return {
+        ok: false,
+        status: 400,
+        error:
+          applicationError instanceof Error
+            ? applicationError.message
+            : "Failed to submit shelter application",
+      };
+    }
   }
 
   async login(
@@ -257,6 +623,25 @@ export async function login(
   input: unknown,
 ): Promise<ServiceResult<{ user: unknown; session: unknown }>> {
   return authService.login(input);
+}
+
+export async function signupShelter(input: unknown): Promise<
+  ServiceResult<{
+    user: unknown;
+    session: unknown;
+    application_status: "pending";
+  }>
+> {
+  return authService.signupShelter(input);
+}
+
+export async function submitShelterApplication(input: unknown): Promise<
+  ServiceResult<{
+    user: unknown;
+    application_status: "pending";
+  }>
+> {
+  return authService.submitShelterApplication(input);
 }
 
 export async function me(): Promise<ServiceResult<{ user: unknown }>> {

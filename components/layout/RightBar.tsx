@@ -14,12 +14,11 @@ export type ShelterMini = {
 };
 
 type Props = {
-  pet_id: string;
   media_id?: string;
   shelter?: ShelterMini | null;
 };
 
-export default function RightBar({ pet_id, media_id, shelter }: Props) {
+export default function RightBar({ media_id, shelter }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -57,7 +56,6 @@ export default function RightBar({ pet_id, media_id, shelter }: Props) {
         <ShareButton
           id={media_id}
           type="video"
-          petId={pet_id}
           className="w-13 h-13"
         />
       ) : null}

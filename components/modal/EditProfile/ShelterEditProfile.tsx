@@ -13,7 +13,7 @@ export default function ShelterEditProfileModal() {
 
   return (
     <EditProfileModalBase
-      title="Edit Shelter Profile"
+      title="Edit Profile"
       fields={[
         { key: "shelter_name", label: "Shelter Name" },
         { key: "about", label: "About" },

@@ -167,7 +167,7 @@ class ShelterService {
 
     return rows.map((row) => ({
       id: row.id,
-      href: `/site/home/${row.id}`,
+      href: `/site/home/pet/${row.id}`,
       imageUrl: row.pets?.photo_url ?? null,
       thumbnailUrl: row.pets?.photo_url ?? null,
       title: row.pets?.name ?? null,

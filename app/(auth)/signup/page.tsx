@@ -136,7 +136,7 @@ export default function SignupPage() {
                 Do you own a shelter?{" "}
                 <a
                   className="font-medium text-black hover:underline"
-                  href="/site/shelterCreation"
+                  href="/shelterSignup"
                 >
                   Create a Page
                 </a>

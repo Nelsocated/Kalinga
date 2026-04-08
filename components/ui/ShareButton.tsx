@@ -9,11 +9,10 @@ type ShareType = "pet" | "video" | "shelter";
 type Props = {
   id: string;
   type: ShareType;
-  petId?: string;
   className?: string;
 };
 
-export default function ShareButton({ id, type, petId, className }: Props) {
+export default function ShareButton({ id, type, className }: Props) {
   const [copied, setCopied] = useState(false);
 
   const copyLink = async () => {
@@ -30,10 +29,7 @@ export default function ShareButton({ id, type, petId, className }: Props) {
       }
 
       if (type === "video") {
-        const url = new URL(base); // Home
-        if (petId) url.searchParams.set("pet", petId);
-        url.searchParams.set("media", id);
-        shareUrl = url.toString();
+        shareUrl = `${base}/site/home/pet/${id}`;
       }
 
       await navigator.clipboard.writeText(shareUrl);

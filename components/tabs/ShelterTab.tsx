@@ -44,17 +44,8 @@ const TAB_META = {
 
 const ITEMS_PER_BATCH = 10;
 
-function buildVideoHref(videoId: string, petId?: string | null) {
-  const params = new URLSearchParams();
-
-  if (petId) {
-    params.set("pets", petId);
-  }
-
-  const query = params.toString();
-  return query
-    ? `/site/home/pet/${videoId}?${query}`
-    : `/site/home/pet/${videoId}`;
+function buildVideoHref(videoId: string) {
+  return `/site/home/pet/${videoId}`;
 }
 
 type Props = {
@@ -162,7 +153,7 @@ export default function ShelterTopCard({ initialVideos, initialPets }: Props) {
                 ? (visibleItems as ShelterVideoMini[]).map((x) => (
                     <VideoCard
                       key={`posted-video-${x.id}`}
-                      href={buildVideoHref(x.id, x.petId)}
+                      href={buildVideoHref(x.id)}
                       thumbnailUrl={x.thumbnailUrl ?? x.imageUrl}
                       subtitle={x.subtitle ?? x.caption ?? "Your shelter"}
                       petName={x.petName ?? x.title ?? "Untitled"}
