@@ -16,7 +16,11 @@ import profile_icon from "@/public/icons/user.svg";
 import notif_icon from "@/public/icons/notifications.svg";
 import messages_icon from "@/public/icons/Messages.svg";
 
-import { ClientAuth, type AuthUser } from "@/lib/utils/clientAuth";
+import {
+  getAuthUser,
+  getProfileRouteByRole,
+  type AuthUser,
+} from "@/lib/utils/clientAuth";
 
 export default function Navbar() {
   const router = useRouter();
@@ -25,7 +29,7 @@ export default function Navbar() {
 
   useEffect(() => {
     async function loadAuthUser() {
-      const user = await ClientAuth.getAuthUser();
+      const user = await getAuthUser();
       setAuthUser(user);
     }
 
@@ -37,7 +41,7 @@ export default function Navbar() {
   function handleProfileClick() {
     if (!authUser) return;
 
-    router.push(ClientAuth.getProfileRouteByRole(authUser));
+    router.push(getProfileRouteByRole(authUser));
   }
 
   return (
@@ -110,8 +114,8 @@ export default function Navbar() {
           <Image
             src={messages_icon}
             alt="messages-icon"
-            width={23}
-            height={23}
+            width={20}
+            height={20}
           />
           <span>Messages</span>
         </Button>

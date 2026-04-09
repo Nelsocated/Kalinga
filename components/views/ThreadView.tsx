@@ -1,4 +1,5 @@
 import type { PersonCard, MessageThread, Message } from "@/lib/types/messages";
+import { ViewSkeleton } from "@/app/site/messages/loading";
 import Image from "next/image";
 
 type MessageWithSender = Message & {
@@ -29,11 +30,7 @@ export default function ThreadView({
   }
 
   if (loadingThread) {
-    return (
-      <div className="flex h-full items-center justify-center text-neutral-500">
-        Loading thread...
-      </div>
-    );
+    return <ViewSkeleton />;
   }
 
   if (!selectedThread) {

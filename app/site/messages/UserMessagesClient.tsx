@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import WebTemplate from "@/components/template/WebTemplate";
 import MessagesTabs from "@/components/tabs/MessagesTabs";
 import ThreadList from "@/components/lists/ThreadList";
 import ThreadView from "@/components/views/ThreadView";
@@ -286,63 +287,62 @@ export default function UserMessagesClient({
   }
 
   return (
-    <div className="relative flex min-h-screen w-full justify-center bg-background py-5 pl-20">
-      <div className="flex h-[94vh] w-full max-w-240 flex-col overflow-hidden rounded-[15px] border-2 bg-white">
-        <div className="flex shrink-0 items-center bg-primary px-5">
-          <h1 className="text-header font-bold text-black">Messages</h1>
-          <BackButton />
-        </div>
+    <>
+      <WebTemplate
+        header={<div>Messages</div>}
+        scrollable={false}
+        main={
+          <div className="grid h-full min-h-0 grid-cols-[320px_1fr] overflow-hidden">
+            <div className="flex min-h-0 flex-col border-r bg-white">
+              <MessagesTabs mode={mode} setMode={setMode} />
 
-        <div className="grid min-h-0 flex-1 grid-cols-[320px_1fr] overflow-hidden">
-          <div className="flex min-h-0 flex-col border-r bg-white">
-            <MessagesTabs mode={mode} setMode={setMode} />
+              <div className="min-h-0 w-full flex-1 overflow-hidden">
+                {mode === "inbox" ? (
+                  <ThreadList
+                    threads={threads}
+                    selectedThreadId={selectedThreadId}
+                    loading={loadingThreads}
+                    onSelectThread={setSelectedThreadId}
+                  />
+                ) : (
+                  <SentMessagesList
+                    items={sentMessages}
+                    loading={loadingSent}
+                    onOpenMessage={(item: SentMessageItem) =>
+                      setOpenedMessage(item)
+                    }
+                  />
+                )}
+              </div>
+            </div>
 
-            <div className="min-h-0 w-full flex-1 overflow-hidden">
+            <div className="min-h-0 overflow-hidden">
               {mode === "inbox" ? (
-                <ThreadList
-                  threads={threads}
+                <ThreadView
                   selectedThreadId={selectedThreadId}
-                  loading={loadingThreads}
-                  onSelectThread={setSelectedThreadId}
+                  selectedThread={selectedThread}
+                  messages={messages}
+                  loadingThread={loadingThread}
+                  onOpenReplyModal={() => setIsReplyModalOpen(true)}
                 />
               ) : (
-                <SentMessagesList
-                  items={sentMessages}
-                  loading={loadingSent}
-                  onOpenMessage={(item: SentMessageItem) =>
-                    setOpenedMessage(item)
-                  }
+                <ComposeView
+                  userId={userId}
+                  mode="new"
+                  shelters={likedShelters}
+                  onCreated={handleRefreshAfterSend}
                 />
               )}
             </div>
           </div>
+        }
+      />
 
-          <div className="min-h-0 overflow-hidden">
-            {mode === "inbox" ? (
-              <ThreadView
-                selectedThreadId={selectedThreadId}
-                selectedThread={selectedThread}
-                messages={messages}
-                loadingThread={loadingThread}
-                onOpenReplyModal={() => setIsReplyModalOpen(true)}
-              />
-            ) : (
-              <ComposeView
-                userId={userId}
-                mode="new"
-                shelters={likedShelters}
-                onCreated={handleRefreshAfterSend}
-              />
-            )}
-          </div>
+      {error ? (
+        <div className="fixed right-6 bottom-6 z-40 rounded-[15px] border bg-white px-4 py-2 text-description text-red-500 shadow">
+          {error}
         </div>
-
-        {error ? (
-          <div className="border-t px-4 py-2 text-description text-red-500">
-            {error}
-          </div>
-        ) : null}
-      </div>
+      ) : null}
 
       {openedMessage ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
@@ -410,6 +410,6 @@ export default function UserMessagesClient({
         onClose={() => setIsReplyModalOpen(false)}
         onCreated={handleRefreshAfterSend}
       />
-    </div>
+    </>
   );
 }

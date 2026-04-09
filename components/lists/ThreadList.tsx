@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { PersonCard, MessageThread } from "@/lib/types/messages";
+import { ListSkeleton } from "@/app/site/messages/loading";
 
 type ThreadWithMeta = MessageThread & {
   adoption_status: string | null;
@@ -29,9 +30,7 @@ export default function ThreadList({
 
       <div className="min-h-0 flex-1 overflow-y-auto scroll-stable">
         {loading ? (
-          <div className="p-4 text-description text-neutral-500">
-            Loading messages...
-          </div>
+          <ListSkeleton header={false} />
         ) : threads.length === 0 ? (
           <div className="p-4 text-description text-neutral-500">
             No messages yet.

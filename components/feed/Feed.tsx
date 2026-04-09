@@ -37,9 +37,9 @@ export default function Feed({
   const targetMediaId = initialMediaId ?? queryMediaId;
 
   const [items, setItems] = useState<FeedItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadFeed() {
@@ -76,6 +76,7 @@ export default function Feed({
         setCurrentIndex(foundIndex >= 0 ? foundIndex : 0);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch feed");
+        setItems([]);
       } finally {
         setLoading(false);
       }
@@ -85,6 +86,8 @@ export default function Feed({
   }, [targetMediaId]);
 
   useEffect(() => {
+    if (loading) return;
+
     if (!items.length) {
       onActiveChange?.(null);
       onNavChange?.(null);
@@ -122,9 +125,9 @@ export default function Feed({
       index: currentIndex,
       total: items.length,
     });
-  }, [items, currentIndex, onActiveChange, onNavChange]);
+  }, [items, currentIndex, loading, onActiveChange, onNavChange]);
 
-  if (loading) return <div>Loading feed...</div>;
+  if (loading) return null;
   if (error) return <div>{error}</div>;
   if (!items.length) return <div>No feed items found.</div>;
 

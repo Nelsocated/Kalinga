@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+import { getAuthUser, type AuthUser } from "@/lib/utils/clientAuth";
 import Button from "../ui/Button";
 import BackButton from "../ui/BackButton";
 import LogoutButton from "../ui/LogoutButton";
@@ -16,6 +17,23 @@ export default function MoreModal() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+
+  function GetUserRole(): boolean {
+    useEffect(() => {
+      async function loadAuthUser() {
+        const user = await getAuthUser();
+        setAuthUser(user);
+      }
+
+      loadAuthUser();
+    }, []);
+
+    if (authUser?.role == "user") {
+      return true;
+    }
+    return false;
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -62,14 +80,18 @@ export default function MoreModal() {
         </div>
 
         <div className="space-y-1 p-2 text-lg text-black flex flex-col">
-          <Button
-            type="button"
-            onClick={() => router.push("/shelterSignup")}
-            className={buttonStyle}
-          >
-            <Image src={Home} alt="home-icon" width={25} height={25} />
-            <span>Create Shelter</span>
-          </Button>
+          {GetUserRole() ? (
+            <Button
+              type="button"
+              onClick={() => router.push("/shelterSignup")}
+              className={buttonStyle}
+            >
+              <Image src={Home} alt="home-icon" width={25} height={25} />
+              <span>Create Shelter</span>
+            </Button>
+          ) : (
+            ""
+          )}
           <Button
             type="button"
             onClick={() => router.push("/site/about")}

@@ -8,7 +8,6 @@ import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 import { getSexIcon } from "@/app/site/profiles/pets/[id]/PetProfileClient";
 import WebTemplate from "@/components/template/WebTemplate";
 import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
 import CharacteristicChip from "@/components/template/pet/CharacteristicChip";
 import LinkPetModal from "@/components/modal/LinkPetModal";
 import type { PetCardProps } from "@/lib/types/shelters";
@@ -19,8 +18,7 @@ type Props = {
 };
 
 type FormState = {
-  title: string;
-  description: string;
+  caption: string;
   petId: string;
   adoptionStatus: "available" | "not_available" | "";
 };
@@ -30,8 +28,7 @@ export default function PostVideoClient({ pets, initialError }: Props) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [form, setForm] = useState<FormState>({
-    title: "",
-    description: "",
+    caption: "",
     petId: "",
     adoptionStatus: "",
   });
@@ -97,8 +94,7 @@ export default function PostVideoClient({ pets, initialError }: Props) {
     setError(null);
 
     if (!selectedFile) return setError("Video file is required.");
-    if (!form.title.trim()) return setError("Video title is required.");
-    if (!form.description.trim()) return setError("Description is required.");
+    if (!form.caption.trim()) return setError("Caption is required.");
     if (!form.petId.trim()) return setError("Please link a pet profile.");
 
     setSubmitting(true);
@@ -107,8 +103,7 @@ export default function PostVideoClient({ pets, initialError }: Props) {
       const body = new FormData();
       body.append("file", selectedFile);
       body.append("petId", form.petId);
-      body.append("title", form.title.trim());
-      body.append("description", form.description.trim());
+      body.append("caption", form.caption.trim());
       body.append("adoptionStatus", form.adoptionStatus);
 
       const res = await fetch("/api/videos", { method: "POST", body });
@@ -178,23 +173,14 @@ export default function PostVideoClient({ pets, initialError }: Props) {
                   />
                 </div>
 
-                <Input
-                  label="Video Title"
-                  value={form.title}
-                  onChange={(e) => updateField("title", e.target.value)}
-                  placeholder="Video Title"
-                  labelClassName="text-subtitle font-semibold"
-                  required
-                />
-
                 <div className="flex flex-col gap-1">
                   <label className="text-subtitle font-semibold">Caption</label>
                   <textarea
-                    value={form.description}
-                    onChange={(e) => updateField("description", e.target.value)}
+                    value={form.caption}
+                    onChange={(e) => updateField("caption", e.target.value)}
                     placeholder="Description"
                     rows={3}
-                    className="resize-none rounded-[10px] border bg-white px-3 py-2 outline-none"
+                    className="resize-none rounded-[15px] border bg-white px-3 py-2 outline-none"
                     required
                   />
                 </div>

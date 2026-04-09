@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Suspense,
-  type FormEvent,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { Suspense, type FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Input from "@/components/ui/Input";
@@ -38,12 +32,10 @@ const STEP_COPY: Record<Step, { title: string; subtitle: string }> = {
 
 function UploadField({
   label,
-  file,
   accept,
   onChange,
 }: {
   label: string;
-  file: File | null;
   accept?: string;
   onChange: (file: File | null) => void;
 }) {
@@ -57,9 +49,6 @@ function UploadField({
           className="block w-full text-sm text-black file:mr-3 file:rounded-[15px] file:border file:border-primary file:bg-background file:px-3 file:py-1 file:text-sm file:font-medium file:text-black hover:file:bg-primary"
           onChange={(event) => onChange(event.target.files?.[0] ?? null)}
         />
-        <p className="mt-2 text-xs text-black/60">
-          {file ? file.name : "No file selected yet"}
-        </p>
       </div>
     </label>
   );
@@ -337,7 +326,6 @@ function ShelterSignupPageContent() {
                   <div className="space-y-2">
                     <UploadField
                       label="Registration Certificate"
-                      file={files.registration_certificate}
                       onChange={(file) =>
                         updateFile("registration_certificate", file)
                       }
@@ -345,19 +333,16 @@ function ShelterSignupPageContent() {
 
                     <UploadField
                       label="Valid ID of the Owner"
-                      file={files.owner_valid_id}
                       onChange={(file) => updateFile("owner_valid_id", file)}
                     />
 
                     <UploadField
                       label="Notarized Valid Contract of Lease"
-                      file={files.lease_contract}
                       onChange={(file) => updateFile("lease_contract", file)}
                     />
 
                     <UploadField
                       label="Photo of the Shelter"
-                      file={files.shelter_photo}
                       accept="image/*"
                       onChange={(file) => updateFile("shelter_photo", file)}
                     />
@@ -394,7 +379,10 @@ function ShelterSignupPageContent() {
               <hr className="mx-auto my-3 w-full border-black/50" />
 
               {isLoggedIn ? (
-                <Button onClick={() => router.push("/site/home")} className="w-full">
+                <Button
+                  onClick={() => router.push("/site/home")}
+                  className="w-full"
+                >
                   Back to Home
                 </Button>
               ) : (

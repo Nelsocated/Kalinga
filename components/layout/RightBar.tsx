@@ -34,7 +34,7 @@ export default function RightBar({ media_id, shelter }: Props) {
       <button
         type="button"
         onClick={goToShelter}
-        className="h-17 w-17 rounded-full overflow-hidden"
+        className="h-17 w-17 rounded-full border overflow-hidden"
       >
         <Image
           src={shelter?.logo_url ?? DEFAULT_AVATAR_URL}
@@ -53,11 +53,7 @@ export default function RightBar({ media_id, shelter }: Props) {
       ) : null}
 
       {media_id ? (
-        <ShareButton
-          id={media_id}
-          type="video"
-          className="w-13 h-13"
-        />
+        <ShareButton id={media_id} type="video" className="w-13 h-13" />
       ) : null}
     </div>
   );

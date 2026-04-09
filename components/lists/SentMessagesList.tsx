@@ -1,5 +1,6 @@
 import type { SentMessageItem } from "@/lib/types/messages";
 import { formatShortDate } from "./ThreadList";
+import { ListSkeleton } from "@/app/site/messages/loading";
 
 type Props = {
   items: SentMessageItem[];
@@ -20,7 +21,7 @@ export default function SentMessagesList({
 
       <div className="min-h-0 flex-1 overflow-y-auto scroll-stable">
         {loading ? (
-          <p className="p-3 text-small text-neutral-500">Loading...</p>
+          <ListSkeleton header={false} />
         ) : (
           <div className="space-y-2 p-3">
             {items.map((item) => (

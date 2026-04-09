@@ -29,7 +29,7 @@ const TAB_META = {
     iconActive: at_pet,
     alt: "pet",
     altActive: "at-pet",
-    label: "Photos",
+    label: "Pet",
   },
 } satisfies Record<
   TabsKey,

@@ -3,7 +3,6 @@
 import Header from "../components/Header";
 import ContentCard from "../components/ContentCard";
 import WebTemplate from "@/components/template/WebTemplate";
-import BackButton from "@/components/ui/BackButton";
 
 export type DashboardStats = {
   totalViews: number;
@@ -29,12 +28,7 @@ type Props = {
 export default function DashboardPage({ stats, items }: Props) {
   return (
     <WebTemplate
-      header={
-        <div className="flex items-center px-5">
-          <h1 className="text-header font-bold text-black">Dashboard</h1>
-          <BackButton />
-        </div>
-      }
+      header={<div>Dashboard</div>}
       main={
         <main className="flex h-full min-h-0 flex-col">
           <Header stats={stats} />
