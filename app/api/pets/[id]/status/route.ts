@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPetStatus } from "@/lib/services/pet/petService";
+import { getPetStatus } from "@/lib/services/adoption/adoptionClient";
 
 type Params = Promise<{ id: string }>;
 
