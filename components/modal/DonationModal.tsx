@@ -60,9 +60,13 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
         }
 
         setData(Array.isArray(json?.data) ? json.data : []);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Donation fetch error:", err);
-        setErrorMsg(err?.message ?? "Unable to fetch donations.");
+
+        const message =
+          err instanceof Error ? err.message : "Unable to fetch donations.";
+
+        setErrorMsg(message);
         setData([]);
       }
     };
@@ -210,7 +214,7 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
                           ) : null}
 
                           {isQrOpen && item.qr_url ? (
-                            <img
+                            <Image
                               src={item.qr_url}
                               alt="QR"
                               className="w-40 rounded-[15px] border"

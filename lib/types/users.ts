@@ -10,3 +10,15 @@ export interface Users {
   updated_at: string;
   created_at: string;
 }
+
+export type UserUpdatePayload = Partial<
+  Pick<
+    Users,
+    | "full_name"
+    | "username"
+    | "bio"
+    | "contact_email"
+    | "contact_phone"
+    | "photo_url"
+  >
+>;

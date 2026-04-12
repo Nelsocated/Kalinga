@@ -4,6 +4,7 @@ import React from "react";
 
 type ButtonProps = {
   children: React.ReactNode;
+  icon?: React.ReactNode;
   onClick?: () => void;
   type?: "button" | "submit";
   loading?: boolean;
@@ -13,6 +14,7 @@ type ButtonProps = {
 
 export default function Button({
   children,
+  icon,
   onClick,
   type = "button",
   loading = false,
@@ -30,9 +32,10 @@ export default function Button({
         w-auto
         py-2 px-4
         rounded-[15px]
-        font-medium
+        font-semibold
         transition
         border
+        text-description
         bg-background text-black
         hover:bg-primary
         disabled:opacity-50
@@ -40,7 +43,10 @@ export default function Button({
         ${className}
       `}
     >
-      {loading ? "Loading..." : children}
+      <div className="flex items-center gap-1">
+        {icon}
+        {loading ? "Loading..." : children}
+      </div>
     </button>
   );
 }

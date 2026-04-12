@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getMyUser, updateMyUser } from "@/lib/services/user/usersService";
-import type { UserUpdatePayload } from "@/lib/services/user/usersService";
+import type { UserUpdatePayload } from "@/lib/types/users";
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";

@@ -10,7 +10,7 @@ export default function MainLayout({
       <aside className="ml-20 shrink-0 flex pt-13">
         <Navbar />
       </aside>
-      <main className="flex-1 min-w-0 px-4 lg:px-8">{children}</main>
+      <main className="flex-1 min-w-0">{children}</main>
     </div>
   );
 }

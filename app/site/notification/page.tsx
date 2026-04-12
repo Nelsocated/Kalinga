@@ -1,7 +1,7 @@
 import NotifClient from "./NotifClient";
 import { getUserId } from "@/lib/utils/getUserId";
 import { getUserAdoptionNotifications } from "@/lib/services/adoption/adoptionService";
-import { fetchShelterById } from "@/lib/services/shelterService";
+import { fetchShelterById } from "@/lib/services/shelter/shelterService";
 import { getPetById } from "@/lib/services/pet/petService";
 
 export type NotificationStatus =
@@ -45,7 +45,7 @@ function buildNotificationContent(
         shortMessage: (
           <>
             Your application for{" "}
-            <span className="font-semibold">{petName}</span> was submitted to $
+            <span className="font-semibold">{petName}</span> was submitted to{" "}
             {shelterName}.
           </>
         ),
@@ -53,8 +53,8 @@ function buildNotificationContent(
           <>
             Your application to adopt {petName} has been{" "}
             <span className="font-semibold">successfully submitted</span>. Thank
-            you for your interest and for giving Nelson the opportunity to find
-            a loving furever home.
+            you for your interest and for giving {petName} the opportunity to
+            find a loving furever home.
             {"\n"}
             The {shelterName} will review your application and reach out to you
             if there are any updates or next steps. Thank you for choosing

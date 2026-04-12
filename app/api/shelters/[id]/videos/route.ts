@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getShelterPostedVideos } from "@/lib/services/shelterService";
+import { getShelterPostedVideos } from "@/lib/services/shelter/shelterService";
 
 type RouteContext = {
   params: Promise<{

@@ -3,7 +3,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import {
   getInitialLikedByUser,
   setLikedByUser,
-} from "@/lib/services/pet/likeService";
+} from "@/lib/services/likeService";
 
 type LikeTargetType = "pet" | "shelter" | "video";
 

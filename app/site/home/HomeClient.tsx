@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import Feed from "@/components/feed/Feed";
 import RightBar, { ShelterMini } from "@/components/layout/RightBar";
+import ScrollBar from "@/components/layout/ScrollBar";
+import CreationPageView from "@/app/shelter/components/CreationPageView";
 
-type FeedNav = {
+type FeedNavType = {
   next: () => void;
   prev: () => void;
   hasNext: boolean;
@@ -19,32 +21,71 @@ type ActiveItem = {
   shelter: ShelterMini | null;
 };
 
-export default function HomeClient() {
-  const [nav, setNav] = useState<FeedNav | null>(null);
+type Props = {
+  isShelter: boolean;
+  initialMediaId?: string | null;
+};
+
+export default function HomeClient({ isShelter, initialMediaId }: Props) {
+  const [nav, setNav] = useState<FeedNavType | null>(null);
   const [active, setActive] = useState<ActiveItem | null>(null);
+  const [showCreationPage, setShowCreationPage] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
+
     return () => {
       document.body.style.overflow = "auto";
     };
   }, []);
 
   return (
-    <div className="min-h-svh bg-background flex px-10">
+    <div className="flex h-svh bg-background px-10">
       <main className="flex flex-1 items-center justify-center">
-        <div className="flex justify-center items-center gap-3">
-          <Feed onActiveChange={setActive} onNavChange={setNav} />
+        <div className="flex flex-1 items-center justify-center">
+          <div className="flex items-center gap-4">
+            {showCreationPage ? (
+              <>
+                <div className="h-[85svh] w-[48svh]">
+                  <CreationPageView />
+                </div>
 
-          {active ? (
-            <RightBar
-              nav={nav}
-              type="video"
-              pet_id={active.pet_id}
-              media_id={active.media_id ?? ""}
-              shelter={active.shelter}
-            />
-          ) : null}
+                <div className="w-18" />
+              </>
+            ) : (
+              <>
+                <Feed
+                  onActiveChange={setActive}
+                  onNavChange={setNav}
+                  initialMediaId={initialMediaId}
+                />
+
+                <div>
+                  {active ? (
+                    <RightBar
+                      media_id={active.media_id ?? ""}
+                      shelter={active.shelter}
+                    />
+                  ) : null}
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="absolute right-10">
+            {nav ? (
+              <ScrollBar
+                onNext={nav.next}
+                onPrev={nav.prev}
+                hasNext={nav.hasNext}
+                hasPrev={nav.hasPrev}
+                isShelter={isShelter}
+                onOpenCreation={() => setShowCreationPage(true)}
+                onCloseCreation={() => setShowCreationPage(false)}
+                isCreationOpen={showCreationPage}
+              />
+            ) : null}
+          </div>
         </div>
       </main>
     </div>

@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import ShelterProfileClient from "./ShelterProfileClient";
-import ProfileTabs from "@/components/profile/card/ProfileTabs";
+import ProfileTabs from "@/components/tabs/ProfileTab";
 import {
   fetchShelterById,
   getShelterPostedPets,
-} from "@/lib/services/shelterService";
+} from "@/lib/services/shelter/shelterService";
 
 type PageProps = {
   params: Promise<{
@@ -37,7 +37,7 @@ export default async function Page({ params }: PageProps) {
     created_at: shelter.created_at ?? null,
     pets: pets.map((pet) => ({
       id: pet.id,
-      name: pet.name ?? "Unknown Pet",
+      name: pet.petName ?? "Unknown Pet",
       sex: pet.gender ?? "unknown",
       photo_url: pet.imageUrl ?? null,
     })),

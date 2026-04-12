@@ -1,4 +1,8 @@
-export type PetStatus = "available" | "pending" | "adopted";
+import type {
+  PetStatus,
+  answer,
+  PetStatusFull,
+} from "@/lib/types/adoptionRequests";
 
 export type AdoptionFormPayload = {
   full_name: string;
@@ -72,4 +76,46 @@ export async function createPetAdoptionRequest(
   if (!res.ok) {
     throw new Error(json?.error ?? "Failed to create adoption request.");
   }
+}
+
+async function parseJsonOrThrow(res: Response) {
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(json?.error ?? `Request failed (${res.status})`);
+  }
+
+  return json;
+}
+
+export async function fetchAdoptionAnswer(answerId: string): Promise<answer> {
+  const res = await fetch(`/api/users/${answerId}/adoption/answer`, {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  const json = await parseJsonOrThrow(res);
+
+  if (!json?.data) {
+    throw new Error("Answer not found.");
+  }
+
+  return json.data as answer;
+}
+
+export async function getPetStatus(petId: string): Promise<PetStatusFull> {
+  if (!petId?.trim()) return null;
+
+  const res = await fetch(`/api/pets/${petId}/status`, {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(json?.error ?? `Request failed (${res.status})`);
+  }
+
+  return (json?.data?.status as PetStatusFull) ?? null;
 }

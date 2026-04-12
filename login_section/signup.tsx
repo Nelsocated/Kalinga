@@ -24,7 +24,6 @@ export default function SignupPage() {
   return (
     <div className="container">
       <div className="card signup">
-
         <div className="left">
           <div className="logo-circle"></div>
           <h2>Kalinga</h2>

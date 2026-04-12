@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSheltersWithStats } from "@/lib/services/shelterService";
+import { getSheltersWithStats } from "@/lib/services/shelter/shelterService";
 
 export async function GET() {
   try {

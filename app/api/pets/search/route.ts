@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import {
-  getAvailablePets,
-  type PetFilters,
-} from "@/lib/services/pet/petService";
-import { getSheltersByIds } from "@/lib/services/shelterService";
+import { getAvailablePets } from "@/lib/services/pet/petService";
+import type { PetFilters } from "@/lib/types/pets";
+import { getSheltersByIds } from "@/lib/services/shelter/shelterService";
 import type { SearchPetCardItem } from "@/lib/types/pets";
 
 const SearchPetsSchema = z.object({

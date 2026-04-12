@@ -4,10 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+import WebTemplate from "@/components/template/WebTemplate";
 import NotifCard from "@/components/cards/NotifCard";
 import StatusCard from "@/components/cards/StatusCard";
 import StatusModal from "@/components/modal/StatusModal";
-import BackButton from "@/components/ui/BackButton";
 import { createClientSupabase } from "@/lib/supabase/client";
 
 import type { NotificationItem } from "./page";
@@ -24,12 +24,17 @@ export default function NotifClient({ notifications }: Props) {
   const router = useRouter();
   const supabase = createClientSupabase();
 
-  const [selected, setSelected] = useState<NotificationItem | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [showStatusCard, setShowStatusCard] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const statusCardRef = useRef<HTMLDivElement | null>(null);
+
+  const selected = useMemo(
+    () => notifications.find((item) => item.id === selectedId) ?? null,
+    [notifications, selectedId],
+  );
 
   const hasNotifications = notifications.length > 0;
 
@@ -38,15 +43,15 @@ export default function NotifClient({ notifications }: Props) {
   }, [notifications]);
 
   const headerStyle =
-    "text-3xl font-semibold flex items-center rounded-[15px] pl-7 border bg-white px-2 ml-6 border-l-0";
+    "text-title font-semibold flex items-center rounded-[15px] pl-7 border bg-white px-2 ml-6 border-l-0";
 
   function handleNotifClick(item: NotificationItem) {
-    if (selected?.id === item.id && showStatusCard) {
+    if (selectedId === item.id && showStatusCard) {
       setOpenModal(true);
       return;
     }
 
-    setSelected(item);
+    setSelectedId(item.id);
     setOpenModal(false);
     setShowStatusCard(true);
   }
@@ -58,6 +63,7 @@ export default function NotifClient({ notifications }: Props) {
   function handleCloseStatusCard() {
     setShowStatusCard(false);
     setOpenModal(false);
+    setSelectedId(null);
   }
 
   useEffect(() => {
@@ -90,24 +96,6 @@ export default function NotifClient({ notifications }: Props) {
     });
   }, [selected, showStatusCard]);
 
-  // keep selected card in sync after refresh
-  useEffect(() => {
-    if (!selected) return;
-
-    const updatedSelected = notifications.find(
-      (item) => item.id === selected.id,
-    );
-
-    if (!updatedSelected) {
-      setSelected(null);
-      setShowStatusCard(false);
-      setOpenModal(false);
-      return;
-    }
-
-    setSelected(updatedSelected);
-  }, [notifications, selected]);
-
   // realtime subscription
   useEffect(() => {
     const channel = supabase
@@ -131,84 +119,84 @@ export default function NotifClient({ notifications }: Props) {
   }, [router, supabase]);
 
   return (
-    <section className="ml-20 flex h-screen max-w-5xl flex-col overflow-hidden rounded-[15px] border bg-white shadow-sm">
-      <div className="bg-primary px-6 py-5 md:px-8">
-        <div className="flex items-center gap-3">
-          <div className="text-4xl font-bold tracking-tight">Notifications</div>
-          <span>
-            <BackButton />
-          </span>
-        </div>
-      </div>
+    <WebTemplate
+      header={<div>Notifications</div>}
+      main={
+        <>
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 min-h-0 overflow-y-auto scroll-stable py-5"
+          >
+            <div className="grid grid-cols-3 place-items-center gap-15 mb-5">
+              <div className="relative flex items-center">
+                <span className="absolute">
+                  <Image src={Home} alt="home-icon" width={50} height={50} />
+                </span>
+                <span className={headerStyle}>Shelter</span>
+              </div>
 
-      <div
-        ref={scrollContainerRef}
-        className="flex-1 min-h-0 overflow-y-auto scroll-stable p-8 "
-      >
-        <div className="mb-7 grid grid-cols-3 place-items-center gap-12">
-          <div className="relative flex items-center">
-            <span className="absolute">
-              <Image src={Home} alt="home-icon" width={50} height={50} />
-            </span>
-            <span className={headerStyle}>Shelter</span>
-          </div>
+              <div className="relative flex items-center">
+                <span className="absolute">
+                  <Image
+                    src={Species}
+                    alt="species-icon"
+                    width={50}
+                    height={50}
+                  />
+                </span>
+                <span className={headerStyle}>Applications</span>
+              </div>
 
-          <div className="relative flex items-center">
-            <span className="absolute">
-              <Image src={Species} alt="species-icon" width={50} height={50} />
-            </span>
-            <span className={headerStyle}>Applications</span>
-          </div>
+              <div className="relative flex items-center">
+                <span className="absolute rounded-full bg-primary">
+                  <Image src={Date} alt="date-icon" width={50} height={50} />
+                </span>
+                <span className={headerStyle}>Date</span>
+              </div>
+            </div>
 
-          <div className="relative flex items-center">
-            <span className="absolute rounded-full bg-primary">
-              <Image src={Date} alt="date-icon" width={50} height={50} />
-            </span>
-            <span className={headerStyle}>Date</span>
-          </div>
-        </div>
+            {!hasNotifications ? (
+              <div className="rounded-[15px] border border-dashed bg-white p-10 text-center">
+                No notifications yet.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {sortedNotifications.map((item) => (
+                  <NotifCard
+                    key={item.id}
+                    item={item}
+                    onSelect={() => handleNotifClick(item)}
+                    onOpenDetails={() => handleNotifClick(item)}
+                  />
+                ))}
 
-        {!hasNotifications ? (
-          <div className="rounded-[15px] border border-dashed bg-white p-10 text-center">
-            No notifications yet.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {sortedNotifications.map((item) => (
-              <NotifCard
-                key={item.id}
-                item={item}
-                isActive={selected?.id === item.id && showStatusCard}
-                onSelect={() => handleNotifClick(item)}
-                onOpenDetails={() => handleNotifClick(item)}
-              />
-            ))}
-
-            {selected && (
-              <div
-                ref={statusCardRef}
-                className={`overflow-hidden transition-all duration-300 ease-out ${
-                  showStatusCard
-                    ? "translate-y-0 opacity-100 max-h-250 pt-5"
-                    : "pointer-events-none translate-y-10 opacity-0 max-h-0"
-                }`}
-              >
-                <StatusCard
-                  item={selected}
-                  onClose={handleCloseStatusCard}
-                  onOpenDetails={() => setOpenModal(true)}
-                />
+                {selected && (
+                  <div
+                    ref={statusCardRef}
+                    className={`overflow-hidden transition-all duration-300 ease-out ${
+                      showStatusCard
+                        ? "translate-y-0 opacity-100 max-h-250 pt-5"
+                        : "pointer-events-none translate-y-10 opacity-0 max-h-0"
+                    }`}
+                  >
+                    <StatusCard
+                      item={selected}
+                      onClose={handleCloseStatusCard}
+                      onOpenDetails={() => setOpenModal(true)}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
 
-      <StatusModal
-        open={openModal}
-        item={selected}
-        onClose={handleCloseModal}
-      />
-    </section>
+          <StatusModal
+            open={openModal}
+            item={selected}
+            onClose={handleCloseModal}
+          />
+        </>
+      }
+    />
   );
 }

@@ -8,12 +8,13 @@ body {
 @theme {
   --color-primary: #f3be0f;
   --color-background: #f6f3ee;
+  --color-innerbg: #fffdf7;
   --color-text: black;
   --color-male: #6495ed;
   --color-female: #f8c8dc;
   --color-border: #f3be0f;
 
-  --font-sans: var(--font-outfit);
+  --font-sans: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --color-submitted: black;
   --color-under_review: #1b48a1;
@@ -22,6 +23,14 @@ body {
   --color-approved: #0f971c;
   --color-adopted: #ec2e57;
   --color-withdrawn: #f07800;
+
+  --text-header: 64px;
+  --text-subheader: 48px;
+  --text-title: 30px;
+  --text-subtitle: 26px;
+  --text-lg: 20px;
+  --text-description: 15px;
+  --text-small: 12px;
 }
 
 @layer base {

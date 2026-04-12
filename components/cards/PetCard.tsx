@@ -3,34 +3,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
-import Male_Icon from "@/public/icons/male-icon.svg";
-import Female_Icon from "@/public/icons/female-icon.svg";
-
-export type PetGender = "male" | "female" | "unknown";
+import {
+  getSexIcon,
+  type PetGender,
+} from "@/app/site/profiles/pets/[id]/PetProfileClient";
 
 export type PetCardProps = {
-  href: string;
+  href?: string;
   imageUrl?: string | null;
   petName: string;
-  sex?: PetGender;
-  shelterName: string;
-  shelterLogo: string;
+  sex: PetGender;
+  shelterName?: string;
+  shelterLogo?: string;
   className?: string;
   year_inShelter?: number;
   title?: string | null;
+  resize?: boolean;
 };
-
-function getSexIcon(sex?: string | null) {
-  if (sex === "male") {
-    return <Image src={Male_Icon} alt="male-icon" width={20} height={20} />;
-  }
-
-  if (sex === "female") {
-    return <Image src={Female_Icon} alt="female-icon" width={20} height={20} />;
-  }
-
-  return null;
-}
 
 export default function PetCard({
   href,
@@ -41,6 +30,7 @@ export default function PetCard({
   shelterLogo,
   year_inShelter,
   title,
+  resize = false,
   className = "",
 }: PetCardProps) {
   const src = (imageUrl ?? "").trim() || DEFAULT_AVATAR_URL;
@@ -54,16 +44,36 @@ export default function PetCard({
 
   const topLabel = title?.trim() || yearLabel;
 
-  return (
-    <Link
-      href={href}
-      className={[
-        "relative block w-50 rounded-[15px] border bg-primary overflow-visible",
-        className,
-      ].join(" ")}
-    >
+  const cardContent = resize ? (
+    <>
       {topLabel ? (
-        <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border-2 border-primary bg-white px-4 py-1 text-xs font-bold text-primary leading-none shadow-sm">
+        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 bg-white px-4 py-1 text-xs leading-none font-bold text-primary shadow-sm">
+          {topLabel}
+        </div>
+      ) : null}
+
+      <div>
+        <div className="relative h-30 overflow-hidden rounded-[15px]">
+          <Image
+            src={src}
+            alt={`${petName} photo`}
+            fill
+            className="object-cover"
+          />
+        </div>
+      </div>
+
+      <div className="ml-1 px-2 py-2">
+        <div className="flex items-center">
+          <div className="text-[20px] leading-none font-bold">{petName}</div>
+          {getSexIcon(sex, 15)}
+        </div>
+      </div>
+    </>
+  ) : (
+    <>
+      {topLabel ? (
+        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 bg-white px-4 py-1 text-xs leading-none font-bold text-primary shadow-sm">
           {topLabel}
         </div>
       ) : null}
@@ -79,16 +89,16 @@ export default function PetCard({
         </div>
       </div>
 
-      <div className="p-2 pt-1 ml-1">
+      <div className="ml-1 px-2">
         <div className="flex items-center">
-          <div className="text-xl font-bold leading-none">{petName}</div>
-          {getSexIcon(sex)}
+          <div className="text-[20px] leading-none font-bold">{petName}</div>
+          {getSexIcon(sex, 20)}
         </div>
 
-        <div className="flex items-center text-sm leading-none">
+        <div className="flex items-center text-[10px] leading-none">
           <Image
-            src={shelterLogo}
-            alt={shelterName}
+            src={shelterLogo || DEFAULT_AVATAR_URL}
+            alt={shelterName ?? ""}
             width={18}
             height={18}
             className="rounded-full"
@@ -96,6 +106,23 @@ export default function PetCard({
           <span>{shelterName}</span>
         </div>
       </div>
+    </>
+  );
+
+  const sharedClassName = [
+    "relative block overflow-visible rounded-[15px] border-3 bg-primary",
+    href ? "cursor-pointer" : "",
+    resize ? "w-40" : "w-50",
+    className,
+  ].join(" ");
+
+  if (!href) {
+    return <div className={sharedClassName}>{cardContent}</div>;
+  }
+
+  return (
+    <Link href={href} className={sharedClassName}>
+      {cardContent}
     </Link>
   );
 }

@@ -17,28 +17,32 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
 
-  const cleanCaption = (caption ?? "").trim();
+  const cleanCaption = (caption ?? "No caption").trim();
   const hasCaption = cleanCaption.length > 0;
 
   return (
     <div className="absolute bottom-0 left-0 w-full text-white">
       <motion.div
         layout
-        transition={{ type: "spring", stiffness: 320, damping: 30 }}
+        transition={{ type: "tween", stiffness: 320, damping: 30 }}
         className={[
           "relative z-10 w-full overflow-hidden rounded-[15px]",
           open
-            ? "bg-[#9c7800]"
+            ? "bg-[#795F07]"
             : "bg-linear-to-t from-black/70 via-black/40 to-transparent",
         ].join(" ")}
       >
-        <div className="px-3 py-3">
-          <p className="text-xl font-bold leading-tight">{shelter_name}</p>
+        <div
+          className={["px-5 py-2", open ? "flex flex-col h-64" : ""].join(" ")}
+        >
+          <p className="text-subtitle font-bold leading-tight">
+            {shelter_name}
+          </p>
 
           {hasCaption && (
             <>
               {!open && (
-                <p className="mt-1 pb-2 text-sm text-white/95 line-clamp-2 wrap-break-words">
+                <p className="text-description text-white/95 line-clamp-2 wrap-break-words truncate">
                   {cleanCaption}
                 </p>
               )}
@@ -47,40 +51,46 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
                 {open && (
                   <motion.p
                     key="caption"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="mt-1 pb-2 text-sm text-white whitespace-pre-wrap wrap-break-words"
+                    className="mt-2 mb-2 text-description text-white whitespace-pre-wrap wrap-break-words break-all text-justify grow overflow-y-auto"
                   >
                     {cleanCaption}
                   </motion.p>
                 )}
               </AnimatePresence>
 
-              <button
-                type="button"
-                onClick={() => setOpen((v) => !v)}
-                className="text-xs font-semibold hover:underline"
-              >
-                {open ? "Less" : "More"}
-              </button>
+              <div className="mt-2 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setOpen((v) => !v)}
+                  className="text-description font-medium leading-none hover:underline"
+                >
+                  {open ? "Less" : "More"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => router.push(`/site/profiles/pets/${id}`)}
+                  className="flex items-center gap-2 text-description font-bold text-white hover:underline"
+                >
+                  <span className="leading-none">Meet {name}!</span>
+
+                  <div className="flex items-center justify-center">
+                    <Image
+                      src={meet_icon}
+                      alt="meet-icon"
+                      width={50}
+                      height={50}
+                      className="relative bottom-2"
+                    />
+                  </div>
+                </button>
+              </div>
             </>
           )}
-
-          <button
-            type="button"
-            className="absolute bottom-3 right-13 text-l font-bold text-white hover:underline"
-            onClick={() => router.push(`/site/profiles/pets/${id}`)}
-          >
-            Meet {name}!
-          </button>
-
-          <Image
-            src={meet_icon}
-            alt="meet-icon"
-            className="absolute bottom-3 right-3"
-          />
         </div>
       </motion.div>
     </div>

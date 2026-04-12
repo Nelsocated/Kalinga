@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchShelterById } from "@/lib/services/shelterService";
+import { fetchShelterById } from "@/lib/services/shelter/shelterService";
 
 type RouteContext = {
   params: Promise<{

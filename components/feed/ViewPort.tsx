@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Caption from "./Caption";
 import playIcon from "@/public/icons/Play-icon.svg";
-import type { FeedItem } from "@/lib/types/feed";
+import type { FeedItem } from "@/lib/services/feedService";
+import { getViewSessionId } from "@/lib/session/getViewSessionId";
 
 type PetCardProps = {
   item: FeedItem;
@@ -12,6 +13,9 @@ type PetCardProps = {
 
 export default function ViewPort({ item }: PetCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hasRecordedViewRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [isPaused, setIsPaused] = useState(false);
 
   const videoMedia = useMemo(
@@ -20,8 +24,50 @@ export default function ViewPort({ item }: PetCardProps) {
   );
 
   const videoUrl = videoMedia?.url ?? null;
+  const mediaId = videoMedia?.id ?? null;
   const caption = videoMedia?.caption ?? null;
   const shelterName = item.shelter?.shelter_name ?? "Unknown shelter";
+
+  const recordView = useCallback(async () => {
+    if (!mediaId || hasRecordedViewRef.current) return;
+
+    hasRecordedViewRef.current = true;
+
+    try {
+      const res = await fetch("/api/views", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mediaId,
+          sessionId: getViewSessionId(),
+        }),
+      });
+
+      if (!res.ok) {
+        const errorBody = await res.json().catch(() => null);
+        console.error("Failed to record view:", res.status, errorBody);
+      }
+    } catch (error) {
+      console.error("Failed to record view", error);
+    }
+  }, [mediaId]);
+
+  const clearViewTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const startViewTimer = useCallback(() => {
+    if (!mediaId || hasRecordedViewRef.current) return;
+    clearViewTimer();
+    timerRef.current = setTimeout(() => {
+      void recordView();
+    }, 3000);
+  }, [mediaId, clearViewTimer, recordView]);
 
   async function togglePlay() {
     const video = videoRef.current;
@@ -41,8 +87,41 @@ export default function ViewPort({ item }: PetCardProps) {
     setIsPaused(true);
   }
 
+  useEffect(() => {
+    hasRecordedViewRef.current = false;
+    clearViewTimer();
+  }, [mediaId, clearViewTimer]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !mediaId) return;
+
+    function handlePlay() {
+      setIsPaused(false);
+      startViewTimer();
+    }
+
+    function handlePause() {
+      setIsPaused(true);
+      clearViewTimer();
+    }
+
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+
+    if (!video.paused) {
+      startViewTimer();
+    }
+
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      clearViewTimer();
+    };
+  }, [mediaId, startViewTimer, clearViewTimer]);
+
   return (
-    <div className="relative w-full h-full overflow-hidden bg-black">
+    <div className="relative h-full w-full overflow-hidden bg-black">
       {videoUrl ? (
         <video
           ref={videoRef}

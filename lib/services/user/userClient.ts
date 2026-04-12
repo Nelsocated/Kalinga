@@ -1,4 +1,4 @@
-import type { UserUpdatePayload } from "./usersService";
+import type { UserUpdatePayload } from "@/lib/types/users";
 import type { Users } from "@/lib/types/users";
 
 type ApiResponse<T> = {
