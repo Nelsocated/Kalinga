@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Input from "../ui/Input";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
 import Button from "../ui/Button";
 
@@ -370,7 +371,7 @@ export default function ComposeView({
           <span className="text-description font-semibold text-black">
             Subject:
           </span>
-          <input
+          <Input
             value={subject}
             readOnly={mode === "reply"}
             onChange={(e) => setSubject(e.target.value)}

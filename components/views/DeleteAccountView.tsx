@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "../ui/Button";
+import Input from "../ui/Input";
 
 export default function DeleteAccountView() {
   const router = useRouter();
@@ -93,7 +94,7 @@ export default function DeleteAccountView() {
                 <label className="mb-2 block text-description font-medium">
                   Confirmation
                 </label>
-                <input
+                <Input
                   type="text"
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
