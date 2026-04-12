@@ -191,18 +191,16 @@ class ShelterService {
   }
 
   async getShelterIdByOwnerId(ownerId: string): Promise<string | null> {
-    const supabase = await this.getSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("shelter")
       .select("id")
-      .eq("owner_id", ownerId)
-      .limit(1)
-      .maybeSingle();
+      .eq("owner_id", ownerId) // ← was user_id
+      .single();
 
-    if (error || !data) return null;
-
-    return data.id;
+    if (error) return null;
+    return data?.id ?? null;
   }
 
   async getShelterPetProps(id: string): Promise<ShelterProfileUI | null> {
@@ -299,6 +297,7 @@ class ShelterService {
       status: 200,
     };
   }
+
   async updateMyShelterProfile(
     payload: ShelterUpdatePayload,
   ): Promise<ShelterServiceResult> {
@@ -400,8 +399,6 @@ class ShelterService {
         status: 400,
       };
     }
-
-    return { ok: true, data: data as ShelterProfile, status: 200 };
 
     return { ok: true, data: data as ShelterProfile, status: 200 };
   }

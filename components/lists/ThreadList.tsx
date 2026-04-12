@@ -1,19 +1,16 @@
-import Image from "next/image";
-import type { PersonCard, MessageThread } from "@/lib/types/messages";
-import { ListSkeleton } from "@/app/site/messages/loading";
+"use client";
 
-type ThreadWithMeta = MessageThread & {
-  adoption_status: string | null;
-  last_message_preview: string | null;
-  unread_count: number;
-  other_party: PersonCard | null;
-};
+import Image from "next/image";
+import type { ThreadWithMeta } from "@/lib/types/messages";
+import { ListSkeleton } from "@/app/site/messages/loading";
+import type { PetStatusFull } from "@/lib/types/adoptionRequests";
 
 type Props = {
   threads: ThreadWithMeta[];
   selectedThreadId: string | null;
   loading: boolean;
   onSelectThread: (threadId: string) => void;
+  withStatus?: boolean;
 };
 
 export default function ThreadList({
@@ -21,6 +18,7 @@ export default function ThreadList({
   selectedThreadId,
   loading,
   onSelectThread,
+  withStatus = false,
 }: Props) {
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -36,23 +34,34 @@ export default function ThreadList({
             No messages yet.
           </div>
         ) : (
-          <div className="space-y-2 p-3">
+          <div className="space-y-2 px-1 py-3">
             {threads.map((thread) => {
               const isActive = selectedThreadId === thread.id;
               const otherPartyName = thread.other_party?.name || "Shelter";
               const otherPartyImage = thread.other_party?.image || null;
+              const status = withStatus
+                ? (thread.adoption_status as PetStatusFull | null)
+                : null;
 
               return (
                 <button
                   key={thread.id}
                   type="button"
                   onClick={() => onSelectThread(thread.id)}
-                  className={`w-full rounded-[15px] border px-4 py-2 text-left transition ${
+                  className={`relative w-full rounded-[15px] border py-2 pl-5 pr-4 text-left transition ${
                     isActive
                       ? "border bg-background"
                       : "border-neutral-200 bg-white hover:bg-neutral-50"
                   }`}
                 >
+                  {withStatus && (
+                    <div
+                      className={`absolute left-0 top-0 h-full w-2 rounded-l-[15px] ${getStatusColor(
+                        status,
+                      )}`}
+                    />
+                  )}
+
                   <div className="flex items-start gap-2">
                     <Avatar name={otherPartyName} image={otherPartyImage} />
 
@@ -68,11 +77,6 @@ export default function ThreadList({
                         </div>
 
                         <div className="flex flex-col items-end gap-1">
-                          {thread.unread_count > 0 ? (
-                            <span className="rounded-full bg-primary px-2 text-small font-bold text-black">
-                              {thread.unread_count}
-                            </span>
-                          ) : null}
                           <span className="text-small text-neutral-500">
                             {formatShortDate(thread.last_message_at)}
                           </span>
@@ -112,6 +116,27 @@ function Avatar({ name, image }: { name: string; image: string | null }) {
       {name.slice(0, 1).toUpperCase()}
     </div>
   );
+}
+
+function getStatusColor(status: PetStatusFull | null) {
+  switch (status) {
+    case "pending":
+      return "submitted";
+    case "under_review":
+      return "bg-under_review";
+    case "contacting_applicant":
+      return "bg-contacting";
+    case "approved":
+      return "bg-approved";
+    case "not_approved":
+      return "bg-reject";
+    case "adopted":
+      return "bg-adopted";
+    case "withdrawn":
+      return "bg-withdrawn";
+    default:
+      return "bg-transparent";
+  }
 }
 
 export function formatShortDate(value: string) {

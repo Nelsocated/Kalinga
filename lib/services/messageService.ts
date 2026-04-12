@@ -9,6 +9,7 @@ import type {
   ThreadWithMeta,
   ShelterMailboxFilter,
 } from "@/lib/types/messages";
+import { getAdoptionMetaMap } from "./adoption/adoptionService";
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
@@ -38,7 +39,7 @@ async function getOwnedShelterIds(authUserId: string): Promise<string[]> {
   const { data, error } = await supabase
     .from("shelter")
     .select("id")
-    .eq("user_id", authUserId);
+    .eq("owner_id", authUserId); // ← was user_id
 
   if (error) throw new Error(error.message);
 
@@ -85,10 +86,6 @@ export async function createMessageThread(
     created_at: now,
     updated_at: now,
     last_message_at: now,
-    user_archived: false,
-    shelter_archived: false,
-    user_deleted: false,
-    shelter_deleted: false,
   };
 
   const { data: thread, error: threadError } = await supabase
@@ -153,10 +150,6 @@ export async function replyToThread(
 
   if (thread.user_deleted && input.senderSide === "user") {
     throw new Error("This thread is deleted for the user");
-  }
-
-  if (thread.shelter_deleted && input.senderSide === "shelter") {
-    throw new Error("This thread is deleted for the shelter");
   }
 
   const now = new Date().toISOString();
@@ -274,37 +267,6 @@ export async function getThreadMessages(threadId: string): Promise<Message[]> {
   return (data ?? []) as Message[];
 }
 
-async function getUnreadCountMap(
-  threadIds: string[],
-  side: "user" | "shelter",
-): Promise<Map<string, number>> {
-  const supabase = await createServerSupabase();
-
-  if (threadIds.length === 0) return new Map();
-
-  const unreadColumn = side === "user" ? "read_by_user" : "read_by_shelter";
-  const senderNullColumn =
-    side === "user" ? "sender_user_id" : "sender_shelter_id";
-
-  const { data, error } = await supabase
-    .from("messages")
-    .select(`thread_id`)
-    .in("thread_id", threadIds)
-    .eq(unreadColumn, false)
-    .not(senderNullColumn, "is", null);
-
-  if (error) throw new Error(error.message);
-
-  const map = new Map<string, number>();
-
-  for (const row of data ?? []) {
-    const threadId = row.thread_id as string;
-    map.set(threadId, (map.get(threadId) ?? 0) + 1);
-  }
-
-  return map;
-}
-
 async function getLatestPreviewMap(
   threadIds: string[],
 ): Promise<Map<string, string | null>> {
@@ -362,9 +324,7 @@ export async function getUserInboxThreads(
   const supabase = await createServerSupabase();
   const authUserId = await getAuthUserId();
 
-  if (authUserId !== userId) {
-    throw new Error("Unauthorized");
-  }
+  if (authUserId !== userId) throw new Error("Unauthorized");
 
   const { data, error } = await supabase
     .from("message_threads")
@@ -381,7 +341,6 @@ export async function getUserInboxThreads(
     .map((t) => t.adoption_request_id)
     .filter((id): id is string => Boolean(id));
 
-  const unreadMap = await getUnreadCountMap(threadIds, "user");
   const previewMap = await getLatestPreviewMap(threadIds);
   const adoptionStatusMap = await getAdoptionStatusMap(adoptionRequestIds);
 
@@ -391,7 +350,8 @@ export async function getUserInboxThreads(
       ? (adoptionStatusMap.get(thread.adoption_request_id) ?? null)
       : null,
     last_message_preview: previewMap.get(thread.id) ?? null,
-    unread_count: unreadMap.get(thread.id) ?? 0,
+    unread_count: 0,
+    other_party: null,
   }));
 }
 
@@ -403,30 +363,30 @@ export async function getShelterInboxThreads(
   const authUserId = await getAuthUserId();
   const shelterIds = await getOwnedShelterIds(authUserId);
 
-  if (!shelterIds.includes(shelterId)) {
-    throw new Error("Unauthorized");
-  }
+  if (!shelterIds.includes(shelterId)) throw new Error("Unauthorized");
 
   const { data, error } = await supabase
     .from("message_threads")
     .select("*")
     .eq("shelter_id", shelterId)
-    .eq("shelter_deleted", false)
     .order("last_message_at", { ascending: false });
 
   if (error) throw new Error(error.message);
 
   const threads = (data ?? []) as MessageThread[];
+
   const adoptionRequestIds = threads
     .map((t) => t.adoption_request_id)
     .filter((id): id is string => Boolean(id));
 
-  const adoptionStatusMap = await getAdoptionStatusMap(adoptionRequestIds);
+  const adoptionMetaMap = await getAdoptionMetaMap(adoptionRequestIds);
 
   const filteredThreads = threads.filter((thread) => {
-    const status = thread.adoption_request_id
-      ? (adoptionStatusMap.get(thread.adoption_request_id) ?? null)
+    const adoptionMeta = thread.adoption_request_id
+      ? adoptionMetaMap.get(thread.adoption_request_id)
       : null;
+
+    const status = adoptionMeta?.status ?? null;
 
     if (filter === "inbox") return true;
     if (filter === "contacting_applicant")
@@ -440,17 +400,22 @@ export async function getShelterInboxThreads(
   });
 
   const filteredThreadIds = filteredThreads.map((t) => t.id);
-  const unreadMap = await getUnreadCountMap(filteredThreadIds, "shelter");
   const previewMap = await getLatestPreviewMap(filteredThreadIds);
 
-  return filteredThreads.map((thread) => ({
-    ...thread,
-    adoption_status: thread.adoption_request_id
-      ? (adoptionStatusMap.get(thread.adoption_request_id) ?? null)
-      : null,
-    last_message_preview: previewMap.get(thread.id) ?? null,
-    unread_count: unreadMap.get(thread.id) ?? 0,
-  }));
+  return filteredThreads.map((thread) => {
+    const adoptionMeta = thread.adoption_request_id
+      ? adoptionMetaMap.get(thread.adoption_request_id)
+      : null;
+
+    return {
+      ...thread,
+      pet_id: adoptionMeta?.pet_id ?? null,
+      adoption_status: adoptionMeta?.status ?? null,
+      last_message_preview: previewMap.get(thread.id) ?? null,
+      unread_count: 0,
+      other_party: null,
+    };
+  });
 }
 
 export async function markThreadAsReadForUser(threadId: string): Promise<void> {
@@ -491,129 +456,6 @@ export async function markThreadAsReadByUser(threadId: string) {
   if (error) throw new Error(error.message);
 }
 
-export async function markThreadAsReadForShelter(
-  threadId: string,
-): Promise<void> {
-  const supabase = await createServerSupabase();
-  const authUserId = await getAuthUserId();
-  const shelterIds = await getOwnedShelterIds(authUserId);
-
-  const { data: thread, error: threadError } = await supabase
-    .from("message_threads")
-    .select("id, shelter_id")
-    .eq("id", threadId)
-    .single();
-
-  if (threadError) throw new Error(threadError.message);
-  if (!thread || !shelterIds.includes(thread.shelter_id as string)) {
-    throw new Error("Unauthorized");
-  }
-
-  const { error } = await supabase
-    .from("messages")
-    .update({ read_by_shelter: true })
-    .eq("thread_id", threadId)
-    .neq("sender_shelter_id", thread.shelter_id);
-
-  if (error) throw new Error(error.message);
-}
-
-export async function archiveThreadForUser(threadId: string): Promise<void> {
-  const supabase = await createServerSupabase();
-  const authUserId = await getAuthUserId();
-
-  const { data: thread, error: threadError } = await supabase
-    .from("message_threads")
-    .select("id, user_id")
-    .eq("id", threadId)
-    .single();
-
-  if (threadError) throw new Error(threadError.message);
-  if (!thread || thread.user_id !== authUserId) {
-    throw new Error("Unauthorized");
-  }
-
-  const { error } = await supabase
-    .from("message_threads")
-    .update({ user_archived: true })
-    .eq("id", threadId);
-
-  if (error) throw new Error(error.message);
-}
-
-export async function archiveThreadForShelter(threadId: string): Promise<void> {
-  const supabase = await createServerSupabase();
-  const authUserId = await getAuthUserId();
-  const shelterIds = await getOwnedShelterIds(authUserId);
-
-  const { data: thread, error: threadError } = await supabase
-    .from("message_threads")
-    .select("id, shelter_id")
-    .eq("id", threadId)
-    .single();
-
-  if (threadError) throw new Error(threadError.message);
-  if (!thread || !shelterIds.includes(thread.shelter_id as string)) {
-    throw new Error("Unauthorized");
-  }
-
-  const { error } = await supabase
-    .from("message_threads")
-    .update({ shelter_archived: true })
-    .eq("id", threadId);
-
-  if (error) throw new Error(error.message);
-}
-
-export async function softDeleteThreadForUser(threadId: string): Promise<void> {
-  const supabase = await createServerSupabase();
-  const authUserId = await getAuthUserId();
-
-  const { data: thread, error: threadError } = await supabase
-    .from("message_threads")
-    .select("id, user_id")
-    .eq("id", threadId)
-    .single();
-
-  if (threadError) throw new Error(threadError.message);
-  if (!thread || thread.user_id !== authUserId) {
-    throw new Error("Unauthorized");
-  }
-
-  const { error } = await supabase
-    .from("message_threads")
-    .update({ user_deleted: true })
-    .eq("id", threadId);
-
-  if (error) throw new Error(error.message);
-}
-
-export async function softDeleteThreadForShelter(
-  threadId: string,
-): Promise<void> {
-  const supabase = await createServerSupabase();
-  const authUserId = await getAuthUserId();
-  const shelterIds = await getOwnedShelterIds(authUserId);
-
-  const { data: thread, error: threadError } = await supabase
-    .from("message_threads")
-    .select("id, shelter_id")
-    .eq("id", threadId)
-    .single();
-
-  if (threadError) throw new Error(threadError.message);
-  if (!thread || !shelterIds.includes(thread.shelter_id as string)) {
-    throw new Error("Unauthorized");
-  }
-
-  const { error } = await supabase
-    .from("message_threads")
-    .update({ shelter_deleted: true })
-    .eq("id", threadId);
-
-  if (error) throw new Error(error.message);
-}
-
 export async function safeCreateMessageThread(input: CreateMessageThreadInput) {
   try {
     return await createMessageThread(input);
@@ -633,29 +475,57 @@ export async function safeReplyToThread(input: ReplyToThreadInput) {
 export async function getUserSentMessages(userId: string) {
   const supabase = await createServerSupabase();
 
-  const { data, error } = await supabase
+  const { data: messages, error } = await supabase
     .from("messages")
-    .select(
-      `
-      id,
-      body,
-      created_at,
-      message_threads (
-        subject,
-        shelter_id
-      )
-    `,
-    )
+    .select("id, body, created_at, thread_id")
     .eq("sender_user_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
+  if (!messages?.length) return [];
 
-  return (data ?? []).map((row: any) => ({
-    id: row.id,
-    body: row.body,
-    created_at: row.created_at,
-    subject: row.message_threads?.subject ?? "",
-    shelter_id: row.message_threads?.shelter_id,
-  }));
+  const threadIds = [...new Set(messages.map((m) => m.thread_id as string))];
+
+  const { data: threads, error: threadError } = await supabase
+    .from("message_threads")
+    .select("id, subject, shelter_id")
+    .in("id", threadIds);
+
+  if (threadError) throw new Error(threadError.message);
+
+  const shelterIds = [
+    ...new Set(
+      (threads ?? []).map((t) => t.shelter_id as string).filter(Boolean),
+    ),
+  ];
+
+  const { data: shelters, error: shelterError } = await supabase
+    .from("shelter")
+    .select("id, shelter_name, logo_url")
+    .in("id", shelterIds.length > 0 ? shelterIds : ["__none__"]);
+
+  if (shelterError) throw new Error(shelterError.message);
+
+  const threadMap = new Map((threads ?? []).map((t) => [t.id, t]));
+  const shelterMap = new Map((shelters ?? []).map((s) => [s.id, s]));
+
+  return messages.map((msg) => {
+    const thread = threadMap.get(msg.thread_id as string);
+    const shelter = thread?.shelter_id
+      ? shelterMap.get(thread.shelter_id)
+      : null;
+
+    return {
+      id: msg.id as string,
+      body: msg.body as string,
+      created_at: msg.created_at as string,
+      subject: thread?.subject ?? null,
+      receiver: {
+        id: shelter?.id ?? thread?.shelter_id ?? "",
+        name: shelter?.shelter_name ?? "Unknown Shelter",
+        image: shelter?.logo_url ?? null,
+        subtitle: null,
+      },
+    };
+  });
 }

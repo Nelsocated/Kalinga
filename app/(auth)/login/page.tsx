@@ -64,13 +64,15 @@ function LoginPageContent() {
                 priority
               />
               <h1 className="mt-4 text-center text-2xl font-medium text-black sm:text-3xl">
-                Will you help us find
-                <br />
-                our fur-ever homes?
+                Give Care. Give Love.
+                <br />A home for every paw.
               </h1>
             </div>
 
             <div className="mx-auto w-full max-w-md rounded-[15px] border-2 bg-white p-5 shadow-sm sm:p-6">
+              <div className="flex justify-center font-bold text-subtitle gap-1">
+                Log into <span className="text-primary">Kalinga</span>
+              </div>
               <form onSubmit={onSubmit} className="space-y-4">
                 <Input
                   label="Email"
@@ -96,14 +98,21 @@ function LoginPageContent() {
                   <p className="text-sm text-red-600">{formError}</p>
                 ) : null}
 
-                <Button type="submit" loading={loading} className="w-full">
+                <Button
+                  type="submit"
+                  loading={loading}
+                  className="w-full flex justify-center"
+                >
                   Log in
                 </Button>
               </form>
 
               <hr className="mx-auto my-3 w-full border-black/50" />
 
-              <Button onClick={() => router.push("/signup")} className="w-full">
+              <Button
+                onClick={() => router.push("/signup")}
+                className="w-full flex justify-center"
+              >
                 Sign up
               </Button>
 

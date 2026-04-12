@@ -111,6 +111,8 @@ export default function PhotoView({ name, photo_url, pet_media = [] }: Props) {
                   <Image
                     src={photo.url}
                     alt={photo.caption ?? "Pet photo"}
+                    width={500}
+                    height={500}
                     className="aspect-3/4 w-full object-cover shadow-sm"
                   />
                 </button>

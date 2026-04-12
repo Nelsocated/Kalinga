@@ -5,6 +5,7 @@ import { getUserInboxThreads } from "@/lib/services/messageService";
 import { getUserById } from "@/lib/services/user/usersService";
 import { fetchShelterById } from "@/lib/services/shelter/shelterService";
 import { getLikedIdsByUser } from "@/lib/services/likeService";
+import type { ThreadWithMeta } from "@/lib/types/messages";
 
 type PersonCard = {
   id: string;
@@ -18,31 +19,6 @@ export type ShelterOption = {
   name: string;
   location: string | null;
   logo_url: string | null;
-};
-
-type MessageThreadType = "general" | "adoption";
-
-type MessageThread = {
-  id: string;
-  user_id: string;
-  shelter_id: string;
-  adoption_request_id: string | null;
-  thread_type: MessageThreadType;
-  subject: string;
-  created_at: string;
-  updated_at: string;
-  last_message_at: string;
-  user_archived: boolean;
-  shelter_archived: boolean;
-  user_deleted: boolean;
-  shelter_deleted: boolean;
-};
-
-type ThreadWithMeta = MessageThread & {
-  adoption_status: string | null;
-  last_message_preview: string | null;
-  unread_count: number;
-  other_party: PersonCard;
 };
 
 function isShelterOption(

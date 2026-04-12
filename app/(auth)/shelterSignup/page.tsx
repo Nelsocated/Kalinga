@@ -239,9 +239,8 @@ function ShelterSignupPageContent() {
                   className="h-auto w-45 sm:w-55 lg:w-65 xl:w-75"
                 />
                 <h1 className="mt-4 text-center text-xl font-medium text-black sm:text-2xl lg:text-3xl">
-                  Will you help us find
-                  <br />
-                  our fur-ever homes?
+                  Give Care. Give Love.
+                  <br />A home for every paw.
                 </h1>
               </div>
             </div>
@@ -358,18 +357,26 @@ function ShelterSignupPageContent() {
                     <Button
                       type="button"
                       onClick={goBack}
-                      className="w-full border-black/20 bg-white"
+                      className="w-full border-black/20 bg-white flex justify-center"
                     >
                       Back
                     </Button>
                   ) : null}
 
                   {step < 3 ? (
-                    <Button type="button" onClick={goNext} className="w-full">
+                    <Button
+                      type="button"
+                      onClick={goNext}
+                      className="w-full flex justify-center"
+                    >
                       Next
                     </Button>
                   ) : (
-                    <Button type="submit" loading={loading} className="w-full">
+                    <Button
+                      type="submit"
+                      loading={loading}
+                      className="w-full flex justify-center"
+                    >
                       Submit Application
                     </Button>
                   )}
@@ -381,7 +388,7 @@ function ShelterSignupPageContent() {
               {isLoggedIn ? (
                 <Button
                   onClick={() => router.push("/site/home")}
-                  className="w-full"
+                  className="w-full flex justify-center"
                 >
                   Back to Home
                 </Button>
@@ -392,7 +399,7 @@ function ShelterSignupPageContent() {
                       `/login?next=${encodeURIComponent("/shelterSignup?step=2")}`,
                     )
                   }
-                  className="w-full"
+                  className="w-full flex justify-center"
                 >
                   Log in Instead
                 </Button>
@@ -415,7 +422,7 @@ function ShelterSignupPageContent() {
             </p>
             <Button
               onClick={() => router.push("/site/home")}
-              className="mt-5 w-full"
+              className="mt-5 w-full flex justify-center"
             >
               Continue to Home
             </Button>

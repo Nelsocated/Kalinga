@@ -43,6 +43,26 @@ export class ClientAuth {
         return `/site/profiles/user/${user.id}`;
     }
   }
+
+  static getNotifRouteByRole(user: AuthUser): string {
+    switch (user.role) {
+      case "shelter":
+        return "/shelter/notification";
+      case "user":
+      default:
+        return `/site/notification`;
+    }
+  }
+
+  static getMsgRouteByRole(user: AuthUser): string {
+    switch (user.role) {
+      case "shelter":
+        return "/shelter/messages";
+      case "user":
+      default:
+        return `/site/messages`;
+    }
+  }
 }
 
 export async function getAuthUser(): Promise<AuthUser | null> {
@@ -51,4 +71,12 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 
 export function getProfileRouteByRole(user: AuthUser) {
   return ClientAuth.getProfileRouteByRole(user);
+}
+
+export function getNotifRouteByRole(user: AuthUser): string {
+  return ClientAuth.getNotifRouteByRole(user);
+}
+
+export function getMsgRouteByRole(user: AuthUser): string {
+  return ClientAuth.getMsgRouteByRole(user);
 }

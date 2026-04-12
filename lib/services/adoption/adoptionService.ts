@@ -7,6 +7,9 @@ import type {
   PetRow,
   PetStatus,
   CreateAdoptionRequestInput,
+  answer,
+  AdoptionMeta,
+  PetStatusFull,
 } from "@/lib/types/adoptionRequests";
 
 class AdoptionService {
@@ -154,6 +157,68 @@ class AdoptionService {
 
     return count ?? 0;
   }
+
+  async getAdoptionAnswerById(id: string): Promise<answer> {
+    const supabase = await createServerSupabase();
+
+    const { data, error } = await supabase
+      .from("adoption_requests")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data as answer;
+  }
+
+  async getAdoptionMetaMap(
+    adoptionRequestIds: string[],
+  ): Promise<Map<string, AdoptionMeta>> {
+    if (adoptionRequestIds.length === 0) return new Map();
+
+    const supabase = await createServerSupabase();
+
+    const { data, error } = await supabase
+      .from("adoption_requests")
+      .select("id, pet_id, status")
+      .in("id", adoptionRequestIds);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return new Map(
+      (data ?? []).map((row) => [
+        row.id,
+        {
+          pet_id: row.pet_id ?? null,
+          status: row.status ?? null,
+        },
+      ]),
+    );
+  }
+
+  async getPetStatus(petId: string): Promise<PetStatusFull> {
+    if (!petId?.trim()) return null;
+
+    const supabase = await createServerSupabase();
+
+    const { data, error } = await supabase
+      .from("adoption_requests")
+      .select("status")
+      .eq("id", petId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[getPetStatus] error:", error);
+      throw new Error(error.message || "Failed to fetch pet status");
+    }
+
+    return (data?.status as PetStatusFull) ?? null;
+  }
 }
 
 export const adoptionService = new AdoptionService();
@@ -179,4 +244,18 @@ export async function getShelterAdoptionNotifications(shelterId: string) {
 
 export async function getAdoptedCountByPetIds(petIds: string[]) {
   return adoptionService.getAdoptedCountByPetIds(petIds);
+}
+
+export async function getAdoptionAnswerById(id: string): Promise<answer> {
+  return adoptionService.getAdoptionAnswerById(id);
+}
+
+export async function getAdoptionMetaMap(
+  adoptionRequestIds: string[],
+): Promise<Map<string, AdoptionMeta>> {
+  return adoptionService.getAdoptionMetaMap(adoptionRequestIds);
+}
+
+export async function getPetStatus(petId: string): Promise<PetStatusFull> {
+  return adoptionService.getPetStatus(petId);
 }

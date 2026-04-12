@@ -19,6 +19,8 @@ import messages_icon from "@/public/icons/Messages.svg";
 import {
   getAuthUser,
   getProfileRouteByRole,
+  getNotifRouteByRole,
+  getMsgRouteByRole,
   type AuthUser,
 } from "@/lib/utils/clientAuth";
 
@@ -42,6 +44,18 @@ export default function Navbar() {
     if (!authUser) return;
 
     router.push(getProfileRouteByRole(authUser));
+  }
+
+  function handleNotifClick() {
+    if (!authUser) return;
+
+    router.push(getNotifRouteByRole(authUser));
+  }
+
+  function handleMsgClick() {
+    if (!authUser) return;
+
+    router.push(getMsgRouteByRole(authUser));
   }
 
   return (
@@ -100,17 +114,13 @@ export default function Navbar() {
         <Button
           type="button"
           className={buttonStyle}
-          onClick={() => router.push("/site/notification")}
+          onClick={handleNotifClick}
         >
           <Image src={notif_icon} alt="notif-icon" width={25} height={25} />
           <span>Notification</span>
         </Button>
 
-        <Button
-          type="button"
-          className={buttonStyle}
-          onClick={() => router.push("/site/messages")}
-        >
+        <Button type="button" className={buttonStyle} onClick={handleMsgClick}>
           <Image
             src={messages_icon}
             alt="messages-icon"

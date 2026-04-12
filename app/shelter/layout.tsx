@@ -10,7 +10,7 @@ export default async function ShelterLayout({
   try {
     await requireShelter();
   } catch {
-    redirect("/");
+    redirect("/site/home");
   }
 
   return (

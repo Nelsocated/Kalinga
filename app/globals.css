@@ -8,13 +8,13 @@ body {
 @theme {
   --color-primary: #f3be0f;
   --color-background: #f6f3ee;
+  --color-innerbg: #fffdf7;
   --color-text: black;
   --color-male: #6495ed;
   --color-female: #f8c8dc;
   --color-border: #f3be0f;
 
-  --font-sans:
-    "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --color-submitted: black;
   --color-under_review: #1b48a1;

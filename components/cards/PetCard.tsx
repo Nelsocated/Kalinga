@@ -18,6 +18,7 @@ export type PetCardProps = {
   className?: string;
   year_inShelter?: number;
   title?: string | null;
+  resize?: boolean;
 };
 
 export default function PetCard({
@@ -29,6 +30,7 @@ export default function PetCard({
   shelterLogo,
   year_inShelter,
   title,
+  resize = false,
   className = "",
 }: PetCardProps) {
   const src = (imageUrl ?? "").trim() || DEFAULT_AVATAR_URL;
@@ -42,7 +44,33 @@ export default function PetCard({
 
   const topLabel = title?.trim() || yearLabel;
 
-  const cardContent = (
+  const cardContent = resize ? (
+    <>
+      {topLabel ? (
+        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 bg-white px-4 py-1 text-xs leading-none font-bold text-primary shadow-sm">
+          {topLabel}
+        </div>
+      ) : null}
+
+      <div>
+        <div className="relative h-30 overflow-hidden rounded-[15px]">
+          <Image
+            src={src}
+            alt={`${petName} photo`}
+            fill
+            className="object-cover"
+          />
+        </div>
+      </div>
+
+      <div className="ml-1 px-2 py-2">
+        <div className="flex items-center">
+          <div className="text-[20px] leading-none font-bold">{petName}</div>
+          {getSexIcon(sex, 15)}
+        </div>
+      </div>
+    </>
+  ) : (
     <>
       {topLabel ? (
         <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 bg-white px-4 py-1 text-xs leading-none font-bold text-primary shadow-sm">
@@ -61,7 +89,7 @@ export default function PetCard({
         </div>
       </div>
 
-      <div className="ml-1 p-2 pt-1">
+      <div className="ml-1 px-2">
         <div className="flex items-center">
           <div className="text-[20px] leading-none font-bold">{petName}</div>
           {getSexIcon(sex, 20)}
@@ -82,8 +110,9 @@ export default function PetCard({
   );
 
   const sharedClassName = [
-    "relative block w-50 overflow-visible rounded-[15px] border bg-primary",
+    "relative block overflow-visible rounded-[15px] border-3 bg-primary",
     href ? "cursor-pointer" : "",
+    resize ? "w-40" : "w-50",
     className,
   ].join(" ");
 

@@ -3,61 +3,76 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { DEFAULT_AVATAR_URL } from "@/lib/constants/assests";
+import Button from "../ui/Button";
 
-type Shelter = {
+type RecipientOption = {
   id: string;
-  logo_url: string | null;
   name: string;
-  location: string | null;
+  image: string | null;
+  subtitle?: string | null;
+  type: "user" | "shelter";
 };
 
 type Props = {
   isModal?: boolean;
   isOpen?: boolean;
-  shelters: Shelter[];
+  recipients: RecipientOption[];
   mode: "new" | "reply";
-  lockedShelter?: Shelter | null;
+  adoptionRequestId?: string;
+  lockedRecipient?: RecipientOption | null;
   lockedSubject?: string;
   lockedThreadId?: string;
+  headerTitle?: string;
   onClose?: () => void;
   onCreated?: (threadId: string) => void;
   userId: string;
+  senderSide: "user" | "shelter";
+  senderShelterId?: string;
 };
 
 export default function ComposeView({
   isModal = false,
   isOpen = true,
-  shelters,
+  recipients,
   mode,
-  lockedShelter,
+  lockedRecipient,
   lockedSubject = "",
   lockedThreadId,
+  headerTitle,
   onClose,
   onCreated,
   userId,
+  senderSide,
+  senderShelterId,
+  adoptionRequestId,
 }: Props) {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [shelterId, setShelterId] = useState("");
+  const [recipientId, setRecipientId] = useState("");
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const selectedShelter = shelters.find((s) => s.id === shelterId);
+  const selectedRecipient =
+    recipients.find((r) => r.id === recipientId) ?? null;
+
+  const currentToRecipient =
+    mode === "reply" ? lockedRecipient : (lockedRecipient ?? selectedRecipient);
 
   useEffect(() => {
     if (mode === "reply") {
       setSubject(lockedSubject);
-      setShelterId(lockedShelter?.id || "");
+      setRecipientId(lockedRecipient?.id || "");
     } else {
-      setSubject("");
-      setShelterId("");
+      setSubject(lockedSubject || "");
+      setRecipientId(lockedRecipient?.id || "");
     }
 
     setBody("");
     setError("");
-  }, [mode, lockedSubject, lockedShelter]);
+    setOpen(false);
+  }, [mode, lockedSubject, lockedRecipient]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -76,8 +91,12 @@ export default function ComposeView({
   async function send() {
     setError("");
 
-    if (mode === "new" && !shelterId) {
-      setError("Please select a shelter.");
+    const currentRecipient =
+      lockedRecipient ??
+      (mode === "reply" ? lockedRecipient : selectedRecipient);
+
+    if (!currentRecipient) {
+      setError("Please select a recipient.");
       return;
     }
 
@@ -95,12 +114,14 @@ export default function ComposeView({
 
     try {
       if (mode === "reply") {
-        const res = await fetch("/api/messages/user/reply", {
+        const res = await fetch("/api/messages/reply", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             threadId: lockedThreadId,
             body,
+            senderSide,
+            senderShelterId: senderSide === "shelter" ? senderShelterId : null,
           }),
         });
 
@@ -114,29 +135,75 @@ export default function ComposeView({
           onCreated?.(lockedThreadId);
         }
       } else {
-        const res = await fetch("/api/messages/user/compose", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        let payload:
+          | {
+              senderSide: "user";
+              userId: string;
+              shelterId: string;
+              subject: string;
+              body: string;
+            }
+          | {
+              senderSide: "shelter";
+              userId: string;
+              shelterId: string;
+              subject: string;
+              body: string;
+            };
+
+        if (senderSide === "user" && currentRecipient.type === "shelter") {
+          payload = {
+            senderSide: "user",
             userId,
-            shelterId,
-            subject,
-            body,
-          }),
-        });
+            shelterId: currentRecipient.id,
+            subject: subject.trim(),
+            body: body.trim(),
+          };
+        } else if (
+          senderSide === "shelter" &&
+          currentRecipient.type === "user"
+        ) {
+          if (!senderShelterId) {
+            throw new Error("Missing sender shelter id.");
+          }
 
-        const data = await res.json();
+          const isAdoptionThread =
+            senderSide === "shelter" && Boolean(adoptionRequestId);
 
-        if (!res.ok) {
-          throw new Error(data.error || "Failed to send message");
+          payload = {
+            senderSide: "shelter",
+            userId: currentRecipient.id,
+            shelterId: senderShelterId,
+            subject: subject.trim(),
+            body: body.trim(),
+            ...(isAdoptionThread && {
+              threadType: "adoption",
+              adoptionRequestId,
+            }),
+          };
+        } else {
+          throw new Error("Invalid recipient for this sender side.");
         }
 
-        onCreated?.(data.data.thread.id);
+        const res = await fetch("/api/messages/compose", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+          throw new Error(data?.error || "Failed to send message");
+        }
+
+        onCreated?.(data?.data?.thread?.id);
       }
 
       setBody("");
-      setSubject("");
-      setShelterId("");
+      setSubject(mode === "reply" ? lockedSubject : "");
+      setRecipientId(mode === "reply" ? lockedRecipient?.id || "" : "");
+      setOpen(false);
     } catch (error) {
       console.error(error);
       setError(
@@ -151,11 +218,46 @@ export default function ComposeView({
     <div className="flex max-h-175 w-full max-w-xl flex-col overflow-hidden rounded-[15px] border bg-white">
       <div className="bg-primary px-4 py-3">
         <h2 className="text-xl font-extrabold text-black">
-          {mode === "reply" ? "Reply" : "New Message"}
+          {headerTitle
+            ? headerTitle
+            : mode === "reply"
+              ? "Reply"
+              : "New Message"}
         </h2>
       </div>
 
-      {mode !== "reply" ? (
+      {mode === "reply" || lockedRecipient ? (
+        <div className="border-b px-4 py-2">
+          <div className="flex items-center gap-3">
+            <span className="shrink-0 text-description font-semibold text-black">
+              To:
+            </span>
+
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="overflow-hidden rounded-full">
+                <Image
+                  src={currentToRecipient?.image || DEFAULT_AVATAR_URL}
+                  alt={currentToRecipient?.name || "unknown recipient"}
+                  width={28}
+                  height={28}
+                  className="h-7 w-7 object-cover"
+                />
+              </div>
+
+              <div className="min-w-0 leading-tight">
+                <p className="truncate text-description font-semibold text-black">
+                  {currentToRecipient?.name ?? "Unknown"}
+                </p>
+                {currentToRecipient?.subtitle ? (
+                  <p className="truncate text-small text-neutral-500">
+                    {currentToRecipient.subtitle}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
         <div className="border-b px-4 py-3">
           <div className="flex items-center gap-3">
             <span className="shrink-0 text-description font-semibold text-black">
@@ -168,12 +270,12 @@ export default function ComposeView({
                 onClick={() => setOpen((prev) => !prev)}
                 className="flex h-11 w-full items-center justify-between rounded-md border bg-white px-3 text-left text-description text-black"
               >
-                {selectedShelter ? (
+                {selectedRecipient ? (
                   <div className="flex min-w-0 items-center gap-2">
                     <div className="overflow-hidden rounded-full">
                       <Image
-                        src={selectedShelter.logo_url || DEFAULT_AVATAR_URL}
-                        alt={selectedShelter.name || "unknown shelter"}
+                        src={selectedRecipient.image || DEFAULT_AVATAR_URL}
+                        alt={selectedRecipient.name || "unknown recipient"}
                         width={28}
                         height={28}
                         className="h-7 w-7 object-cover"
@@ -181,19 +283,19 @@ export default function ComposeView({
                     </div>
 
                     <div className="min-w-0 leading-tight">
-                      <p className="truncate text-desciption font-semibold text-black">
-                        {selectedShelter.name}
+                      <p className="truncate text-description font-semibold text-black">
+                        {selectedRecipient.name}
                       </p>
-                      {selectedShelter.location ? (
+                      {selectedRecipient.subtitle ? (
                         <p className="truncate text-small text-neutral-500">
-                          {selectedShelter.location}
+                          {selectedRecipient.subtitle}
                         </p>
                       ) : null}
                     </div>
                   </div>
                 ) : (
                   <span className="text-description text-neutral-400">
-                    Select a shelter
+                    Select a recipient
                   </span>
                 )}
 
@@ -204,20 +306,20 @@ export default function ComposeView({
 
               {open ? (
                 <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto scroll-stable rounded-md border bg-white shadow-lg">
-                  {shelters.length === 0 ? (
+                  {recipients.length === 0 ? (
                     <div className="px-3 py-1 text-description text-neutral-500">
-                      No shelters available
+                      No recipients available
                     </div>
                   ) : (
-                    shelters.map((shelter) => {
-                      const isSelected = shelterId === shelter.id;
+                    recipients.map((recipient) => {
+                      const isSelected = recipientId === recipient.id;
 
                       return (
                         <button
-                          key={shelter.id}
+                          key={recipient.id}
                           type="button"
                           onClick={() => {
-                            setShelterId(shelter.id);
+                            setRecipientId(recipient.id);
                             setOpen(false);
                           }}
                           className={`block w-full px-3 py-1 text-left text-description transition hover:bg-neutral-100 ${
@@ -227,8 +329,8 @@ export default function ComposeView({
                           <div className="flex items-center gap-2">
                             <div className="overflow-hidden rounded-full">
                               <Image
-                                src={shelter.logo_url || DEFAULT_AVATAR_URL}
-                                alt={shelter.name}
+                                src={recipient.image || DEFAULT_AVATAR_URL}
+                                alt={recipient.name}
                                 width={28}
                                 height={28}
                                 className="h-7 w-7 object-cover"
@@ -237,11 +339,11 @@ export default function ComposeView({
 
                             <div className="min-w-0 leading-tight">
                               <p className="truncate text-description font-semibold text-black">
-                                {shelter.name}
+                                {recipient.name}
                               </p>
-                              {shelter.location ? (
+                              {recipient.subtitle ? (
                                 <p className="truncate text-small text-neutral-500">
-                                  {shelter.location}
+                                  {recipient.subtitle}
                                 </p>
                               ) : null}
                             </div>
@@ -255,42 +357,11 @@ export default function ComposeView({
             </div>
           </div>
 
-          {error && !shelterId ? (
+          {error && !currentToRecipient ? (
             <p className="mt-2 pl-10 text-small text-red-500">
-              Please select a shelter.
+              Please select a recipient.
             </p>
           ) : null}
-        </div>
-      ) : (
-        <div className="border-b px-4 py-2">
-          <div className="flex items-center gap-3">
-            <span className="shrink-0 text-description font-semibold text-black">
-              To:
-            </span>
-
-            <div className="flex min-w-0 items-center gap-2">
-              <div className="overflow-hidden rounded-full">
-                <Image
-                  src={lockedShelter?.logo_url || DEFAULT_AVATAR_URL}
-                  alt={lockedShelter?.name || "unknown shelter"}
-                  width={28}
-                  height={28}
-                  className="h-7 w-7 object-cover"
-                />
-              </div>
-
-              <div className="min-w-0 leading-tight">
-                <p className="truncate text-description font-semibold text-black">
-                  {lockedShelter?.name}
-                </p>
-                {lockedShelter?.location ? (
-                  <p className="truncate text-small text-neutral-500">
-                    {lockedShelter.location}
-                  </p>
-                ) : null}
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -329,23 +400,23 @@ export default function ComposeView({
 
         <div className="mt-6 flex justify-center gap-2">
           {isModal ? (
-            <button
+            <Button
               type="button"
               onClick={onClose}
               className="rounded-[15px] border px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-neutral-100"
             >
               Cancel
-            </button>
+            </Button>
           ) : null}
 
-          <button
+          <Button
             type="button"
             onClick={send}
             disabled={sending}
             className="rounded-[15px] border bg-background px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-[#FFE27A] disabled:opacity-60"
           >
             {sending ? "Sending..." : "Send"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -362,7 +433,7 @@ export default function ComposeView({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 ">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       {content}
     </div>
   );

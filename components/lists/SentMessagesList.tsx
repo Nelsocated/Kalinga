@@ -15,7 +15,7 @@ export default function SentMessagesList({
 }: Props) {
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="w-full border-b-2 px-5 text-center text-subtitle font-semibold text-black">
+      <div className="w-full border-b-2 px-5 text-center text-title font-semibold text-black">
         Sent Messages
       </div>
 
@@ -23,7 +23,7 @@ export default function SentMessagesList({
         {loading ? (
           <ListSkeleton header={false} />
         ) : (
-          <div className="space-y-2 p-3">
+          <div className="space-y-2 py-3 px-1">
             {items.map((item) => (
               <button
                 key={item.id}
@@ -40,11 +40,11 @@ export default function SentMessagesList({
                   </div>
                 </div>
 
-                <p className="truncate text-description font-semibold text-neutral-600">
+                <p className="truncate text-sm font-semibold text-neutral-600">
                   {item.subject || "(No subject)"}
                 </p>
 
-                <p className="mt-2 line-clamp-2 truncate text-small text-black">
+                <p className="mt-2 line-clamp-2 truncate text-description text-black">
                   {item.body}
                 </p>
               </button>

@@ -26,6 +26,11 @@ export interface Adoption_Requests {
   created_at: string;
 }
 
+export type AdoptionMeta = {
+  pet_id: string | null;
+  status: string | null;
+};
+
 export type PetStatus = "available" | "pending" | "adopted";
 
 export type AdoptionRequestStatus =
@@ -78,3 +83,29 @@ export type PetRow = {
   status: PetStatus;
   shelter_id: string | null;
 };
+
+export type answer = {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  occupation: string | null;
+  reason: string | null;
+  confirm_safe: boolean;
+  confirm_allergies: boolean;
+  confirm_food: boolean;
+  confirm_attention: boolean;
+  confirm_vet: boolean;
+  created_at: string;
+};
+
+export type PetStatusFull =
+  | "pending"
+  | "under_review"
+  | "contacting_applicant"
+  | "approved"
+  | "not_approved"
+  | "adopted"
+  | "withdrawn"
+  | null;

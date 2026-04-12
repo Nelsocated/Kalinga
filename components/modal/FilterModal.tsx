@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 
 import type { Pets, SearchPetCardItem } from "@/lib/types/pets";
-import { fetchSearchPets } from "@/lib/services/pet/petSearchClient";
+import { fetchSearchPets } from "@/lib/services/pet/petClient";
 
 import PetCard from "@/components/cards/PetCard";
 import Button from "@/components/ui/Button";

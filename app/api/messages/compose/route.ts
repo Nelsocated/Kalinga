@@ -5,27 +5,32 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
-type CreateUserThreadBody = {
+type CreateThreadBody = {
+  senderSide: "user" | "shelter";
+  userId: string; // applicant's user ID
   shelterId: string;
   subject: string;
   body: string;
   threadType?: "general" | "adoption";
   adoptionRequestId?: string | null;
-  userId: string;
 };
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as CreateUserThreadBody;
+    const body = (await req.json()) as CreateThreadBody;
 
     if (
       !body.userId ||
       !body.shelterId ||
       !body.subject?.trim() ||
-      !body.body?.trim()
+      !body.body?.trim() ||
+      !body.senderSide
     ) {
       return NextResponse.json(
-        { error: "userId, shelterId, subject, and body are required" },
+        {
+          error:
+            "userId, shelterId, senderSide, subject, and body are required",
+        },
         { status: 400 },
       );
     }
@@ -37,13 +42,13 @@ export async function POST(req: Request) {
       body: body.body.trim(),
       threadType: body.threadType ?? "general",
       adoptionRequestId: body.adoptionRequestId ?? null,
-      senderSide: "user",
+      senderSide: body.senderSide, // ← pass through instead of hardcoding
     });
 
     return NextResponse.json({ data: result }, { status: 201 });
   } catch (error) {
     const message = getErrorMessage(error);
-    console.error("[POST /api/messages/user/compose]", error);
+    console.error("[POST /api/messages/compose]", error);
 
     if (message === "Unauthorized") {
       return NextResponse.json({ error: message }, { status: 401 });

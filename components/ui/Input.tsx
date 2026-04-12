@@ -11,6 +11,7 @@ type InputProps = {
   placeholder?: string;
   autoComplete?: string;
   disabled?: boolean;
+  readOnly?: boolean; // ✅ ADD THIS
   required?: boolean;
   error?: string;
   hint?: string;
@@ -33,6 +34,7 @@ export default function Input({
   placeholder,
   autoComplete,
   disabled = false,
+  readOnly = false,
   required = false,
   error,
   hint,
@@ -56,6 +58,7 @@ export default function Input({
       )}
 
       <label className={`leading-7 ${labelClassName}`}>{label}</label>
+
       <input
         id={id}
         name={name}
@@ -63,6 +66,7 @@ export default function Input({
         placeholder={placeholder}
         autoComplete={autoComplete}
         disabled={disabled}
+        readOnly={readOnly}
         required={required}
         value={isControlled ? value : undefined}
         defaultValue={!isControlled ? defaultValue : undefined}

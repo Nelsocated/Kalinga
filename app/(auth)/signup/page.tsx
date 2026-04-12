@@ -66,9 +66,8 @@ export default function SignupPage() {
                 className="h-auto w-full max-w-55 xl:max-w-65"
               />
               <h1 className="mt-4 text-center text-2xl font-medium text-black xl:text-3xl">
-                Will you help us find
-                <br />
-                our fur-ever homes?
+                Give Care. Give Love.
+                <br />A home for every paw.
               </h1>
             </div>
 
@@ -121,14 +120,21 @@ export default function SignupPage() {
                   <p className="text-sm text-red-600">{formError}</p>
                 ) : null}
 
-                <Button type="submit" loading={loading} className="w-full">
+                <Button
+                  type="submit"
+                  loading={loading}
+                  className="w-full flex justify-center"
+                >
                   Submit
                 </Button>
               </form>
 
               <hr className="mx-auto my-3 w-full border-black/50" />
 
-              <Button onClick={() => router.push("/login")} className="w-full">
+              <Button
+                onClick={() => router.push("/login")}
+                className="w-full flex justify-center"
+              >
                 Log in
               </Button>
 

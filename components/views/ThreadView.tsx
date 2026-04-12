@@ -113,6 +113,8 @@ function Avatar({ name, image }: { name: string; image: string | null }) {
       <Image
         src={image}
         alt={name}
+        width={500}
+        height={500}
         className="h-10 w-10 rounded-full border object-cover"
       />
     );
