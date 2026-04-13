@@ -24,8 +24,8 @@ export default function ProfileHeader({
 
   return (
     <div className="w-full">
-      <div className="flex w-full items-center justify-between">
-        <div className="flex min-w-0 flex-1 items-center py-2">
+      <div className="flex w-full items-center justify-between gap-8 py-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2 py-2">
           <div className="overflow-hidden rounded-full shrink-0">
             <Image src={src} alt={title} width={80} height={80} />
           </div>
@@ -33,10 +33,10 @@ export default function ProfileHeader({
           <div className="min-w-0 flex flex-col pl-2 leading-5">
             <div className="text-title font-semibold">{title}</div>
             <div className="text-lg font-medium">{subtitle}</div>
-            {actions ? <div>{actions}</div> : null}
           </div>
         </div>
 
+        {actions ? <div>{actions}</div> : null}
         {rightSlot ? <div className="shrink-0 ml-10">{rightSlot}</div> : null}
       </div>
     </div>

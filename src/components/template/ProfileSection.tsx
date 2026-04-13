@@ -12,9 +12,9 @@ export default function ProfileSection({
   className?: string;
 }) {
   return (
-    <section className="p-2">
+    <section className="py-2">
       {title && (
-        <div className="text-lg font-bold leading-5 wrap-break-words mb-2">
+        <div className="text-title text-secondary font-bold wrap-break-words">
           {title}
         </div>
       )}

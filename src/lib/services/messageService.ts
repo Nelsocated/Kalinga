@@ -148,10 +148,6 @@ export async function replyToThread(
   if (threadError) throw new Error(threadError.message);
   if (!thread) throw new Error("Thread not found");
 
-  if (thread.user_deleted && input.senderSide === "user") {
-    throw new Error("This thread is deleted for the user");
-  }
-
   const now = new Date().toISOString();
 
   let messageInsert:
@@ -330,7 +326,6 @@ export async function getUserInboxThreads(
     .from("message_threads")
     .select("*")
     .eq("user_id", userId)
-    .eq("user_deleted", false)
     .order("last_message_at", { ascending: false });
 
   if (error) throw new Error(error.message);

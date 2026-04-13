@@ -46,12 +46,12 @@ export default function AdminDashboardClient({
       header={<div>Shelter Application</div>}
       main={
         <>
-          <div className="flex flex-col gap-3 border-b border-primary/20 px-5 py-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 border-b border-primary/20 px-5 py-2 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-black md:text-base">
                 Number of Shelter Applications:
               </span>
-              <div className="rounded-[15px] border border-primary/40 px-2 text-sm font-semibold">
+              <div className="rounded-[15px] border border-primary/40 px-4 py-1 text-lg font-semibold">
                 {filteredApplications.length}
               </div>
             </div>

@@ -48,9 +48,9 @@ function LoginPageContent() {
 
   return (
     <div className="min-h-screen bg-primary px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-      <div className="mx-auto grid min-h-[calc(100svh-2rem)] w-full max-w-7xl rounded-[15px] bg-background shadow-lg sm:min-h-[calc(100svh-3rem)]">
+      <div className="mx-auto grid min-h-[calc(100svh-2rem)] w-full max-w-7xl rounded-[15px] bg-innerbg shadow-lg sm:min-h-[calc(100svh-3rem)]">
         <div className="col-start-1 row-start-1 z-10 justify-self-end self-start p-6 sm:p-6">
-          <Button onClick={() => router.push("/site/about")}>About Us</Button>
+          <Button onClick={() => router.push("/about")}>About Us</Button>
         </div>
 
         <main className="col-start-1 row-start-1 flex min-h-0 items-center justify-center p-4 pt-20 sm:p-6 sm:pt-24 lg:p-10">

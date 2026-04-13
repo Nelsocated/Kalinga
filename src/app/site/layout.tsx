@@ -6,11 +6,11 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-outerbg">
       <aside className="ml-20 shrink-0 flex pt-13">
         <Navbar />
       </aside>
-      <main className="flex-1 min-w-0">{children}</main>
+      <main className="flex-1 min-w-0 ">{children}</main>
     </div>
   );
 }

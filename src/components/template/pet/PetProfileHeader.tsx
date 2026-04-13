@@ -31,11 +31,11 @@ export default function PetProfileHeader({
   return (
     <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between">
       <div className="flex flex-col">
-        <div className="flex flex-row gap-1 text-5xl font-bold">
+        <div className="flex flex-row gap-1 text-name font-bold">
           {title} {sex}
         </div>
 
-        <div className="flex items-center p-0">
+        <div className="flex items-center">
           <div className="h-15 w-15 overflow-hidden rounded-full">
             <Image
               src={src}
@@ -60,7 +60,7 @@ export default function PetProfileHeader({
                 <div className="text-description font-semibold">{subtitle}</div>
               ))}
 
-            {location ? <div className="text-sm">{location}</div> : null}
+            {location ? <div className="text-small">{location}</div> : null}
             {meta ? <div className="mt-1">{meta}</div> : null}
             {actions ? <div className="mt-1">{actions}</div> : null}
           </div>

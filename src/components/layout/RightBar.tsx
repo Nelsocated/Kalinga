@@ -53,7 +53,11 @@ export default function RightBar({ media_id, shelter }: Props) {
       ) : null}
 
       {media_id ? (
-        <ShareButton id={media_id} type="video" className="w-13 h-13" />
+        <ShareButton
+          id={media_id}
+          type="video"
+          className="w-13 h-13 bg-primary"
+        />
       ) : null}
     </div>
   );

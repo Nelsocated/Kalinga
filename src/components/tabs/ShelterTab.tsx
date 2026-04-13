@@ -139,8 +139,8 @@ export default function ShelterTopCard({ initialVideos, initialPets }: Props) {
           </div>
         </div>
 
-        <div className="px-4">
-          <hr className="border-black/10" />
+        <div className="py-2">
+          <hr className="border-primary" />
         </div>
 
         <div ref={scrollRef} className="mt-3 min-h-0 flex-1 px-4 pr-1">

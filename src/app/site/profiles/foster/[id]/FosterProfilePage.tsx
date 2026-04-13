@@ -2,10 +2,9 @@
 
 import { useRouter } from "next/navigation";
 
-import PetProfileTemplate from "@/src/components/template/PetProfileTemplate";
+import WebTemplate from "@/src/components/template/WebTemplate";
 import PetProfileHeader from "@/src/components/template/pet/PetProfileHeader";
 import ProfileSection from "@/src/components/template/ProfileSection";
-import BackButton from "@/src/components/ui/BackButton";
 import Button from "@/src/components/ui/Button";
 import PhotoView from "@/src/components/views/PhotoView";
 import LikeButton from "@/src/components/ui/LikeButton";
@@ -47,9 +46,25 @@ export default function FosterProfilePage({
   const router = useRouter();
 
   return (
-    <PetProfileTemplate
+    <WebTemplate
+      header={<div>Foster Story</div>}
+      side={
+        <div className="p-5">
+          <PhotoView name={name} photo_url={photo_url} pet_media={pet_media} />
+
+          <div className="mt-4 flex justify-center">
+            <Button
+              type="button"
+              onClick={() => router.push(`/site/profiles/pets/${petId}`)}
+              className="bg-primary px-4 text-lg font-semibold"
+            >
+              More Info
+            </Button>
+          </div>
+        </div>
+      }
       main={
-        <div>
+        <>
           <PetProfileHeader
             title={name}
             sex={getSexIcon(sex)}
@@ -57,47 +72,23 @@ export default function FosterProfilePage({
             subtitleHref={petId ? `/site/profiles/pets/${petId}` : undefined}
             location={location ?? "Unknown location"}
             imageUrl={logo_url ?? undefined}
+            likeButton={<LikeButton targetType="pet" targetId={petId} />}
           />
 
-          <div>
-            <ProfileSection>
-              <div className="text-lg font-semibold whitespace-normal text-justify [word-break:normal] wrap-normal ">
-                {title ? `"${title}"` : "Untitled story"}
-              </div>
-            </ProfileSection>
-
-            <ProfileSection>
-              <div className="text-description whitespace-pre-line [word-break:normal] wrap-break-word text-justify">
-                {description || "No description yet."}
-              </div>
-            </ProfileSection>
-          </div>
-        </div>
-      }
-      side={
-        <div className="px-7 pb-2">
-          <PhotoView name={name} photo_url={photo_url} pet_media={pet_media} />
-
-          <div className="mt-4 flex justify-center">
-            <Button
-              type="button"
-              onClick={() => router.push(`/site/profiles/pets/${petId}`)}
-              className="bg-primary font-semibold text-lg px-4"
+          <ProfileSection>
+            <h3
+              className="text-primary
+[text-shadow:-1px_-1px_0_black,1px_-1px_0_black,-1px_1px_0_black,1px_1px_0_black] text-subtitle leading-7 font-extrabold text-justify"
             >
-              More Info
-            </Button>
-          </div>
-        </div>
-      }
-      top={
-        <>
-          <BackButton />
+              “{title}”
+            </h3>
+          </ProfileSection>
 
-          <LikeButton
-            targetType="pet"
-            targetId={petId}
-            className="text-primary h-12"
-          />
+          <ProfileSection>
+            <div className="text-description whitespace-pre-line wrap-break-words text-justify">
+              {description || "No description yet."}
+            </div>
+          </ProfileSection>
         </>
       }
     />

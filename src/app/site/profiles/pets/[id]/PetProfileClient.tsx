@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import Image from "next/image";
 
-import PetProfileTemplate from "@/src/components/template/PetProfileTemplate";
 import PetProfileHeader from "@/src/components/template/pet/PetProfileHeader";
 import ProfileSection from "@/src/components/template/ProfileSection";
 import CharacteristicChip, {
@@ -11,9 +10,9 @@ import CharacteristicChip, {
 } from "@/src/components/template/pet/CharacteristicChip";
 import PhotoView from "@/src/components/views/PhotoView";
 import LikeButton from "@/src/components/ui/LikeButton";
-import BackButton from "@/src/components/ui/BackButton";
 import AdoptModal from "@/src/components/modal/AdoptModal";
 
+import WebTemplate from "@/src/components/template/WebTemplate";
 import Male_Icon from "@/public/icons/male-icon.svg";
 import Female_Icon from "@/public/icons/female-icon.svg";
 
@@ -89,18 +88,31 @@ export default function PetProfileClient({
       { label: "Breed", value: initialPet.breed },
       { label: "Age", value: initialPet.age_label },
       { label: "Size", value: initialPet.size },
-      { label: "Vaccinated", value: initialPet.vaccinated, type: "boolean" },
+      { label: "Vaccinated", value: initialPet.vaccinated },
       {
         label: "Spayed/Neutered",
         value: initialPet.spayed_neutered,
-        type: "boolean",
       },
     ],
     [initialPet],
   );
 
   return (
-    <PetProfileTemplate
+    <WebTemplate
+      header={<div>Pet Profile</div>}
+      side={
+        <div className="px-7">
+          <PhotoView
+            name={initialPet.name}
+            photo_url={initialPet.photo_url ?? ""}
+            pet_media={initialPet.pet_media ?? []}
+          />
+
+          <div className="mt-4 flex justify-center">
+            <AdoptModal petId={id} />
+          </div>
+        </div>
+      }
       main={
         <>
           <PetProfileHeader
@@ -133,7 +145,6 @@ export default function PetProfileClient({
                     key={item.label}
                     label={item.label}
                     value={item.value as string | boolean}
-                    type={item.type}
                   />
                 ))}
             </div>
@@ -144,30 +155,6 @@ export default function PetProfileClient({
               {initialPet.description ?? "No description yet."}
             </div>
           </ProfileSection>
-        </>
-      }
-      side={
-        <div className="px-7 pb-2">
-          <PhotoView
-            name={initialPet.name}
-            photo_url={initialPet.photo_url ?? ""}
-            pet_media={initialPet.pet_media ?? []}
-          />
-
-          <div className="mt-4 flex justify-center">
-            <AdoptModal petId={id} />
-          </div>
-        </div>
-      }
-      top={
-        <>
-          <BackButton />
-
-          <LikeButton
-            targetType="pet"
-            targetId={id}
-            className="text-primary h-12"
-          />
         </>
       }
     />

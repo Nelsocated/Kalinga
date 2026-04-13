@@ -53,7 +53,7 @@ export default function SignupPage() {
 
   return (
     <div className="h-svh overflow-hidden bg-primary p-3 sm:p-4 lg:p-6">
-      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-center rounded-[15px] bg-background shadow-lg">
+      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-center rounded-[15px] bg-innerbg shadow-lg">
         <main className="flex h-full w-full items-center justify-center p-3 sm:p-4 lg:p-6">
           <div className="grid h-full w-full max-w-6xl items-center gap-6 lg:grid-cols-2 lg:gap-12">
             <div className="hidden h-full min-h-0 flex-col items-center justify-center lg:flex">

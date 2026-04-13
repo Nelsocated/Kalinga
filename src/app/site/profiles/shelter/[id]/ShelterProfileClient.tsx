@@ -3,7 +3,9 @@
 import TopCard from "@/src/components/template/user/TopCard";
 import ProfileSection from "@/src/components/template/ProfileSection";
 import WebTemplate from "@/src/components/template/WebTemplate";
-
+import LikeButton from "@/src/components/ui/LikeButton";
+import DonationModal from "@/src/components/modal/DonationModal";
+import ShareButton from "@/src/components/ui/ShareButton";
 import React from "react";
 
 type ShelterPetUI = {
@@ -40,6 +42,17 @@ export default function ShelterProfileClient({
           title={shelter.shelter_name}
           subtitle={shelter.location ?? ""}
           imageUrl={shelter.logo_url}
+          actions={
+            <div className="flex gap-3">
+              <DonationModal shelterId={shelter.id} />
+              <ShareButton id={shelter.id} type="shelter" />
+              <LikeButton
+                targetId={shelter.id}
+                targetType="shelter"
+                className="text-primary h-10"
+              />
+            </div>
+          }
         />
       }
       main={

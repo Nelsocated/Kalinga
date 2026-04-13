@@ -7,9 +7,10 @@ body {
 
 @theme {
   --color-primary: #f3be0f;
-  --color-background: #f6f3ee;
+  --color-secondary: #042666;
+  --color-outerbg: #fff9ed;
   --color-innerbg: #fffdf7;
-  --color-text: black;
+  --color-chip: #fef3b3;
   --color-male: #6495ed;
   --color-female: #f8c8dc;
   --color-border: #f3be0f;
@@ -23,9 +24,11 @@ body {
   --color-approved: #0f971c;
   --color-adopted: #ec2e57;
   --color-withdrawn: #f07800;
+  --color-textwhite: #fffaeb;
 
-  --text-header: 64px;
-  --text-subheader: 48px;
+  --text-header: 60px;
+  --text-name: 50px;
+  --text-subheader: 34px;
   --text-title: 30px;
   --text-subtitle: 26px;
   --text-lg: 20px;

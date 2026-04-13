@@ -57,7 +57,9 @@ export default function Input({
         </div>
       )}
 
-      <label className={`leading-7 ${labelClassName}`}>{label}</label>
+      <label htmlFor={id} className={`block mb-1 ${labelClassName}`}>
+        {label}
+      </label>
 
       <input
         id={id}

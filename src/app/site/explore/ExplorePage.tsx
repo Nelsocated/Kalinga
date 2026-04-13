@@ -7,8 +7,8 @@ import WebTemplate from "@/src/components/template/WebTemplate";
 import PetCard from "@/src/components/cards/PetCard";
 import FosterCard from "@/src/components/cards/FosterCard";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
-import Back from "@/public/buttons/Back.svg";
-import Forward from "@/public/buttons/Forward.svg";
+import Back from "@/public/buttons/Back(2).svg";
+import Forward from "@/public/buttons/Forward(2).svg";
 
 import type { LongestPet, FosterStory } from "./page";
 
@@ -30,17 +30,17 @@ function SectionHeader({
 }) {
   return (
     <div className="mb-4 flex items-center">
-      <h2 className="text-subheader font-semibold">{title}</h2>
+      <h2 className="text-subheader font-bold text-secondary">{title}</h2>
       <button
         type="button"
         onClick={onClick}
-        className="flex h-9 w-9 items-center justify-center text-xl font-bold text-black"
+        className="flex h-9 w-9 items-center justify-center text-xl font-bold text-secondary hover:scale-110"
         aria-label={expanded ? `Collapse ${title}` : `Expand ${title}`}
       >
         {expanded ? (
-          <Image src={Back} alt="back-icon" width={40} height={40} />
+          <Image src={Back} alt="back-icon" width={13} height={13} />
         ) : (
-          <Image src={Forward} alt="forward-icon" width={40} height={40} />
+          <Image src={Forward} alt="forward-icon" width={13} height={13} />
         )}
       </button>
     </div>

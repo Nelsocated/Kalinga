@@ -47,7 +47,7 @@ export default function PetCard({
   const cardContent = resize ? (
     <>
       {topLabel ? (
-        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 bg-white px-4 py-1 text-xs leading-none font-bold text-primary shadow-sm">
+        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 border-secondary bg-primary px-4 py-1 text-small leading-none font-bold shadow-sm">
           {topLabel}
         </div>
       ) : null}
@@ -65,7 +65,7 @@ export default function PetCard({
 
       <div className="ml-1 px-2 py-2">
         <div className="flex items-center">
-          <div className="text-[20px] leading-none font-bold">{petName}</div>
+          <div className="text-lg leading-none font-bold">{petName}</div>
           {getSexIcon(sex, 15)}
         </div>
       </div>
@@ -73,13 +73,13 @@ export default function PetCard({
   ) : (
     <>
       {topLabel ? (
-        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 bg-white px-4 py-1 text-xs leading-none font-bold text-primary shadow-sm">
+        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 border-secondary bg-primary px-4 py-1 text-small leading-none font-bold shadow-sm">
           {topLabel}
         </div>
       ) : null}
 
-      <div className="p-1">
-        <div className="relative h-45 overflow-hidden rounded-[15px]">
+      <div>
+        <div className="relative h-35 overflow-hidden rounded-[15px]">
           <Image
             src={src}
             alt={`${petName} photo`}
@@ -89,28 +89,34 @@ export default function PetCard({
         </div>
       </div>
 
-      <div className="ml-1 px-2">
-        <div className="flex items-center">
-          <div className="text-[20px] leading-none font-bold">{petName}</div>
-          {getSexIcon(sex, 20)}
+      <div className="ml-1 flex justify-between items-center px-2 py-1">
+        <div>
+          <div className="flex items-center">
+            <div className="text-lg leading-none font-bold">{petName}</div>
+            {getSexIcon(sex, 20)}
+          </div>
+
+          <div className="flex items-center gap-1 text-small leading-none">
+            <Image
+              src={shelterLogo || DEFAULT_AVATAR_URL}
+              alt={shelterName ?? "Shelter logo"}
+              width={18}
+              height={18}
+              className="rounded-full"
+            />
+            <span>{shelterName}</span>
+          </div>
         </div>
 
-        <div className="flex items-center text-[10px] leading-none">
-          <Image
-            src={shelterLogo || DEFAULT_AVATAR_URL}
-            alt={shelterName ?? ""}
-            width={18}
-            height={18}
-            className="rounded-full"
-          />
-          <span>{shelterName}</span>
+        <div className="border bg-chip rounded-full px-3 py-1 text-small">
+          More Info
         </div>
       </div>
     </>
   );
 
   const sharedClassName = [
-    "relative block overflow-visible rounded-[15px] border-3 bg-primary",
+    "relative block overflow-visible rounded-[15px] border-2 border-secondary bg-chip",
     href ? "cursor-pointer" : "",
     resize ? "w-40" : "w-50",
     className,

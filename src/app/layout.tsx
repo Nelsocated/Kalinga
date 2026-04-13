@@ -7,7 +7,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-background min-h-screen">{children}</body>
+      <body className="bg-outerbg min-h-screen">{children}</body>
     </html>
   );
 }

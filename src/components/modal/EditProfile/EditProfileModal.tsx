@@ -158,7 +158,7 @@ export default function EditProfileModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex w-fit items-center gap-2 rounded-[15px] border border-black/50 bg-primary px-4 py-1 text-sm font-semibold hover:brightness-95"
+        className="flex w-fit items-center gap-2 rounded-[15px] border border-black/50 bg-primary px-7 py-1 text-description text-secondary font-semibold hover:brightness-95"
       >
         {triggerLabel}
         <Image src={Edit} alt="edit-button" width={20} height={20} />
@@ -188,7 +188,7 @@ export default function EditProfileModal({
             </div>
 
             {/* Body */}
-            <div className="max-h-[75vh] overflow-y-auto scroll-stable p-2 px-5">
+            <div className="max-h-[75vh] overflow-y-auto scroll-stable py-2 px-5">
               {/* Avatar */}
               <div className="flex flex-col items-center gap-2 ">
                 <div className="relative h-16 w-16 overflow-hidden rounded-full bg-black/10">
@@ -224,7 +224,7 @@ export default function EditProfileModal({
                       type={field.type ?? "text"}
                       label={field.label}
                       placeholder={field.label}
-                      labelClassName="text-description font-medium"
+                      labelClassName="text-description text-secondary font-medium"
                       value={values[field.key] ?? ""}
                       onChange={(e) =>
                         setValues((prev) => ({
@@ -232,7 +232,6 @@ export default function EditProfileModal({
                           [field.key]: e.target.value,
                         }))
                       }
-                      className=""
                     />
                   </div>
                 ))}
@@ -259,7 +258,7 @@ export default function EditProfileModal({
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 rounded-[15px] border border-black/10 bg-white px-3 py-2 text-sm font-semibold"
+                  className="flex-1 rounded-[15px] border border-black/10 bg-innerbg text-black px-3 py-2 text-sm font-semibold"
                 >
                   Cancel
                 </button>
@@ -268,7 +267,7 @@ export default function EditProfileModal({
                   type="button"
                   onClick={handleSave}
                   disabled={!canSave}
-                  className="flex-1 rounded-[15px] bg-primary px-3 py-2 text-sm font-semibold disabled:opacity-50"
+                  className="flex-1 rounded-[15px] bg-primary px-3 py-2 text-sm text-secondary font-semibold"
                 >
                   {saving ? "Saving..." : "Save"}
                 </button>

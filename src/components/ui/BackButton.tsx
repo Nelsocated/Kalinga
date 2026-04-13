@@ -3,13 +3,19 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import BackIcon from "@/public/buttons/Back.svg";
+import WhiteBack from "@/public/buttons/WhiteBack.svg";
 
 type Props = {
   onClick?: () => void;
   className?: string;
+  isModal?: boolean;
 };
 
-export default function BackButton({ onClick, className }: Props) {
+export default function BackButton({
+  onClick,
+  className,
+  isModal = false,
+}: Props) {
   const router = useRouter();
 
   function handleClick() {
@@ -29,9 +35,15 @@ export default function BackButton({ onClick, className }: Props) {
     <button
       type="button"
       onClick={handleClick}
-      className={`flex items-center justify-center ${className ?? ""}`}
+      className={`flex items-center justify-center hover:scale-110 ${className ?? ""}`}
     >
-      <Image src={BackIcon} alt="Back" width={40} height={40} priority />
+      <Image
+        src={isModal ? WhiteBack : BackIcon}
+        alt="Back"
+        width={15}
+        height={15}
+        priority
+      />
     </button>
   );
 }

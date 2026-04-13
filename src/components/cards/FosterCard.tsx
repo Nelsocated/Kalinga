@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ReactNode } from "react";
 import Image from "next/image";
-import Forward from "@/public/buttons/Forward.svg";
+import Forward from "@/public/buttons/Forward(2).svg";
 
 type FosterCardProps = {
   href: string; // for foster profile button
@@ -19,23 +19,26 @@ export default function FosterCard({
   children,
 }: FosterCardProps) {
   return (
-    <div className="relative flex w-full rounded-[15px] border-2 bg-primary transition hover:shadow-lg">
-      <div className="flex w-full rounded-[15px] bg-background">
+    <div className="relative flex w-full rounded-[15px] border-2 border-secondary transition hover:shadow-lg">
+      <div className="flex w-full rounded-[15px] bg-chip">
         <div>{children}</div>
 
-        <div className="flex flex-1 flex-col justify-between p-5">
+        <div className="flex flex-1 flex-col justify-between px-5 py-2">
           <div>
-            <h3 className="text-subtitle leading-7 font-extrabold wrap-break-words line-clamp-2">
+            <h3
+              className="text-justify text-lg text-primary
+[text-shadow:-1px_-1px_0_black,1px_-1px_0_black,-1px_1px_0_black,1px_1px_0_black] leading-7 font-extrabold wrap-break-words line-clamp-2"
+            >
               “{title}”
             </h3>
-            <p className="ml-4 pr-10 text-justify leading-6 wrap-break-words line-clamp-6">
+            <p className="ml-4 text-justify leading-6 wrap-break-words line-clamp-4">
               {description}
             </p>
           </div>
         </div>
         <div className="flex justify-end items-center mr-5">
           <Link href={href}>
-            <Image src={Forward} alt="forward-icon" width={40} height={40} />
+            <Image src={Forward} alt="forward-icon" width={15} height={15} />
           </Link>
         </div>
       </div>

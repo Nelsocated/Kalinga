@@ -46,7 +46,7 @@ export default function ShareButton({ id, type, className }: Props) {
       type="button"
       onClick={copyLink}
       className={[
-        "h-10 rounded-full overflow-hidden bg-primary flex flex-col items-center justify-center transition",
+        "h-10 rounded-full overflow-hidden flex flex-col items-center justify-center transition",
         className,
       ].join(" ")}
     >

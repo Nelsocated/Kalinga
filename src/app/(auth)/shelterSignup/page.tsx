@@ -225,7 +225,7 @@ function ShelterSignupPageContent() {
 
   return (
     <div className="h-svh overflow-hidden bg-primary p-3 sm:p-4 lg:p-6">
-      <div className="mx-auto flex h-full w-full max-w-7xl rounded-[15px] bg-background shadow-lg">
+      <div className="mx-auto flex h-full w-full max-w-7xl rounded-[15px] bg-innerbg shadow-lg">
         <main className="flex h-full w-full items-center justify-center p-8 py-1">
           <div className="grid h-full w-full items-center gap-6 lg:grid-cols-2 lg:gap-12">
             <div className="hidden h-full items-center justify-center lg:flex">
@@ -244,7 +244,6 @@ function ShelterSignupPageContent() {
                 </h1>
               </div>
             </div>
-
             <div className="mx-auto flex w-full max-w-md flex-col justify-center rounded-[15px] border-2 bg-white px-4 py-4 shadow-sm sm:px-5 sm:py-5 lg:px-6 lg:py-6">
               <div className="mb-3">
                 <p className="text-xs font-medium uppercase tracking-[0.25em] text-black/50">

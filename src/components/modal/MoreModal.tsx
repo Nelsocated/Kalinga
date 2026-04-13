@@ -94,7 +94,7 @@ export default function MoreModal() {
           )}
           <Button
             type="button"
-            onClick={() => router.push("/site/about")}
+            onClick={() => router.push("/about")}
             className={buttonStyle}
           >
             <Image src={About} alt="about-icon" width={25} height={25} />

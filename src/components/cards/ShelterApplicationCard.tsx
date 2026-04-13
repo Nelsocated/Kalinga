@@ -24,9 +24,9 @@ function formatTimeAgo(dateString: string | null) {
 
 export default function ShelterApplicationCard({ item }: Props) {
   return (
-    <article className="rounded-[15px] border-2 bg-white p-2">
-      <div className="flex items-start gap-3">
-        <div className="w-20 border rounded-[15px]">
+    <article className="rounded-[15px] border-2 bg-outerbg p-2">
+      <div className="flex items-center gap-3">
+        <div className="w-25 border rounded-[15px]">
           <Image
             src={item.photo_url ?? DEFAULT_AVATAR_URL}
             alt={`${item.shelterName} photo`}
@@ -37,7 +37,7 @@ export default function ShelterApplicationCard({ item }: Props) {
 
         <div className="min-w-0 flex-1 items-center">
           <div className="flex items-start justify-between gap-3">
-            <h2 className="line-clamp-1 text-lg font-bold text-black md:text-subtitle">
+            <h2 className="line-clamp-1 text-subtitle font-bold text-black md:text-subtitle">
               {item.shelterName}
             </h2>
 
