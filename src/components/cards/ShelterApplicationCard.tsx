@@ -35,8 +35,8 @@ export default function ShelterApplicationCard({ item }: Props) {
           />
         </div>
 
-        <div className="min-w-0 flex-1 items-center">
-          <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 items-center pr-2">
+          <div className="flex items-center justify-between gap-3">
             <h2 className="line-clamp-1 text-subtitle font-bold text-black md:text-subtitle">
               {item.shelterName}
             </h2>

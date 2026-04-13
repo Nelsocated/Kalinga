@@ -14,6 +14,7 @@ export default function PetProfileHeader({
   imageUrl,
   meta,
   actions,
+  likeButton,
 }: {
   title: string;
   sex?: React.ReactNode;
@@ -29,14 +30,19 @@ export default function PetProfileHeader({
   const router = useRouter();
 
   return (
-    <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between">
-      <div className="flex flex-col">
-        <div className="flex flex-row gap-1 text-name font-bold">
-          {title} {sex}
+    <div className="relative w-full pr-5">
+      <div className="flex w-full flex-col">
+        <div className="flex w-full items-center justify-between gap-2 text-name font-bold">
+          <div className="min-w-0 flex items-center gap-1">
+            <span className="truncate">{title}</span>
+            <span className="shrink-0">{sex}</span>
+          </div>
+
+          <div className="ml-auto shrink-0">{likeButton}</div>
         </div>
 
-        <div className="flex items-center">
-          <div className="h-15 w-15 overflow-hidden rounded-full">
+        <div className="mt-2 flex w-full items-center">
+          <div className="h-15 w-15 shrink-0 overflow-hidden rounded-full">
             <Image
               src={src}
               alt={title}
@@ -46,7 +52,7 @@ export default function PetProfileHeader({
             />
           </div>
 
-          <div className="ml-2 leading-tight">
+          <div className="ml-2 min-w-0 leading-tight">
             {subtitle &&
               (subtitleHref ? (
                 <button

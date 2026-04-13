@@ -101,7 +101,7 @@ export default function PetProfileClient({
     <WebTemplate
       header={<div>Pet Profile</div>}
       side={
-        <div className="px-7">
+        <div className="p-5">
           <PhotoView
             name={initialPet.name}
             photo_url={initialPet.photo_url ?? ""}
@@ -127,7 +127,11 @@ export default function PetProfileClient({
             location={initialPet.shelter?.location ?? "Unknown Location"}
             imageUrl={initialPet.shelter?.logo_url}
             likeButton={
-              <LikeButton targetType="pet" targetId={initialPet.id} />
+              <LikeButton
+                targetType="pet"
+                targetId={initialPet.id}
+                className="h-10"
+              />
             }
           />
 
