@@ -47,10 +47,6 @@ const TAB_META = {
 
 const ITEMS_PER_BATCH = 10;
 
-function buildVideoHref(videoId: string) {
-  return `/site/home/pet/${videoId}`;
-}
-
 type Props = {
   shelterId: string;
   initialVideos: ShelterVideoMini[];
@@ -111,6 +107,8 @@ export default function ShelterTopCard({ initialVideos, initialPets }: Props) {
     return () => observer.disconnect();
   }, [hasMore, loadMore]);
 
+  const base = window.location.origin;
+
   return (
     <div className="min-h-0 pr-7">
       <div className="flex min-h-0 flex-col rounded-[15px] bg-white">
@@ -156,7 +154,7 @@ export default function ShelterTopCard({ initialVideos, initialPets }: Props) {
                 ? (visibleItems as ShelterVideoMini[]).map((x) => (
                     <VideoCard
                       key={`posted-video-${x.id}`}
-                      href={buildVideoHref(x.id)}
+                      href={`${base}/site/home/pet/${x.id}`}
                       thumbnailUrl={x.thumbnailUrl ?? x.imageUrl}
                       subtitle={x.subtitle ?? x.caption ?? "Your shelter"}
                       petName={x.petName ?? x.title ?? "Untitled"}
@@ -165,7 +163,7 @@ export default function ShelterTopCard({ initialVideos, initialPets }: Props) {
                 : (visibleItems as ShelterPetMini[]).map((x) => (
                     <PetCard
                       key={`posted-pet-${x.id}`}
-                      href={`/site/profiles/pets/${x.id}`}
+                      href={`${base}/site/profiles/pets/${x.id}`}
                       imageUrl={x.imageUrl}
                       petName={x.petName ?? "Unnamed Pet"}
                       sex={x.gender ?? "unknown"}

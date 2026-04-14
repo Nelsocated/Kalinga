@@ -9,9 +9,10 @@ import { getViewSessionId } from "@/src/lib/session/getViewSessionId";
 
 type PetCardProps = {
   item: FeedItem;
+  isActive: boolean;
 };
 
-export default function ViewPort({ item }: PetCardProps) {
+export default function ViewPort({ item, isActive }: PetCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hasRecordedViewRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -73,24 +74,55 @@ export default function ViewPort({ item }: PetCardProps) {
     const video = videoRef.current;
     if (!video) return;
 
-    if (video.paused) {
-      try {
-        await video.play();
-        setIsPaused(false);
-      } catch {
-        setIsPaused(true);
-      }
+    if (video.muted) {
+      video.muted = false;
+      await video.play();
+      setIsPaused(false);
       return;
     }
 
-    video.pause();
-    setIsPaused(true);
+    if (video.paused) {
+      await video.play();
+      setIsPaused(false);
+    } else {
+      video.pause();
+      setIsPaused(true);
+    }
   }
 
   useEffect(() => {
     hasRecordedViewRef.current = false;
     clearViewTimer();
   }, [mediaId, clearViewTimer]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handle = async () => {
+      if (isActive) {
+        try {
+          video.muted = false;
+          await video.play();
+          setIsPaused(false);
+        } catch {
+          video.muted = true;
+          try {
+            await video.play();
+            setIsPaused(false);
+          } catch {
+            setIsPaused(true);
+          }
+        }
+      } else {
+        video.pause();
+        video.muted = true;
+        setIsPaused(true);
+      }
+    };
+
+    handle();
+  }, [isActive]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -130,6 +162,7 @@ export default function ViewPort({ item }: PetCardProps) {
           playsInline
           loop
           autoPlay
+          muted
           onClick={togglePlay}
           onPause={() => setIsPaused(true)}
           onPlay={() => setIsPaused(false)}

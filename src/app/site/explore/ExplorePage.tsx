@@ -117,7 +117,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
       header={<div>Explore</div>}
       main={
         <main>
-          <div className="ml-6 flex flex-col gap-7">
+          <div className="flex flex-col gap-7 ">
             {(showBoth || showOnlyLongest) && (
               <section>
                 <SectionHeader
@@ -133,8 +133,8 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
                   <div
                     className={
                       showOnlyLongest
-                        ? "grid grid-cols-4 gap-4 pt-3 overflow-y-auto scroll stable"
-                        : "grid grid-cols-1 gap-4 pt-3 overflow-y-auto scroll stable"
+                        ? "grid grid-cols-4 gap-4 pt-3 scroll stable"
+                        : "grid grid-cols-4 gap-4 pt-3 scroll stable"
                     }
                   >
                     {(showOnlyLongest
@@ -173,7 +173,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
                   <div
                     className={
                       showOnlyFoster
-                        ? "grid grid-cols-1 gap-4 pt-3 overflow-y-auto scroll stable"
+                        ? "grid grid-cols-1 gap-4 pt-3  scroll stable"
                         : "grid grid-cols-4 gap-4 pt-3"
                     }
                   >
@@ -189,7 +189,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
                           description={card.description}
                         >
                           <PetCard
-                            href={`/site/profiles/pets/${card.petId}`} // ← pet profile
+                            href={`/site/profiles/pets/${card.petId}`}
                             title={`"${card.title}"`}
                             imageUrl={card.imageUrl}
                             petName={card.petName}

@@ -18,7 +18,7 @@ type TabKey = "change-password" | "delete-account";
 function SettingsTabsView() {
   const [activeTab, setActiveTab] = useState<TabKey>("change-password");
 
-  const buttonStyle = `text-lg font-semibold hover:bg-primary flex items-center rounded-[15px] pl-6 ml-7 border px-2 py-1 border-l-0`;
+  const buttonStyle = `text-lg font-semibold hover:bg-primary  flex items-center rounded-[15px] pl-6 ml-7 border px-2 py-1 border-l-0`;
 
   return (
     <div className="overflow-y-auto scroll-stable">
@@ -26,7 +26,7 @@ function SettingsTabsView() {
         <button
           type="button"
           onClick={() => setActiveTab("change-password")}
-          className={`flex items-center `}
+          className={`flex items-center hover:scale-105`}
         >
           <div className="bg-primary rounded-full w-12 h-12 flex items-center justify-center absolute">
             <Image src={Setting} alt="setting-icon" width={25} height={25} />
@@ -41,7 +41,7 @@ function SettingsTabsView() {
         <button
           type="button"
           onClick={() => setActiveTab("delete-account")}
-          className={`flex items-center `}
+          className={`flex items-center hover:scale-105`}
         >
           <div className="bg-primary rounded-full w-12 h-12 flex items-center justify-center absolute">
             <Image

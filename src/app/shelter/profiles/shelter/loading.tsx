@@ -69,9 +69,9 @@ export default function Loading() {
 
             <div className="grid grid-cols-4 py-">
               <Skeleton className="w-48 h-77 rounded-[15px] border-2 border-secondary" />
-              <Skeleton className="w-48 h-77 rounded-[15px] border-2" />
-              <Skeleton className="w-48 h-77 rounded-[15px] border-2" />
-              <Skeleton className="w-48 h-77 rounded-[15px] border-2" />
+              <Skeleton className="w-48 h-77 rounded-[15px] border-2 border-secondary" />
+              <Skeleton className="w-48 h-77 rounded-[15px] border-2 border-secondary" />
+              <Skeleton className="w-48 h-77 rounded-[15px] border-2 border-secondary" />
             </div>
           </div>
         }

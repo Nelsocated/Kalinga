@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ViewPort from "./ViewPort";
 import type { FeedItem } from "@/src/lib/services/feedService";
@@ -37,90 +37,38 @@ export default function Feed({
   const targetMediaId = initialMediaId ?? queryMediaId;
 
   const [items, setItems] = useState<FeedItem[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const seenIdsRef = useRef<Set<string>>(new Set());
-  const isFetchingRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const loadMore = useCallback(
-    async (reset = false) => {
-      if (isFetchingRef.current) return;
-
+  // 🔥 fetch ALL
+  useEffect(() => {
+    const fetchAll = async () => {
       try {
-        isFetchingRef.current = true;
-        if (reset) setLoading(true);
-        setError(null);
+        setLoading(true);
 
-        const excludedIds = reset ? [] : Array.from(seenIdsRef.current);
-
-        const params = new URLSearchParams({
-          limit: "10",
-          excluded: excludedIds.join(","),
-        });
+        const params = new URLSearchParams();
         if (targetMediaId) params.set("media", targetMediaId);
 
-        const res = await fetch(`/api/feed?${params}`, { cache: "no-store" });
+        const res = await fetch(`/api/feed?${params}`);
         const result = await res.json();
-        if (!res.ok) throw new Error(result.error || "Failed to fetch feed");
 
-        const nextItems: FeedItem[] = result.items ?? [];
-        nextItems.forEach((item) => seenIdsRef.current.add(item.id));
-
-        if (reset) {
-          setItems(nextItems);
-          setCurrentIndex(0);
-          setHasMore(true);
-        } else {
-          setItems((prev) => [...prev, ...nextItems]);
-        }
-
-        if (nextItems.length < 10) setHasMore(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch feed");
+        setItems(result.items ?? []);
+        setCurrentIndex(0);
+      } catch {
+        setError("Failed to fetch feed");
       } finally {
         setLoading(false);
-        isFetchingRef.current = false;
       }
-    },
-    [targetMediaId],
-  );
+    };
 
-  // Initial load
-  useEffect(() => {
-    seenIdsRef.current = new Set();
-    loadMore(true);
-  }, [targetMediaId]); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchAll();
+  }, [targetMediaId]);
 
-  // IntersectionObserver on sentinel — fires loadMore when bottom is near
-  useEffect(() => {
-    if (!sentinelRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isFetchingRef.current) {
-          loadMore(false);
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    observer.observe(sentinelRef.current);
-    return () => observer.disconnect();
-  }, [hasMore, loadMore]);
-
-  useEffect(() => {
-    if (items.length > 0) {
-      setCurrentIndex(0);
-    }
-  }, [items]);
-
-  // IntersectionObserver per item — track which is currently in view
+  // 🔥 active tracking
   useEffect(() => {
     if (!items.length) return;
 
@@ -138,7 +86,7 @@ export default function Feed({
         },
         {
           root: containerRef.current,
-          threshold: 0.6, // item must be 60% visible to count as "active"
+          threshold: 0.6,
         },
       );
 
@@ -149,13 +97,9 @@ export default function Feed({
     return () => observers.forEach((o) => o.disconnect());
   }, [items]);
 
-  // Notify parent of active item + nav
+  // 🔥 nav + active item
   useEffect(() => {
-    if (!items.length) {
-      onActiveChange?.(null);
-      onNavChange?.(null);
-      return;
-    }
+    if (!items.length) return;
 
     const current = items[currentIndex];
     if (!current) return;
@@ -166,23 +110,19 @@ export default function Feed({
     onActiveChange?.({
       pet_id: current.id,
       media_id: videoMedia?.id ?? null,
-      shelter: current.shelter
-        ? {
-            id: current.shelter.id,
-            shelter_name: current.shelter.shelter_name,
-            logo_url: current.shelter.logo_url ?? null,
-          }
-        : null,
+      shelter: current.shelter ?? null,
     });
 
     onNavChange?.({
       next: () => {
-        const nextEl = itemRefs.current[currentIndex + 1];
-        nextEl?.scrollIntoView({ behavior: "smooth" });
+        itemRefs.current[currentIndex + 1]?.scrollIntoView({
+          behavior: "smooth",
+        });
       },
       prev: () => {
-        const prevEl = itemRefs.current[currentIndex - 1];
-        prevEl?.scrollIntoView({ behavior: "smooth" });
+        itemRefs.current[currentIndex - 1]?.scrollIntoView({
+          behavior: "smooth",
+        });
       },
       hasNext: currentIndex < items.length - 1,
       hasPrev: currentIndex > 0,
@@ -191,9 +131,8 @@ export default function Feed({
     });
   }, [items, currentIndex, onActiveChange, onNavChange]);
 
-  if (loading && items.length === 0) return null;
+  if (loading) return null;
   if (error) return <div>{error}</div>;
-  if (!items.length) return <div>No feed items found.</div>;
 
   return (
     <div
@@ -209,18 +148,9 @@ export default function Feed({
           }}
           className="h-[95svh] w-full snap-start snap-always shrink-0"
         >
-          <ViewPort item={item} />
+          <ViewPort item={item} isActive={i === currentIndex} />
         </div>
       ))}
-
-      {/* Sentinel — triggers loadMore when scrolled into view */}
-      <div ref={sentinelRef} className="h-1 w-full" />
-
-      {!hasMore && (
-        <div className="flex h-20 items-center justify-center text-white/40 text-sm">
-          You&apos;ve seen them all 🐾
-        </div>
-      )}
     </div>
   );
 }

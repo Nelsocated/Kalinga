@@ -81,7 +81,7 @@ export default function NotifShelter({ items = [] }: Props) {
     <WebTemplate
       header={"Notification"}
       main={
-        <main className="flex h-full min-h-0 flex-col">
+        <main className="flex h-full min-h-0 flex-col ">
           {!isReviewing ? (
             <FilterView
               species={species}
@@ -147,7 +147,7 @@ export default function NotifShelter({ items = [] }: Props) {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 pt-2">
                     {filteredItems.map((item) => (
                       <NotifShelterCard
                         key={item.id}

@@ -89,7 +89,7 @@ export default function PetCard({
         </div>
       </div>
 
-      <div className="ml-1 flex justify-between items-center px-2 py-1">
+      <div className="ml-1 flex justify-between items-center px-1 py-1">
         <div>
           <div className="flex items-center">
             <div className="text-lg leading-none font-bold">{petName}</div>
@@ -104,7 +104,7 @@ export default function PetCard({
               height={18}
               className="rounded-full"
             />
-            <span>{shelterName}</span>
+            <span className="truncate">{shelterName}</span>
           </div>
         </div>
 

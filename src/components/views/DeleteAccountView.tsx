@@ -67,7 +67,7 @@ export default function DeleteAccountView() {
           <button
             type="button"
             onClick={() => setOpenConfirm(true)}
-            className="rounded-[15px] bg-white border-2 border-reject px-4 py-2 text-lg font-bold text-black hover:bg-reject"
+            className="rounded-[15px] hover:scale-105 bg-white border-2 border-reject px-4 py-2 text-lg font-bold text-black hover:bg-reject"
           >
             Delete My Account
           </button>

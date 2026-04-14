@@ -352,7 +352,7 @@ export default function Page() {
                 <Button
                   type="submit"
                   disabled={submitting || uploadingImage}
-                  className="w-full max-w-100"
+                  className="w-full max-w-40 flex justify-center hover:scale-105 "
                 >
                   {submitting || uploadingImage ? "Posting..." : "Post"}
                 </Button>

@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
-import Back_Button from "../ui/BackButton";
+import BackButton from "../ui/BackButton";
 import {
   createPetAdoptionRequest,
   fetchPetAdoptionStatus,
@@ -193,7 +193,7 @@ export default function AdoptModal({ petId }: Props) {
               <>
                 <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-2">
                   <div className="pl-4">
-                    <Back_Button onClick={closeModal} />
+                    <BackButton onClick={closeModal} />
                   </div>
                   <div className="text-center text-subheader font-bold text-white">
                     Adopt Pet

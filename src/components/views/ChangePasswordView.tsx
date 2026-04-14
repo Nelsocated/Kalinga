@@ -146,7 +146,7 @@ export default function ChangePasswordView() {
     }
   }
 
-  const border = "border-1";
+  const border = "border-1 ";
   const labelClass = "w-56 shrink-0 text-right text-lg font-medium";
   const rowClass = "mx-auto flex w-full max-w-2xl items-center gap-5";
   const inputWrapClass = "flex-1";
@@ -221,6 +221,7 @@ export default function ChangePasswordView() {
                   setConfirmNewPassword("");
                   setError("");
                 }}
+                className="hover:scale-105"
                 disabled={loading || checkingEmail}
               >
                 Clear
@@ -230,6 +231,7 @@ export default function ChangePasswordView() {
                 type="button"
                 onClick={handleChangePassword}
                 disabled={loading || checkingEmail}
+                className="bg-primary hover:scale-105"
               >
                 {loading ? "Updating..." : "Change Password"}
               </Button>

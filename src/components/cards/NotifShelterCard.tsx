@@ -34,8 +34,8 @@ function statusText(name: string, status: string) {
   }
 
   return (
-    <div className="line-clamp-1 h-15 rounded-[15px] bg-primary px-8 py-1 text-sm font-semibold text-black">
-      {name} {switchCase(status)}
+    <div className="line-clamp-1 h-15 rounded-[15px] bg-primary w-60 px-3 py-1 text-sm font-semibold text-black">
+      <span className="truncate">{name}</span> {switchCase(status)}
     </div>
   );
 }
@@ -62,6 +62,8 @@ export default function NotifShelterCard({ item, status }: Props) {
           </button>
         </div>
 
+        <div className="mt-6 h-30" />
+
         <article className="absolute z-10 mt-6 w-107.5 rounded-[15px] border-3 bg-innerbg p-2">
           <div className="grid grid-cols-[155px_1fr] items-center gap-3">
             <PetCard
@@ -71,10 +73,10 @@ export default function NotifShelterCard({ item, status }: Props) {
               resize={true}
             />
 
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3 p-1">
               <Button
                 type="button"
-                className="flex w-full justify-center rounded-[15px] border bg-white px-3 text-description font-medium text-black"
+                className="flex w-full justify-center rounded-[15px] hover:scale-105 border bg-white px-3 text-description font-medium text-black"
                 onClick={() => setOpenAnswer(true)}
               >
                 Review Application Form
@@ -82,7 +84,7 @@ export default function NotifShelterCard({ item, status }: Props) {
 
               <Button
                 type="button"
-                className="flex w-full justify-center rounded-[15px] border bg-white px-3 text-description font-medium text-black"
+                className="flex w-full justify-center rounded-[15px] hover:scale-105 border bg-white px-3 text-description font-medium text-black"
                 onClick={() => setOpenMessage(true)}
               >
                 Message User
@@ -90,7 +92,7 @@ export default function NotifShelterCard({ item, status }: Props) {
 
               <Button
                 type="button"
-                className="flex w-full justify-center rounded-[15px] border bg-white px-3 text-description font-medium text-black"
+                className="flex w-full justify-center rounded-[15px] hover:scale-105 border bg-white px-3 text-description font-medium text-black"
               >
                 Update Adoption Status
               </Button>

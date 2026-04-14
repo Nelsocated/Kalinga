@@ -290,7 +290,7 @@ export default function WriteFosterClient({ pets, initialError }: Props) {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full max-w-40"
+                    className="w-full max-w-40 flex justify-center hover:scale-105 "
                   >
                     {loading ? "Posting..." : "Post"}
                   </Button>

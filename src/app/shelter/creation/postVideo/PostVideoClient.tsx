@@ -332,7 +332,7 @@ export default function PostVideoClient({ pets, initialError }: Props) {
                   <Button
                     type="submit"
                     disabled={submitting}
-                    className="w-full max-w-40"
+                    className="w-full max-w-40 flex justify-center hover:scale-105 "
                   >
                     {submitting ? "Posting..." : "Post"}
                   </Button>
