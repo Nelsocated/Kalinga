@@ -275,7 +275,7 @@ function ShelterSignupPageContent() {
                       type="password"
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
-                      placeholder="At least 6 characters"
+                      placeholder="Password"
                       autoComplete="new-password"
                       required
                     />
@@ -284,7 +284,7 @@ function ShelterSignupPageContent() {
                       label="Fullname"
                       value={fullName}
                       onChange={(event) => setFullName(event.target.value)}
-                      placeholder="Fullname"
+                      placeholder="Enter you Fullname"
                       required
                     />
 
@@ -292,7 +292,7 @@ function ShelterSignupPageContent() {
                       label="Username"
                       value={username}
                       onChange={(event) => setUsername(event.target.value)}
-                      placeholder="Username"
+                      placeholder="Enter your Username"
                       required
                     />
                   </>
@@ -356,7 +356,7 @@ function ShelterSignupPageContent() {
                     <Button
                       type="button"
                       onClick={goBack}
-                      className="w-full border-black/20 bg-white flex justify-center"
+                      className="w-full border-black/20 bg-white flex justify-center hover:scale-105"
                     >
                       Back
                     </Button>
@@ -366,7 +366,7 @@ function ShelterSignupPageContent() {
                     <Button
                       type="button"
                       onClick={goNext}
-                      className="w-full flex justify-center"
+                      className="w-full flex justify-center bg-primary hover:scale-105"
                     >
                       Next
                     </Button>
@@ -374,7 +374,7 @@ function ShelterSignupPageContent() {
                     <Button
                       type="submit"
                       loading={loading}
-                      className="w-full flex justify-center"
+                      className="w-full flex justify-center bg-primary hover:scale-105"
                     >
                       Submit Application
                     </Button>
@@ -387,7 +387,7 @@ function ShelterSignupPageContent() {
               {isLoggedIn ? (
                 <Button
                   onClick={() => router.push("/site/home")}
-                  className="w-full flex justify-center"
+                  className="w-full flex justify-center hover:scale-105"
                 >
                   Back to Home
                 </Button>
@@ -398,7 +398,7 @@ function ShelterSignupPageContent() {
                       `/login?next=${encodeURIComponent("/shelterSignup?step=2")}`,
                     )
                   }
-                  className="w-full flex justify-center"
+                  className="w-full flex justify-center hover:scale-105"
                 >
                   Log in Instead
                 </Button>
@@ -421,7 +421,7 @@ function ShelterSignupPageContent() {
             </p>
             <Button
               onClick={() => router.push("/site/home")}
-              className="mt-5 w-full flex justify-center"
+              className="mt-5 w-full flex justify-center hover:scale-105"
             >
               Continue to Home
             </Button>

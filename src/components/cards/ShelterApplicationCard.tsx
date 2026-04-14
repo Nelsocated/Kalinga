@@ -48,7 +48,7 @@ export default function ShelterApplicationCard({ item }: Props) {
 
           <Link
             href={`/admin/application/${item.id}`}
-            className="mt-2 flex h-8.5 w-full items-center justify-center rounded-[15px] border bg-innerbg text-sm font-medium text-black transition"
+            className="mt-2 flex h-8.5 w-full items-center justify-center rounded-[15px] hover:scale-105 border bg-innerbg text-sm font-medium text-black transition"
           >
             Review Application
           </Link>

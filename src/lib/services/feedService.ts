@@ -23,7 +23,19 @@ export type FeedItem = {
 async function getFeedByMediaId(mediaId: string): Promise<FeedItem | null> {
   const supabase = await createServerSupabase();
 
-  const { data, error } = await supabase
+  // 1. Get the media row
+  const { data: media, error: mediaError } = await supabase
+    .from("pet_media")
+    .select("id, pet_id, type, url, caption, created_at")
+    .eq("id", mediaId)
+    .eq("type", "video")
+    .maybeSingle();
+
+  if (mediaError) throw new Error(mediaError.message);
+  if (!media) return null;
+
+  // 2. Fetch the parent pet
+  const { data: pet, error: petError } = await supabase
     .from("pets")
     .select(
       `
@@ -42,45 +54,36 @@ async function getFeedByMediaId(mediaId: string): Promise<FeedItem | null> {
       )
     `,
     )
-    .eq("pet_media.id", mediaId)
-    .eq("pet_media.type", "video")
-    .limit(1)
+    .eq("id", media.pet_id)
     .maybeSingle();
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (petError) throw new Error(petError.message);
 
-  return (data as FeedItem | null) ?? null;
+  return (pet as FeedItem | null) ?? null;
 }
-
 export async function getFeed(
   limit = 10,
-  page = 0,
+  excludedIds: string[] = [],
   mediaId?: string | null,
 ): Promise<FeedItem[]> {
   const supabase = await createServerSupabase();
 
+  // Fetch the pinned item first so we know its pet ID to exclude
+  const targetItem = mediaId ? await getFeedByMediaId(mediaId) : null;
+
+  // Exclude already-seen IDs + the pinned pet so it doesn't appear twice
+  const allExcluded = targetItem
+    ? [...excludedIds, targetItem.id]
+    : excludedIds;
+
   const { data, error } = await supabase.rpc("get_random_feed", {
-    limit_count: limit,
-    offset_count: page * limit,
+    limit_count: targetItem ? limit - 1 : limit, // save one slot for pinned
+    excluded_ids: allExcluded,
   });
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
 
   const randomItems = (data ?? []) as FeedItem[];
 
-  if (!mediaId) return randomItems;
-
-  const targetItem = await getFeedByMediaId(mediaId);
-  if (!targetItem) return randomItems;
-
-  const deduped = randomItems.filter((item) => {
-    const media = item.pet_media ?? [];
-    return !media.some((m) => m.id === mediaId);
-  });
-
-  return [targetItem, ...deduped];
+  return targetItem ? [targetItem, ...randomItems] : randomItems;
 }

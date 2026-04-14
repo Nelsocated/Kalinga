@@ -40,40 +40,37 @@ export default function Feed({
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-
-  const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
+  const seenIdsRef = useRef<Set<string>>(new Set());
   const isFetchingRef = useRef(false);
-  const lastTriggeredPage = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const nextItem = items[currentIndex + 1];
-
-  const loadFeed = useCallback(
-    async (pageToLoad: number, reset = false) => {
+  const loadMore = useCallback(
+    async (reset = false) => {
       if (isFetchingRef.current) return;
 
       try {
         isFetchingRef.current = true;
-        setLoading(true);
+        if (reset) setLoading(true);
         setError(null);
 
-        const url = `/api/feed?limit=10&page=${pageToLoad}${
-          targetMediaId ? `&media=${targetMediaId}` : ""
-        }`;
+        const excludedIds = reset ? [] : Array.from(seenIdsRef.current);
 
-        const res = await fetch(url, {
-          method: "GET",
-          cache: "no-store",
+        const params = new URLSearchParams({
+          limit: "10",
+          excluded: excludedIds.join(","),
         });
+        if (targetMediaId) params.set("media", targetMediaId);
 
+        const res = await fetch(`/api/feed?${params}`, { cache: "no-store" });
         const result = await res.json();
+        if (!res.ok) throw new Error(result.error || "Failed to fetch feed");
 
-        if (!res.ok) {
-          throw new Error(result.error || "Failed to fetch feed");
-        }
-
-        const nextItems = result.items ?? [];
+        const nextItems: FeedItem[] = result.items ?? [];
+        nextItems.forEach((item) => seenIdsRef.current.add(item.id));
 
         if (reset) {
           setItems(nextItems);
@@ -83,9 +80,7 @@ export default function Feed({
           setItems((prev) => [...prev, ...nextItems]);
         }
 
-        if (nextItems.length < 10) {
-          setHasMore(false);
-        }
+        if (nextItems.length < 10) setHasMore(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch feed");
       } finally {
@@ -96,34 +91,66 @@ export default function Feed({
     [targetMediaId],
   );
 
+  // Initial load
   useEffect(() => {
-    setPage(0);
-    loadFeed(0, true);
-  }, [targetMediaId, loadFeed]);
+    seenIdsRef.current = new Set();
+    loadMore(true);
+  }, [targetMediaId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // IntersectionObserver on sentinel — fires loadMore when bottom is near
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetchingRef.current) {
+          loadMore(false);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
 
   useEffect(() => {
-    if (page === 0) return;
-    loadFeed(page);
-  }, [page, loadFeed]);
-
-  useEffect(() => {
-    if (!hasMore || loading) return;
-
-    const remaining = items.length - currentIndex;
-
-    if (remaining <= 3 && lastTriggeredPage.current !== page) {
-      lastTriggeredPage.current = page;
-      setPage((p) => p + 1);
+    if (items.length > 0) {
+      setCurrentIndex(0);
     }
-  }, [currentIndex, items.length, hasMore, loading, page]);
+  }, [items]);
 
+  // IntersectionObserver per item — track which is currently in view
   useEffect(() => {
-    lastTriggeredPage.current = 0;
-  }, [page]);
+    if (!items.length) return;
 
+    const observers: IntersectionObserver[] = [];
+
+    items.forEach((_, i) => {
+      const el = itemRefs.current[i];
+      if (!el) return;
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            setCurrentIndex(i);
+          }
+        },
+        {
+          root: containerRef.current,
+          threshold: 0.6, // item must be 60% visible to count as "active"
+        },
+      );
+
+      obs.observe(el);
+      observers.push(obs);
+    });
+
+    return () => observers.forEach((o) => o.disconnect());
+  }, [items]);
+
+  // Notify parent of active item + nav
   useEffect(() => {
-    if (loading) return;
-
     if (!items.length) {
       onActiveChange?.(null);
       onNavChange?.(null);
@@ -131,14 +158,10 @@ export default function Feed({
     }
 
     const current = items[currentIndex];
-    if (!current) {
-      onActiveChange?.(null);
-      onNavChange?.(null);
-      return;
-    }
+    if (!current) return;
 
     const videoMedia =
-      current.pet_media?.find((media) => media.type === "video") ?? null;
+      current.pet_media?.find((m) => m.type === "video") ?? null;
 
     onActiveChange?.({
       pet_id: current.id,
@@ -153,34 +176,51 @@ export default function Feed({
     });
 
     onNavChange?.({
-      next: () =>
-        setCurrentIndex((prev) => Math.min(prev + 1, items.length - 1)),
-      prev: () => setCurrentIndex((prev) => Math.max(prev - 1, 0)),
+      next: () => {
+        const nextEl = itemRefs.current[currentIndex + 1];
+        nextEl?.scrollIntoView({ behavior: "smooth" });
+      },
+      prev: () => {
+        const prevEl = itemRefs.current[currentIndex - 1];
+        prevEl?.scrollIntoView({ behavior: "smooth" });
+      },
       hasNext: currentIndex < items.length - 1,
       hasPrev: currentIndex > 0,
       index: currentIndex,
       total: items.length,
     });
-  }, [items, currentIndex, loading, onActiveChange, onNavChange]);
+  }, [items, currentIndex, onActiveChange, onNavChange]);
 
-  // =========================
-  // ❌ STATES
-  // =========================
   if (loading && items.length === 0) return null;
   if (error) return <div>{error}</div>;
   if (!items.length) return <div>No feed items found.</div>;
 
-  // =========================
-  // 🎬 UI
-  // =========================
   return (
-    <div className="h-[95svh] aspect-9/16 w-full max-w-[55svh] overflow-hidden rounded-2xl border-2 bg-black">
-      {/* 🔥 PRELOAD NEXT VIDEO */}
-      {nextItem?.pet_media?.[0]?.url && (
-        <link rel="preload" as="video" href={nextItem.pet_media[0].url} />
-      )}
+    <div
+      ref={containerRef}
+      className="h-[95svh] w-full max-w-[55svh] overflow-y-scroll snap-y snap-mandatory rounded-2xl border-2 bg-black"
+      style={{ scrollbarWidth: "none" }}
+    >
+      {items.map((item, i) => (
+        <div
+          key={item.id}
+          ref={(el) => {
+            itemRefs.current[i] = el;
+          }}
+          className="h-[95svh] w-full snap-start snap-always shrink-0"
+        >
+          <ViewPort item={item} />
+        </div>
+      ))}
 
-      <ViewPort item={items[currentIndex]} />
+      {/* Sentinel — triggers loadMore when scrolled into view */}
+      <div ref={sentinelRef} className="h-1 w-full" />
+
+      {!hasMore && (
+        <div className="flex h-20 items-center justify-center text-white/40 text-sm">
+          You&apos;ve seen them all 🐾
+        </div>
+      )}
     </div>
   );
 }

@@ -89,8 +89,8 @@ function LoginPageContent() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                  autoComplete="current-password"
+                  placeholder="Password"
+                  autoComplete="new-password"
                   required
                 />
 
@@ -101,7 +101,7 @@ function LoginPageContent() {
                 <Button
                   type="submit"
                   loading={loading}
-                  className="w-full flex justify-center"
+                  className="w-full flex justify-center bg-primary hover:scale-105"
                 >
                   Log in
                 </Button>
@@ -111,7 +111,7 @@ function LoginPageContent() {
 
               <Button
                 onClick={() => router.push("/signup")}
-                className="w-full flex justify-center"
+                className="w-full flex justify-center hover:scale-105"
               >
                 Sign up
               </Button>

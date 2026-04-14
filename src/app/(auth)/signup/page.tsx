@@ -55,15 +55,14 @@ export default function SignupPage() {
     <div className="h-svh overflow-hidden bg-primary p-3 sm:p-4 lg:p-6">
       <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-center rounded-[15px] bg-innerbg shadow-lg">
         <main className="flex h-full w-full items-center justify-center p-3 sm:p-4 lg:p-6">
-          <div className="grid h-full w-full max-w-6xl items-center gap-6 lg:grid-cols-2 lg:gap-12">
+          <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-16">
             <div className="hidden h-full min-h-0 flex-col items-center justify-center lg:flex">
               <Image
                 src={kalinga_logo}
                 alt="kalinga-logo"
-                width={260}
-                height={260}
+                width={300}
+                height={300}
                 priority
-                className="h-auto w-full max-w-55 xl:max-w-65"
               />
               <h1 className="mt-4 text-center text-2xl font-medium text-black xl:text-3xl">
                 Give Care. Give Love.
@@ -81,6 +80,22 @@ export default function SignupPage() {
 
               <form onSubmit={onSubmit} className="mt-2 space-y-3">
                 <Input
+                  label="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your Username"
+                  required
+                />
+
+                <Input
+                  label="Fullname"
+                  value={fullName}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your Fullname"
+                  required
+                />
+
+                <Input
                   label="Email"
                   type="email"
                   value={email}
@@ -95,24 +110,8 @@ export default function SignupPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
+                  placeholder="Password"
                   autoComplete="new-password"
-                  required
-                />
-
-                <Input
-                  label="Fullname"
-                  value={fullName}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Fullname"
-                  required
-                />
-
-                <Input
-                  label="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Username"
                   required
                 />
 
@@ -123,7 +122,7 @@ export default function SignupPage() {
                 <Button
                   type="submit"
                   loading={loading}
-                  className="w-full flex justify-center"
+                  className="w-full flex justify-center bg-primary hover:scale-105"
                 >
                   Submit
                 </Button>
@@ -133,7 +132,7 @@ export default function SignupPage() {
 
               <Button
                 onClick={() => router.push("/login")}
-                className="w-full flex justify-center"
+                className="w-full flex justify-center hover:scale-105"
               >
                 Log in
               </Button>
