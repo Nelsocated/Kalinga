@@ -7,7 +7,6 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get("status");
 
     const validStatus =
-      status === "pending" ||
       status === "under_review" ||
       status === "approved" ||
       status === "rejected" ||

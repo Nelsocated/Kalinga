@@ -92,7 +92,7 @@ export default function PetCard({
       <div className="ml-1 flex justify-between items-center px-1 py-1">
         <div>
           <div className="flex items-center">
-            <div className="text-lg leading-none font-bold">{petName}</div>
+            <div className="text-lg leading-none font-bold ">{petName}</div>
             {getSexIcon(sex, 20)}
           </div>
 

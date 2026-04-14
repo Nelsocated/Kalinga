@@ -35,7 +35,6 @@ export default function AdminDashboardClient({
     value: ShelterApplicationStatus | "all";
   }[] = [
     { label: "All", value: "all" },
-    { label: "Pending", value: "pending" },
     { label: "Under Review", value: "under_review" },
     { label: "Approved", value: "approved" },
     { label: "Rejected", value: "rejected" },

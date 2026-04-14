@@ -6,5 +6,6 @@ export async function GET(req: Request) {
   const mediaId = searchParams.get("media");
 
   const items = await getFeed(mediaId);
+
   return Response.json({ items });
 }

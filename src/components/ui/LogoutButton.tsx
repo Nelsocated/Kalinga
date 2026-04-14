@@ -84,7 +84,7 @@ export default function LogoutButton({
                   setError("");
                 }}
                 disabled={loading}
-                className="text-sm text-neutral-700"
+                className="text-sm text-neutral-700 bg-primary hover:scale-105"
               >
                 Cancel
               </Button>
@@ -93,7 +93,7 @@ export default function LogoutButton({
                 type="button"
                 onClick={handleLogout}
                 disabled={loading}
-                className="text-sm text-neutral-700"
+                className="text-sm text-neutral-700 hover:scale-105"
               >
                 {loading ? "Logging out..." : "Yes, log out"}
               </Button>

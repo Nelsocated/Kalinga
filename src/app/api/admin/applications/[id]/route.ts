@@ -38,7 +38,7 @@ export async function GET(_: NextRequest, context: RouteContext) {
 }
 
 type PatchBody = {
-  status?: "pending" | "under_review" | "approved" | "rejected";
+  status?: "under_review" | "approved" | "rejected";
   reviewNote?: string | null;
   reviewedBy?: string | null;
 };
@@ -49,7 +49,6 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     const body = (await req.json()) as PatchBody;
 
     if (
-      body.status !== "pending" &&
       body.status !== "under_review" &&
       body.status !== "approved" &&
       body.status !== "rejected"

@@ -216,7 +216,7 @@ export default function ReviewApplicationClient({ initialData }: Props) {
                 type="button"
                 disabled={submitting || isApproved}
                 onClick={() => handleUpdate("approved")}
-                className={`w-full border border-approved rounded-[15px] text-sm font-bold py-2
+                className={`w-full border border-approved rounded-[15px] text-sm font-bold py-2 hover:scale-105
                  ${isApproved ? "opacity-50 cursor-not-allowed" : "hover:bg-approved text-black"}`}
               >
                 {isApproved
@@ -230,7 +230,7 @@ export default function ReviewApplicationClient({ initialData }: Props) {
                 type="button"
                 disabled={submitting || isRejected}
                 onClick={() => handleUpdate("rejected")}
-                className={`w-full border border-reject rounded-[15px] text-sm font-bold py-2
+                className={`w-full border border-reject rounded-[15px] text-sm font-bold py-2 hover:scale-105
                 ${isRejected ? "opacity-50 cursor-not-allowed" : "hover:bg-reject text-black"}`}
               >
                 {isRejected

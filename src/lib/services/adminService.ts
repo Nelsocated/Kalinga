@@ -1,11 +1,7 @@
 import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
 
-export type ShelterApplicationStatus =
-  | "pending"
-  | "under_review"
-  | "approved"
-  | "rejected";
+export type ShelterApplicationStatus = "under_review" | "approved" | "rejected";
 
 export type ShelterApplicationItem = {
   id: string;
@@ -55,7 +51,7 @@ function normalizeShelterApplication(
       row.application_status === "approved" ||
       row.application_status === "rejected"
         ? row.application_status
-        : "pending",
+        : "under_review",
     applicationSubmittedAt:
       typeof row.application_submitted_at === "string"
         ? row.application_submitted_at

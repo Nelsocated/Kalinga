@@ -139,7 +139,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
                   >
                     {(showOnlyLongest
                       ? longestCards
-                      : longestCards.slice(0, 5)
+                      : longestCards.slice(0, 4)
                     ).map((card) => (
                       <PetCard
                         key={card.key}

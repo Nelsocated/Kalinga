@@ -52,7 +52,7 @@ export default function MoreModal() {
   }, []);
 
   const buttonStyle =
-    "bg-white hover:bg-background border-0 flex items-center gap-3";
+    "bg-white hover:bg-background hover:scale-105 border-0 flex items-center gap-3";
 
   return (
     <div ref={wrapperRef} className="relative inline-block w-full">

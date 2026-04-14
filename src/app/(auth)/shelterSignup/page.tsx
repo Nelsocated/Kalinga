@@ -284,7 +284,7 @@ function ShelterSignupPageContent() {
                       label="Fullname"
                       value={fullName}
                       onChange={(event) => setFullName(event.target.value)}
-                      placeholder="Enter you Fullname"
+                      placeholder="Enter your Fullname"
                       required
                     />
 
