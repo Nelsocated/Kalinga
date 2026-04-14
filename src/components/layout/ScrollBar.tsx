@@ -36,7 +36,7 @@ export default function ScrollBar({
           isCreationOpen ? (
             <BackButton
               onClick={onCloseCreation}
-              className="flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
+              className="hover:scale-105 flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
             />
           ) : (
             onOpenCreation && (
@@ -51,7 +51,7 @@ export default function ScrollBar({
         <button
           type="button"
           onClick={onPrev}
-          className={`h-20 w-20 ${
+          className={`h-20 w-20 hover:scale-105 ${
             hasPrev ? "" : "pointer-events-none opacity-50"
           }`}
         >
@@ -61,7 +61,7 @@ export default function ScrollBar({
         <button
           type="button"
           onClick={onNext}
-          className={`h-20 w-20 ${
+          className={`h-20 w-20 hover:scale-105 ${
             hasNext ? "" : "pointer-events-none opacity-50"
           }`}
         >

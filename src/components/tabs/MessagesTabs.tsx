@@ -11,8 +11,8 @@ type Props = {
 
 export default function MessagesTabs({ mode, setMode }: Props) {
   return (
-    <div className="mt-3 pb-3 flex items-center justify-center gap-2 border-b-2">
-      <div className="relative flex items-center flex-row-reverse">
+    <div className="py-3 flex items-center justify-center gap-2 border-b-2">
+      <div className="relative flex items-center flex-row-reverse hover:scale-105 ">
         <TabButton
           active={mode === "inbox"}
           onClick={() => setMode("inbox")}
@@ -23,7 +23,7 @@ export default function MessagesTabs({ mode, setMode }: Props) {
           <Image src={mail} alt="mail" width={36} height={36} />
         </span>
       </div>
-      <div className="relative flex items-center ">
+      <div className="relative flex items-center hover:scale-105 ">
         <span className="absolute">
           <Image src={at_play} alt="at_play" width={41} height={41} />
         </span>

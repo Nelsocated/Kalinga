@@ -193,10 +193,10 @@ export default function MessagesLayout({
         header={<div>Messages</div>}
         scrollable={false}
         main={
-          <div className="grid h-full min-h-0 grid-cols-[320px_1fr] overflow-hidden">
+          <div className="grid h-full min-h-0 grid-cols-[320px_1fr]">
             <div className="flex min-h-0 flex-col border-r bg-white">
               <MessagesTabs mode={mode} setMode={setMode} />
-              <div className="min-h-0 w-full flex-1 overflow-hidden">
+              <div className="min-h-0 w-full flex-1 ">
                 {mode === "inbox" ? (
                   <ThreadList
                     threads={threads}

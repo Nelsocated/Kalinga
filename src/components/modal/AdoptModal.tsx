@@ -124,7 +124,7 @@ export default function AdoptModal({ petId }: Props) {
     <>
       <button
         onClick={openModal}
-        className="rounded-[15px] bg-primary px-10 py-2 text-xl font-bold text-white"
+        className="rounded-[15px] bg-primary px-10 py-2 text-xl font-bold text-white hover:scale-105 "
       >
         Adopt!
       </button>
@@ -136,7 +136,7 @@ export default function AdoptModal({ petId }: Props) {
           <div className="relative z-10 w-125 max-w-[90%] overflow-hidden rounded-[15px] border-2 bg-white shadow-2xl">
             {checkingStatus ? (
               <>
-                <div className="rounded-t-[15px] bg-primary py-4 text-center text-xl font-bold text-white">
+                <div className="rounded-t-[15px] bg-primary py-4 text-center text-xl font-bold text-innerbg">
                   Adopt Pet
                 </div>
 
@@ -191,11 +191,11 @@ export default function AdoptModal({ petId }: Props) {
               </>
             ) : (
               <>
-                <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-4">
+                <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-2">
                   <div className="pl-4">
                     <Back_Button onClick={closeModal} />
                   </div>
-                  <div className="text-center text-xl font-bold text-white">
+                  <div className="text-center text-subheader font-bold text-white">
                     Adopt Pet
                   </div>
                   <div />
@@ -352,7 +352,7 @@ export default function AdoptModal({ petId }: Props) {
                       <Button
                         type="submit"
                         disabled={loading}
-                        className="border border-primary"
+                        className="border border-primary hover:scale-105 "
                       >
                         {loading ? "Submitting..." : "Submit"}
                       </Button>

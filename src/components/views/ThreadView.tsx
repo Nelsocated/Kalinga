@@ -102,7 +102,7 @@ export default function ThreadView({
         <button
           type="button"
           onClick={onOpenReplyModal}
-          className="rounded-[15px] border bg-white px-5 py-2 text-description font-semibold text-black transition hover:bg-primary"
+          className="hover:scale-105  rounded-[15px] border bg-white px-5 py-2 text-description font-semibold text-black transition hover:bg-primary"
         >
           Reply
         </button>

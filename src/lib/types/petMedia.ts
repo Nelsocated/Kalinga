@@ -57,3 +57,8 @@ export type ServiceResult<T> = {
   details?: unknown;
   data?: T;
 };
+
+export type UploadPetPhotoInput = {
+  file: File;
+  petId: string;
+};

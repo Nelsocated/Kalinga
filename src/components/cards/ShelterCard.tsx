@@ -47,7 +47,7 @@ export default function ShelterCard({
     <Link
       href={href}
       className={[
-        "block w-full rounded-[15px] border bg-outerbg p-3 shadow-sm transition  hover:bg-black/5",
+        "block w-full rounded-[15px] border bg-outerbg p-3 hover:scale-105  shadow-sm transition  hover:bg-black/5",
         className,
       ].join(" ")}
     >

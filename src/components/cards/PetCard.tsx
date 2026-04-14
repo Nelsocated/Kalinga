@@ -47,7 +47,7 @@ export default function PetCard({
   const cardContent = resize ? (
     <>
       {topLabel ? (
-        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 border-secondary bg-primary px-4 py-1 text-small leading-none font-bold shadow-sm">
+        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 bg-chip px-4 py-1 text-small leading-none font-bold shadow-sm">
           {topLabel}
         </div>
       ) : null}
@@ -73,7 +73,7 @@ export default function PetCard({
   ) : (
     <>
       {topLabel ? (
-        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 border-secondary bg-primary px-4 py-1 text-small leading-none font-bold shadow-sm">
+        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full px-4 py-1 border-2 bg-chip text-small leading-none font-bold shadow-sm">
           {topLabel}
         </div>
       ) : null}
@@ -108,7 +108,7 @@ export default function PetCard({
           </div>
         </div>
 
-        <div className="border bg-chip rounded-full px-3 py-1 text-small">
+        <div className="border border-black rounded-full px-3 py-1 text-small">
           More Info
         </div>
       </div>
@@ -116,7 +116,7 @@ export default function PetCard({
   );
 
   const sharedClassName = [
-    "relative block overflow-visible rounded-[15px] border-2 border-secondary bg-chip",
+    "relative block overflow-visible rounded-[15px] border-2 bg-primary hover:scale-105",
     href ? "cursor-pointer" : "",
     resize ? "w-40" : "w-50",
     className,

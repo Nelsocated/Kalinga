@@ -48,7 +48,7 @@ export default function ThreadList({
                   key={thread.id}
                   type="button"
                   onClick={() => onSelectThread(thread.id)}
-                  className={`relative w-full rounded-[15px] border py-2 pl-5 pr-4 text-left transition ${
+                  className={`relative w-full rounded-[15px] border py-2 pl-5 pr-4 hover:scale-105  text-left transition ${
                     isActive
                       ? "border bg-background"
                       : "border-neutral-200 bg-white hover:bg-neutral-50"

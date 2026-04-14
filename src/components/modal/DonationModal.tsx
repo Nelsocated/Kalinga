@@ -95,7 +95,7 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
         type="button"
         onClick={() => setIsOpen(true)}
         className={[
-          "text-black font-semibold flex flex-col items-center leading-none",
+          "text-black font-semibold flex flex-col items-center leading-none hover:scale-105",
           buttonClassName,
         ].join(" ")}
       >
@@ -114,27 +114,27 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
               <div className="pl-4">
                 <BackButton onClick={() => setIsOpen(false)} />
               </div>
-              <div className="text-center text-xl font-bold text-white">
+              <div className="text-center text-subheader font-bold text-white">
                 Donations
               </div>
               <div />
             </div>
 
-            <div className="max-h-[75vh] overflow-y-auto scroll-stable p-5 space-y-6">
+            <div className="max-h-[75vh] overflow-y-auto scroll-stable px-5 py-2 text-black space-y-2">
               {errorMsg ? (
                 <div className="text-sm text-red-600">{errorMsg}</div>
               ) : null}
 
               {/* GOODS */}
               <div>
-                <div className="text-lg font-bold">Goods</div>
+                <div className="text-lg font-semibold">Goods</div>
 
                 {goodsInstruction ? (
-                  <div className="text-sm leading-relaxed pb-3">
+                  <div className="text-description font-medium leading-relaxed">
                     {goodsInstruction}
                   </div>
                 ) : (
-                  <div className="text-sm opacity-60 pb-3">
+                  <div className="text-description font-medium opacity-60">
                     No instruction provided.
                   </div>
                 )}
@@ -142,15 +142,15 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
                 <button
                   type="button"
                   onClick={() => setShowGoodsList((prev) => !prev)}
-                  className="font-medium hover:underline text-semibold"
+                  className="font-medium hover:underline text-semibold text-lg hover:scale-105 "
                 >
                   {showGoodsList ? "Hide donation items" : "What to Donate?"}
                 </button>
 
                 {showGoodsList && (
-                  <div className="p-4">
+                  <div className="px-4">
                     {goods.length ? (
-                      <ul className="space-y-1 text-sm">
+                      <ul className="space-y-1 text-description font-medium">
                         {goods.map((item, i) => (
                           <li key={i}>- {item || "Unnamed item"}</li>
                         ))}
@@ -165,7 +165,7 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
 
               {/* MONETARY */}
               <div>
-                <div className="text-lg font-bold">Monetary</div>
+                <div className="text-lg font-semibold">Monetary</div>
 
                 {monetary.length ? (
                   <div>
@@ -173,9 +173,9 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
                       const isQrOpen = openQrId === item.id;
 
                       return (
-                        <div key={item.id} className="p-3">
+                        <div key={item.id} className="px-2 py-1">
                           <div className="flex items-center justify-between">
-                            <div className="font-semibold">
+                            <div className="font-semibold text-subtitle">
                               {item.method?.toUpperCase() || "PAYMENT METHOD"}
                             </div>
 
@@ -187,7 +187,7 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
                                 )
                               }
                               disabled={!item.qr_url}
-                              className="rounded-full bg-primary p-1 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-full bg-primary  p-1 disabled:cursor-not-allowed disabled:opacity-50"
                               aria-label={
                                 isQrOpen ? "Hide QR code" : "Show QR code"
                               }
@@ -202,24 +202,28 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
                           </div>
 
                           {item.account_name ? (
-                            <div className="text-sm">
+                            <div className="text-description font-medium">
                               Account Name: {item.account_name}
                             </div>
                           ) : null}
 
                           {item.account_number ? (
-                            <div className="text-sm">
+                            <div className="text-description font-medium">
                               Account No: {item.account_number}
                             </div>
                           ) : null}
 
-                          {isQrOpen && item.qr_url ? (
-                            <Image
-                              src={item.qr_url}
-                              alt="QR"
-                              className="w-40 rounded-[15px] border"
-                            />
-                          ) : null}
+                          <div className="flex items-center justify-center  ">
+                            {isQrOpen && item.qr_url ? (
+                              <Image
+                                src={item.qr_url}
+                                alt="QR"
+                                width={500}
+                                height={500}
+                                className="w-50 rounded-[15px] border mt-5"
+                              />
+                            ) : null}
+                          </div>
                         </div>
                       );
                     })}

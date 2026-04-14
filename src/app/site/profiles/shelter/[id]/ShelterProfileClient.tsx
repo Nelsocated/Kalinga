@@ -21,7 +21,7 @@ export type ShelterProfileUI = {
   location?: string | null;
   logo_url?: string | null;
   about?: string | null;
-  contact?: string | null;
+  contact?: React.ReactNode | null;
   created_at?: string | null;
   pets: ShelterPetUI[];
 };

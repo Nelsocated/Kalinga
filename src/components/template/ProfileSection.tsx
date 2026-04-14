@@ -14,7 +14,7 @@ export default function ProfileSection({
   return (
     <section className="py-2">
       {title && (
-        <div className="text-title text-secondary font-bold wrap-break-words">
+        <div className="text-subtitle text-secondary font-bold wrap-break-words">
           {title}
         </div>
       )}

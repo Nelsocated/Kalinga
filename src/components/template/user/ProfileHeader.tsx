@@ -24,13 +24,13 @@ export default function ProfileHeader({
 
   return (
     <div className="w-full">
-      <div className="flex w-full items-center justify-between gap-8 py-2">
-        <div className="flex min-w-0 flex-1 items-center gap-2 py-2">
+      <div className="flex w-full items-center justify-between gap-8">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <div className="overflow-hidden rounded-full shrink-0">
             <Image src={src} alt={title} width={80} height={80} />
           </div>
 
-          <div className="min-w-0 flex flex-col pl-2 leading-5">
+          <div className="min-w-0 flex flex-col pl-2 leading-6">
             <div className="text-title font-semibold">{title}</div>
             <div className="text-lg font-medium">{subtitle}</div>
           </div>

@@ -44,6 +44,33 @@ export default function HomeClient({
     };
   }, []);
 
+  useEffect(() => {
+    if (!nav || showCreationPage) return;
+
+    let lastScroll = 0;
+
+    const handleWheel = (e: WheelEvent) => {
+      const now = Date.now();
+      if (now - lastScroll < 400) return;
+
+      if (e.deltaY > 0 && nav.hasNext) {
+        nav.next();
+      }
+
+      if (e.deltaY < 0 && nav.hasPrev) {
+        nav.prev();
+      }
+
+      lastScroll = now;
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, [nav, showCreationPage]); // ✅ ALWAYS both
+
   return (
     <div className="flex h-svh bg-background px-10">
       <main className="flex flex-1 items-center justify-center">

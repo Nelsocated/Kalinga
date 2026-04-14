@@ -26,7 +26,7 @@ export default function LinkPetModal({ open, pets, onClose, onSelect }: Props) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
       <div className="w-full max-w-2xl overflow-hidden rounded-[15px] border bg-white shadow-2xl">
-        <div className="flex items-center justify-center bg-primary px-6 py-3">
+        <div className="flex items-center justify-center bg-primary text-innerbg px-6 py-3">
           <h2 className="text-subtitle font-extrabold text-black">
             Link a Pet Profile
           </h2>

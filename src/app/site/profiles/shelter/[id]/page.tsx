@@ -31,9 +31,12 @@ export default async function Page({ params }: PageProps) {
     location: shelter.location ?? null,
     about: shelter.about ?? null,
     contact:
-      [shelter.contact_email, shelter.contact_phone]
-        .filter(Boolean)
-        .join(" • ") || null,
+      shelter.contact_email || shelter.contact_phone ? (
+        <div className="flex flex-col">
+          {shelter.contact_email && <span>{shelter.contact_email}</span>}
+          {shelter.contact_phone && <span>{shelter.contact_phone}</span>}
+        </div>
+      ) : null,
     created_at: shelter.created_at ?? null,
     pets: pets.map((pet) => ({
       id: pet.id,

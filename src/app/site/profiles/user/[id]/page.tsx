@@ -23,8 +23,12 @@ export default async function Page({
     avatar_url: data.photo_url ?? null,
     bio: data.bio ?? null,
     contact:
-      [data.contact_email, data.contact_phone].filter(Boolean).join(" • ") ||
-      null,
+      data.contact_email || data.contact_phone ? (
+        <div className="flex flex-col">
+          {data.contact_email && <span>{data.contact_email}</span>}
+          {data.contact_phone && <span>{data.contact_phone}</span>}
+        </div>
+      ) : null,
     location: null,
     created_at: data.created_at,
   };

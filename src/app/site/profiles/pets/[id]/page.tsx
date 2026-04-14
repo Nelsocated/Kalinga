@@ -42,6 +42,7 @@ export default async function PetProfilePage({ params }: PageProps) {
           shelter_name: shelter.shelter_name ?? null,
           logo_url: shelter.logo_url ?? null,
           location: shelter.location ?? null,
+          owner_id: shelter.owner_id ?? null,
         }
       : null,
     pet_media: petMedia.map((media) => ({

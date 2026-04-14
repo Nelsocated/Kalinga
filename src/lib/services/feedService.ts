@@ -56,12 +56,14 @@ async function getFeedByMediaId(mediaId: string): Promise<FeedItem | null> {
 
 export async function getFeed(
   limit = 10,
+  page = 0,
   mediaId?: string | null,
 ): Promise<FeedItem[]> {
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase.rpc("get_random_feed", {
     limit_count: limit,
+    offset_count: page * limit,
   });
 
   if (error) {
@@ -70,15 +72,10 @@ export async function getFeed(
 
   const randomItems = (data ?? []) as FeedItem[];
 
-  if (!mediaId) {
-    return randomItems;
-  }
+  if (!mediaId) return randomItems;
 
   const targetItem = await getFeedByMediaId(mediaId);
-
-  if (!targetItem) {
-    return randomItems;
-  }
+  if (!targetItem) return randomItems;
 
   const deduped = randomItems.filter((item) => {
     const media = item.pet_media ?? [];

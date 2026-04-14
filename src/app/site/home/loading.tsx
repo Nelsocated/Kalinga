@@ -6,7 +6,7 @@ export default function Loading() {
         <div className="flex flex-1 items-center justify-center">
           <div className="flex items-center gap-4">
             {/* Fake Feed */}
-            <div className="relative h-[85svh] w-[48svh] overflow-hidden rounded-[28px] border-2 bg-yellow-100/60 shadow-lg">
+            <div className="relative h-[95svh] aspect-9/16 w-full overflow-hidden rounded-[28px] border-2 bg-yellow-100/60 shadow-lg">
               {/* moving yellow shimmer */}
               <div className="absolute inset-0">
                 <div className="absolute inset-y-0 -left-1/2 w-1/2 animate-[shimmer_1.8s_linear_infinite] bg-linear-to-r from-transparent via-yellow-300/40 to-transparent" />

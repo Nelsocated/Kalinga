@@ -15,19 +15,19 @@ import Size from "@/public/icons/Size.svg";
 import type { Pets } from "@/src/lib/types/pets";
 
 const sectionTitle = "flex items-center gap-2 text-subtitle font-semibold";
-const buttonGroup = "mt-1 flex flex-wrap gap-2 ";
+const buttonGroup = "mt-1 flex flex-nowrap gap-2 ";
 
 const filterBtn = (active: boolean) =>
   [
-    "rounded-[15px] px-2 py-1 border text-lg font-medium flex items-center justify-center gap-2 text-center leading-none transition",
+    "rounded-[15px] hover:scale-105  w-full py-2 border text-[18px] font-medium flex items-center justify-center gap-2 text-center leading-none transition",
     active
       ? "bg-primary text-black"
-      : "border-black/50 bg-white text-black hover:bg-primary/10",
+      : "border-primary bg-white text-black hover:bg-primary/10",
   ].join(" ");
 
 function Header({ title, onBack }: { title: string; onBack: () => void }) {
   return (
-    <div className="relative flex items-center justify-center rounded-t-[15px] bg-primary text-subheader font-bold text-white">
+    <div className="relative flex items-center justify-center rounded-t-[15px]  bg-primary py-1 px-5 text-subheader font-bold text-white">
       <div className="absolute left-4">
         <BackButton onClick={onBack} />
       </div>
@@ -229,14 +229,14 @@ function Actions({
         <Button
           type="button"
           onClick={onReset}
-          className="border border-black/20 bg-white text-black"
+          className="border border-black/20 bg-innerbg hover:bg-chip text-black hover:scale-105 "
         >
           Reset
         </Button>
         <Button
           type="button"
           onClick={onSearch}
-          className="flex items-center justify-center gap-2 border bg-white"
+          className="flex items-center justify-center gap-2 px-y bg-primary hover:scale-105 "
         >
           <Image src={Meet} alt="meet-icon" width={32} height={32} />
           See Pets

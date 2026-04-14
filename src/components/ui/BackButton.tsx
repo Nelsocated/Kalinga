@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import BackIcon from "@/public/buttons/Back.svg";
+import BackIcon from "@/public/buttons/Back(2).svg";
 import WhiteBack from "@/public/buttons/WhiteBack.svg";
 
 type Props = {

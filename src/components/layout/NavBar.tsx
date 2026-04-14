@@ -38,7 +38,7 @@ export default function Navbar() {
     loadAuthUser();
   }, []);
 
-  const buttonStyle = "flex w-full gap-3 border-none text-lg";
+  const buttonStyle = "flex w-full gap-3 border-none text-lg hover:scale-105";
 
   function handleProfileClick() {
     if (!authUser) return;

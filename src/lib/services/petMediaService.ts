@@ -7,6 +7,7 @@ import type {
   VideoRow,
   ServiceResult,
   CreateVideoInput,
+  UploadPetPhotoInput,
 } from "@/src/lib/types/petMedia";
 import { randomUUID } from "crypto";
 
@@ -246,6 +247,69 @@ class PetMediaService {
       };
     }
   }
+
+  async uploadPetPhoto(
+    input: UploadPetPhotoInput,
+  ): Promise<ServiceResult<{ url: string }>> {
+    try {
+      const { file, petId } = input;
+
+      const supabase = await createServerSupabase();
+
+      const ext = file.name.split(".").pop() || "jpg";
+      const filePath = `${petId}/${crypto.randomUUID()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("pet_photos")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        return {
+          ok: false,
+          status: 500,
+          error: "Upload failed",
+          details: uploadError.message,
+        };
+      }
+
+      const { data } = supabase.storage
+        .from("pet_photos")
+        .getPublicUrl(filePath);
+
+      const url = data.publicUrl;
+
+      const { error: dbError } = await supabase.from("pet_media").insert({
+        pet_id: petId,
+        type: "photo",
+        url,
+      });
+
+      if (dbError) {
+        return {
+          ok: false,
+          status: 500,
+          error: "DB insert failed",
+          details: dbError.message,
+        };
+      }
+
+      return {
+        ok: true,
+        status: 201,
+        data: { url },
+      };
+    } catch (err) {
+      return {
+        ok: false,
+        status: 500,
+        error: "Internal server error",
+        details: err instanceof Error ? err.message : "Unknown error",
+      };
+    }
+  }
 }
 
 export const petMediaService = new PetMediaService();
@@ -270,4 +334,8 @@ export async function createVideo(
   input: CreateVideoInput,
 ): Promise<ServiceResult<VideoRow>> {
   return petMediaService.createVideo(input);
+}
+
+export async function uploadPetPhoto(input: UploadPetPhotoInput) {
+  return petMediaService.uploadPetPhoto(input);
 }

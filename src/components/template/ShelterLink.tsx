@@ -23,7 +23,7 @@ export default function ShelterLinks({
         <button
           type="button"
           onClick={() => router.push("/admin/dashboard")}
-          className="flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
+          className="hover:scale-105 flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
         >
           <Image
             src={Application}
@@ -36,7 +36,7 @@ export default function ShelterLinks({
         <button
           type="button"
           onClick={onOpenCreation}
-          className="flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
+          className="hover:scale-105 flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
         >
           <Image src={Plus} alt="plus-icon" width={40} height={40} />
         </button>
@@ -44,7 +44,7 @@ export default function ShelterLinks({
 
       <Link
         href="/shelter/notification"
-        className="flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
+        className="hover:scale-105 flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
       >
         <Image src={File} alt="file-icon" width={30} height={30} />
       </Link>

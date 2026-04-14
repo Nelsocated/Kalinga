@@ -403,7 +403,7 @@ export default function ComposeView({
             <Button
               type="button"
               onClick={onClose}
-              className="rounded-[15px] border px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-neutral-100"
+              className="hover:scale-105  rounded-[15px] border px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-neutral-100"
             >
               Cancel
             </Button>
@@ -413,7 +413,7 @@ export default function ComposeView({
             type="button"
             onClick={send}
             disabled={sending}
-            className="rounded-[15px] border bg-background px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-[#FFE27A] disabled:opacity-60"
+            className="hover:scale-105  rounded-[15px] border bg-background px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-[#FFE27A] disabled:opacity-60"
           >
             {sending ? "Sending..." : "Send"}
           </Button>

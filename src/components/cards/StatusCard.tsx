@@ -103,7 +103,7 @@ export default function StatusCard({ item, onClose }: Props) {
           <BackButton onClick={onClose} />
         </div>
 
-        <h2 className="text-center text-subtitle font-extrabold">
+        <h2 className="text-center text-subtitle font-extrabold text-innerbg">
           {item.title}
         </h2>
       </div>

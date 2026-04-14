@@ -12,7 +12,7 @@ type UserUI = {
   location?: string | null;
   avatar_url?: string | null;
   bio?: string | null;
-  contact?: string | null;
+  contact?: React.ReactNode | null;
   created_at?: string | null;
 };
 

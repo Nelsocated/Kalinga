@@ -60,7 +60,7 @@ export default function MoreModal() {
         <Button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex w-full gap-3 border-none"
+          className="flex w-full gap-3 border-none hover:scale-105"
         >
           <Image src={More} alt="more-icon" width={25} height={25} />
           <span>More</span>
@@ -74,8 +74,8 @@ export default function MoreModal() {
             : "pointer-events-none max-h-0 opacity-0"
         }`}
       >
-        <div className="flex items-center justify-between bg-primary px-5 py-2">
-          <h2 className="text-2xl font-bold text-black">More</h2>
+        <div className="flex items-center justify-between bg-primary text-innerbg px-5 py-2">
+          <h2 className="text-subtitle font-bold ">More</h2>
           <BackButton onClick={() => setOpen(false)} />
         </div>
 

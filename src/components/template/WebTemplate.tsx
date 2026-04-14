@@ -23,13 +23,13 @@ export default function WebTemplate({
   return (
     <div className="min-h-screen bg-background flex overflow-hidden">
       <div className="flex-1 flex justify-center pl-20 py-5">
-        <div className="w-full max-w-240 max-h-[94vh] rounded-[15px] border-4 bg-white flex flex-col overflow-hidden">
+        <div className="w-full max-w-240 max-h-[94vh] rounded-[15px] border-4 border-secondary bg-white flex flex-col overflow-hidden">
           {/* HEADER */}
-          <div className="flex items-center gap-3 border-b-2 bg-secondary px-5 py-1 shrink-0">
-            <div className="text-header font-bold leading-none text-textwhite mb-3">
+          <div className="flex items-center justify-between gap-3 bg-secondary px-5 py-3 shrink-0">
+            <div className="text-header font-bold leading-none text-textwhite">
               {header}
             </div>
-            <div className="mr-3 flex items-center">
+            <div className="mr-5 flex items-center">
               <BackButton isModal />
             </div>
           </div>

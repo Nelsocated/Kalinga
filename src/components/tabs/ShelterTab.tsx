@@ -32,7 +32,7 @@ const TAB_META = {
     iconActive: at_pet,
     alt: "pet",
     altActive: "at-pet",
-    label: "Pet",
+    label: "Pets",
   },
 } satisfies Record<
   TabsKey,
@@ -213,11 +213,11 @@ function TabButton({
       onClick={onClick}
       aria-pressed={active}
       className={[
-        "group flex min-w-21 flex-col items-center gap-1 rounded-full px-3",
+        "group flex min-w-21 flex-col items-center gap-1 rounded-full px-3 hover:scale-105",
         "transition-all duration-200 ease-out",
       ].join(" ")}
     >
-      <div className="transition-transform duration-200 ease-out group-hover:scale-105">
+      <div className="transition-transform duration-200 ease-out ">
         {children}
       </div>
 

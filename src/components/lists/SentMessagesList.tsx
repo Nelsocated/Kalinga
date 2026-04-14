@@ -29,7 +29,7 @@ export default function SentMessagesList({
                 key={item.id}
                 type="button"
                 onClick={() => onOpenMessage(item)}
-                className="w-full rounded-[15px] border p-4 py-2 text-left hover:bg-neutral-50"
+                className="w-full rounded-[15px] border p-4 py-2 text-left hover:bg-neutral-50 hover:scale-105 "
               >
                 <div className="flex items-center justify-between text-sm font-bold">
                   <div className="flex items-center truncate">

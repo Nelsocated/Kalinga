@@ -16,7 +16,7 @@ export default function StatusModal({ open, item, onClose }: Props) {
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
       <div className="w-full max-w-lg overflow-hidden rounded-[15px] border bg-outerbg shadow-2xl">
         <div className="flex items-center justify-center bg-primary px-6 py-2">
-          <h2 className="text-subtitle font-extrabold text-black">
+          <h2 className="text-subtitle font-extrabold text-innerbg">
             {item.title}
           </h2>
         </div>

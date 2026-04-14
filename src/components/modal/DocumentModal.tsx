@@ -33,7 +33,7 @@ export default function DocumentModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-[15px] border px-3 py-1.5 text-sm font-medium"
+            className="rounded-[15px] border px-3 py-1.5 text-sm font-medium hover:scale-105 "
           >
             Close
           </button>

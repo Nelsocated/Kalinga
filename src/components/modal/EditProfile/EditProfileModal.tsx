@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import BackButton from "../../ui/BackButton";
 import Input from "../../ui/Input";
-import Edit from "@/public/buttons/Edit.svg";
+import Edit from "@/public/buttons/Edit(2).svg";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
 
 type Field = {
@@ -158,10 +158,10 @@ export default function EditProfileModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex w-fit items-center gap-2 rounded-[15px] border border-black/50 bg-primary px-7 py-1 text-description text-secondary font-semibold hover:brightness-95"
+        className="flex w-fit items-center gap-2 rounded-[15px] border border-black/50 bg-primary px-7 py-1 text-description text-secondary font-semibold hover:scale-105"
       >
         {triggerLabel}
-        <Image src={Edit} alt="edit-button" width={20} height={20} />
+        <Image src={Edit} alt="edit-button" width={15} height={15} />
       </button>
 
       {open && (
@@ -177,11 +177,11 @@ export default function EditProfileModal({
             role="dialog"
           >
             {/* Header — matches DonationModal exactly */}
-            <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-2 ">
+            <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-3 ">
               <div className="pl-4">
                 <BackButton onClick={closeModal} />
               </div>
-              <div className="text-center text-xl font-bold text-white">
+              <div className="text-center text-title font-bold text-innerbg">
                 {title}
               </div>
               <div />
@@ -217,7 +217,7 @@ export default function EditProfileModal({
               </div>
 
               {/* Fields */}
-              <div>
+              <div className="space-y-3">
                 {fields.map((field) => (
                   <div key={field.key}>
                     <Input
@@ -258,7 +258,7 @@ export default function EditProfileModal({
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 rounded-[15px] border border-black/10 bg-innerbg text-black px-3 py-2 text-sm font-semibold"
+                  className="flex-1 rounded-[15px] hover:scale-105  border border-black/10 bg-innerbg text-black px-3 py-2 text-sm font-semibold"
                 >
                   Cancel
                 </button>
@@ -267,7 +267,7 @@ export default function EditProfileModal({
                   type="button"
                   onClick={handleSave}
                   disabled={!canSave}
-                  className="flex-1 rounded-[15px] bg-primary px-3 py-2 text-sm text-secondary font-semibold"
+                  className="flex-1 rounded-[15px] hover:scale-105 bg-primary px-3 py-2 text-sm text-secondary font-semibold"
                 >
                   {saving ? "Saving..." : "Save"}
                 </button>

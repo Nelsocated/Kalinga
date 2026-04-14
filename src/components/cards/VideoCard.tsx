@@ -25,7 +25,7 @@ export default function VideoCard({
     <Link
       href={href}
       className={[
-        "block overflow-hidden rounded-[15px] border-2 border-secondary w-48 h-77",
+        "block overflow-hidden rounded-[15px] border-2 border-secondary hover:scale-105 w-48 h-77",
         className,
       ].join(" ")}
     >

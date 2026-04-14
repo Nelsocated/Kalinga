@@ -118,7 +118,7 @@ export default function FilterModal() {
           setActiveView("filters");
           setFilterError(null);
         }}
-        className="border"
+        className="border hover:scale-105"
       >
         <div className="flex gap-3">
           <Image src={Filter} alt="filter-icon" width={25} height={25} />
@@ -138,9 +138,9 @@ export default function FilterModal() {
               onBack={handleBack}
             />
 
-            <div className="max-h-[82vh] overflow-y-auto scroll-stable py-3">
+            <div className="max-h-[82vh] overflow-y-auto scroll-stable py-3 px-5">
               {activeView === "filters" ? (
-                <div className="space-y-5 flex flex-col items-center justify-center">
+                <div className="space-y-5 flex flex-col">
                   <FilterControls.SpeciesSection
                     selected={species}
                     onToggle={handleSpeciesToggle}
@@ -164,7 +164,7 @@ export default function FilterModal() {
                   />
                 </div>
               ) : (
-                <div className="space-y-4 pt-2 px-4">
+                <div className="space-y-4 pt-2 px-2  overflow-y-auto scroll-stable">
                   {loading ? (
                     <PetResultsLoading />
                   ) : pets.length === 0 ? (
@@ -177,7 +177,7 @@ export default function FilterModal() {
                         {pets.length} pet{pets.length > 1 ? "s" : ""} found
                       </div>
 
-                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                         {pets.map((pet) => (
                           <PetCard
                             key={pet.id}

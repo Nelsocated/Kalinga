@@ -180,7 +180,7 @@ export default function LikeButton({
       onClick={onToggle}
       whileTap={{ scale: 0.8 }}
       disabled={loading}
-      className="cursor-pointer select-none disabled:opacity-60"
+      className="cursor-pointer select-none disabled:opacity-60 hover:scale-105"
       aria-pressed={liked}
       aria-label={liked ? "Unlike" : "Like"}
     >

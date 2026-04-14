@@ -34,7 +34,7 @@ export default function RightBar({ media_id, shelter }: Props) {
       <button
         type="button"
         onClick={goToShelter}
-        className="h-17 w-17 rounded-full border overflow-hidden"
+        className="h-17 w-17 rounded-full border overflow-hidden hover:scale-105"
       >
         <Image
           src={shelter?.logo_url ?? DEFAULT_AVATAR_URL}

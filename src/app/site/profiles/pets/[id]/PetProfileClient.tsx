@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { createClientSupabase } from "@/src/lib/supabase/client";
 
 import PetProfileHeader from "@/src/components/template/pet/PetProfileHeader";
 import ProfileSection from "@/src/components/template/ProfileSection";
@@ -11,6 +13,7 @@ import CharacteristicChip, {
 import PhotoView from "@/src/components/views/PhotoView";
 import LikeButton from "@/src/components/ui/LikeButton";
 import AdoptModal from "@/src/components/modal/AdoptModal";
+import AddPetPhotosModal from "@/src/components/modal/AddPetPhotosModal";
 
 import WebTemplate from "@/src/components/template/WebTemplate";
 import Male_Icon from "@/public/icons/male-icon.svg";
@@ -29,6 +32,7 @@ type ShelterMini = {
   shelter_name?: string | null;
   logo_url?: string | null;
   location?: string | null;
+  owner_id?: string | null;
 };
 
 type PetProfile = {
@@ -97,6 +101,20 @@ export default function PetProfileClient({
     [initialPet],
   );
 
+  const supabase = createClientSupabase();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function getUser() {
+      const { data } = await supabase.auth.getUser();
+      setUserId(data.user?.id ?? null);
+    }
+
+    getUser();
+  }, [supabase.auth]);
+
+  const isOwner = userId === initialPet.shelter?.owner_id;
+
   return (
     <WebTemplate
       header={<div>Pet Profile</div>}
@@ -133,6 +151,7 @@ export default function PetProfileClient({
                 className="h-10"
               />
             }
+            actions={isOwner ? <AddPetPhotosModal petId={id} /> : null}
           />
 
           <ProfileSection title="Characteristics">

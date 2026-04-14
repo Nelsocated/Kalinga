@@ -81,7 +81,7 @@ export default function AnswerModal({ isOpen, onClose, answerId }: Props) {
       <div className="relative z-10 w-125 max-w-[90%] overflow-hidden rounded-[15px] border-2 bg-white shadow-2xl">
         {view === "loading" ? (
           <>
-            <div className="rounded-t-[15px] bg-primary py-4 text-center text-xl font-bold text-white">
+            <div className="rounded-t-[15px] bg-primary py-4 text-center text-lg font-bold text-innerbg">
               Adoption Answer
             </div>
 
@@ -210,7 +210,7 @@ export default function AnswerModal({ isOpen, onClose, answerId }: Props) {
                   type="button"
                   onClick={closeModal}
                   disabled={loading}
-                  className="border border-primary"
+                  className="border border-primary hover:scale-105 "
                 >
                   Close
                 </Button>
