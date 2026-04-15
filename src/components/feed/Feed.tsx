@@ -15,15 +15,15 @@ type FeedNav = {
   total: number;
 };
 
+type ActiveItem = {
+  pet_id: string;
+  media_id: string | null;
+  shelter: ShelterMini | null;
+};
+
 type FeedProps = {
   initialMediaId?: string | null;
-  onActiveChange?: (
-    item: {
-      pet_id: string;
-      media_id: string | null;
-      shelter: ShelterMini | null;
-    } | null,
-  ) => void;
+  onActiveChange?: (item: ActiveItem | null) => void;
   onNavChange?: (nav: FeedNav | null) => void;
 };
 
@@ -44,9 +44,9 @@ export default function Feed({
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // 🔥 fetch ALL
+  // FETCH ALL VIDEOS
   useEffect(() => {
-    const fetchAll = async () => {
+    const fetchFeed = async () => {
       try {
         setLoading(true);
 
@@ -65,10 +65,10 @@ export default function Feed({
       }
     };
 
-    fetchAll();
+    fetchFeed();
   }, [targetMediaId]);
 
-  // 🔥 active tracking
+  // TRACK ACTIVE ITEM
   useEffect(() => {
     if (!items.length) return;
 
@@ -97,20 +97,17 @@ export default function Feed({
     return () => observers.forEach((o) => o.disconnect());
   }, [items]);
 
-  // 🔥 nav + active item
+  // NAV + ACTIVE ITEM
   useEffect(() => {
     if (!items.length) return;
 
     const current = items[currentIndex];
     if (!current) return;
 
-    const videoMedia =
-      current.pet_media?.find((m) => m.type === "video") ?? null;
-
     onActiveChange?.({
-      pet_id: current.id,
-      media_id: videoMedia?.id ?? null,
-      shelter: current.shelter ?? null,
+      pet_id: current.pet_id,
+      media_id: current.media_id,
+      shelter: current.shelter,
     });
 
     onNavChange?.({
@@ -133,6 +130,7 @@ export default function Feed({
 
   if (loading) return null;
   if (error) return <div>{error}</div>;
+  if (!items.length) return <div>No feed items</div>;
 
   return (
     <div
@@ -142,10 +140,8 @@ export default function Feed({
     >
       {items.map((item, i) => (
         <div
-          key={item.id}
-          ref={(el) => {
-            itemRefs.current[i] = el;
-          }}
+          key={item.media_id}
+          ref={(el) => void (itemRefs.current[i] = el)}
           className="h-[95svh] w-full snap-start snap-always shrink-0"
         >
           <ViewPort item={item} isActive={i === currentIndex} />

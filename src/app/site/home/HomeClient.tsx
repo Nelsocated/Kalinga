@@ -38,7 +38,6 @@ export default function HomeClient({
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
-
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -53,72 +52,57 @@ export default function HomeClient({
       const now = Date.now();
       if (now - lastScroll < 400) return;
 
-      if (e.deltaY > 0 && nav.hasNext) {
-        nav.next();
-      }
-
-      if (e.deltaY < 0 && nav.hasPrev) {
-        nav.prev();
-      }
+      if (e.deltaY > 0 && nav.hasNext) nav.next();
+      if (e.deltaY < 0 && nav.hasPrev) nav.prev();
 
       lastScroll = now;
     };
 
     window.addEventListener("wheel", handleWheel, { passive: true });
 
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-    };
-  }, [nav, showCreationPage]); // ✅ ALWAYS both
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, [nav, showCreationPage]);
 
   return (
     <div className="flex h-svh bg-background px-10">
       <main className="flex flex-1 items-center justify-center">
-        <div className="flex flex-1 items-center justify-center">
-          <div className="flex items-center gap-4">
-            {showCreationPage ? (
-              <>
-                <div className="h-[85svh] w-[48svh]">
-                  <CreationPageView />
-                </div>
-
-                <div className="w-18" />
-              </>
-            ) : (
-              <>
-                <Feed
-                  onActiveChange={setActive}
-                  onNavChange={setNav}
-                  initialMediaId={initialMediaId}
-                />
-
-                <div>
-                  {active ? (
-                    <RightBar
-                      media_id={active.media_id ?? ""}
-                      shelter={active.shelter}
-                    />
-                  ) : null}
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="absolute right-10">
-            {nav ? (
-              <ScrollBar
-                onNext={nav.next}
-                onPrev={nav.prev}
-                hasNext={nav.hasNext}
-                hasPrev={nav.hasPrev}
-                isShelter={isShelter}
-                isAdmin={isAdmin}
-                onOpenCreation={() => setShowCreationPage(true)}
-                onCloseCreation={() => setShowCreationPage(false)}
-                isCreationOpen={showCreationPage}
+        <div className="flex items-center gap-4">
+          {showCreationPage ? (
+            <div className="h-[85svh] w-[48svh]">
+              <CreationPageView />
+            </div>
+          ) : (
+            <>
+              <Feed
+                onActiveChange={setActive}
+                onNavChange={setNav}
+                initialMediaId={initialMediaId}
               />
-            ) : null}
-          </div>
+
+              {active && (
+                <RightBar
+                  media_id={active.media_id ?? ""}
+                  shelter={active.shelter}
+                />
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="absolute right-10">
+          {nav && (
+            <ScrollBar
+              onNext={nav.next}
+              onPrev={nav.prev}
+              hasNext={nav.hasNext}
+              hasPrev={nav.hasPrev}
+              isShelter={isShelter}
+              isAdmin={isAdmin}
+              onOpenCreation={() => setShowCreationPage(true)}
+              onCloseCreation={() => setShowCreationPage(false)}
+              isCreationOpen={showCreationPage}
+            />
+          )}
         </div>
       </main>
     </div>

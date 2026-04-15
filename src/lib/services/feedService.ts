@@ -2,21 +2,17 @@ import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
 
 export type FeedItem = {
-  id: string;
-  name: string;
+  pet_id: string;
+  media_id: string;
+  url: string;
+  caption: string | null;
   created_at: string | null;
-  shelter?: {
+  name: string;
+  shelter: {
     id: string;
     shelter_name: string | null;
     logo_url?: string | null;
   } | null;
-  pet_media?: Array<{
-    id: string;
-    type: string | null;
-    url?: string | null;
-    caption?: string | null;
-    created_at?: string | null;
-  }> | null;
 };
 
 export async function getFeed(mediaId?: string | null): Promise<FeedItem[]> {
