@@ -63,6 +63,7 @@ export default function ViewPort({ item, isActive }: Props) {
           playsInline
           loop
           muted
+          autoPlay
           onClick={togglePlay}
         />
       ) : (
