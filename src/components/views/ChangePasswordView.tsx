@@ -138,7 +138,6 @@ export default function ChangePasswordView() {
         method: "POST",
       });
     } catch {
-      // ignore logout error and still redirect
     } finally {
       setSuccessOpen(false);
       setLoggingOut(false);

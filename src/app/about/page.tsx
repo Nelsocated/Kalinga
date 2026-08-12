@@ -1,13 +1,8 @@
 "use client";
 
 import React from "react";
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import BackButton from "@/src/components/ui/BackButton";
-import logo from "@/public/kalinga_logo.svg";
-import Arian from "@/public/team/Arian.png";
-import Chrisciel from "@/public/team/Chrisciel.png";
-import Nelson from "@/public/team/Nelson.png";
-import Nino from "@/public/team/Nino.png";
 
 export default function Page() {
   const [heroRef, heroVisible] = useInView();
@@ -16,12 +11,10 @@ export default function Page() {
 
   return (
     <main className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth no-scrollbar">
-      {/* BACK BUTTON */}
       <div className="fixed top-25 left-25 z-50">
         <BackButton />
       </div>
 
-      {/* HERO */}
       <section className="h-screen snap-start">
         <Section>
           <div
@@ -33,7 +26,7 @@ export default function Page() {
             }`}
           >
             <Image
-              src={logo}
+              src={"/kalinga_logo.svg"}
               alt="kalinga-logo"
               width={200}
               height={200}
@@ -51,7 +44,6 @@ export default function Page() {
         </Section>
       </section>
 
-      {/* MISSION */}
       <section className="h-screen snap-start">
         <Section>
           <div
@@ -85,7 +77,6 @@ export default function Page() {
         </Section>
       </section>
 
-      {/* TEAM */}
       <section className="h-screen snap-start">
         <Section>
           <div
@@ -107,19 +98,30 @@ export default function Page() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
               <Team
-                image={Chrisciel}
+                image={"/team/Chrisciel.png"}
                 name="Chrisciel Joy A."
                 family="Catedrilla"
               />
-              <Team image={Nelson} name="Nelson A." family="Lago III" />
-              <Team image={Arian} name="Elijah Arian G." family="Mardoquio" />
-              <Team image={Nino} name="Niño Kriebel C." family="Olmo" />
+              <Team
+                image={"/team/Nelson.png"}
+                name="Nelson A."
+                family="Lago III"
+              />
+              <Team
+                image={"/team/Arian.png"}
+                name="Elijah Arian G."
+                family="Mardoquio"
+              />
+              <Team
+                image={"/team/Nino.png"}
+                name="Niño Kriebel C."
+                family="Olmo"
+              />
             </div>
           </div>
         </Section>
       </section>
 
-      {/* PAGE-SCOPED CSS ONLY */}
       <style jsx global>{`
         /* HIDE SCROLLBAR ONLY FOR THIS PAGE */
         .no-scrollbar::-webkit-scrollbar {
@@ -168,7 +170,6 @@ export default function Page() {
 function Section({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative h-screen bg-primary px-6 py-6 overflow-hidden">
-      {/* background glow */}
       <div className="absolute -top-20 -left-20 w-80 h-80 bg-secondary rounded-full animate-float" />
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-primary rounded-full animate-float" />
       <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-secondary rounded-full animate-float" />
@@ -203,7 +204,7 @@ function useInView() {
 }
 
 type Props = {
-  image: StaticImageData;
+  image: string;
   name: string;
   family: string;
 };

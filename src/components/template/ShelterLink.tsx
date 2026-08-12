@@ -2,9 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import Plus from "@/public/icons/Plus.svg";
-import File from "@/public/icons/FIle.svg";
-import Application from "@/public/buttons/Application.svg";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -26,7 +23,7 @@ export default function ShelterLinks({
           className="hover:scale-105 flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
         >
           <Image
-            src={Application}
+            src={"/buttons/Application.svg"}
             alt="application-icon"
             width={40}
             height={40}
@@ -38,7 +35,12 @@ export default function ShelterLinks({
           onClick={onOpenCreation}
           className="hover:scale-105 flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
         >
-          <Image src={Plus} alt="plus-icon" width={40} height={40} />
+          <Image
+            src={"/icons/Plus.svg"}
+            alt="plus-icon"
+            width={40}
+            height={40}
+          />
         </button>
       )}
 
@@ -46,7 +48,7 @@ export default function ShelterLinks({
         href="/shelter/notification"
         className="hover:scale-105 flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
       >
-        <Image src={File} alt="file-icon" width={30} height={30} />
+        <Image src={"/icons/FIle.svg"} alt="file-icon" width={30} height={30} />
       </Link>
     </div>
   );

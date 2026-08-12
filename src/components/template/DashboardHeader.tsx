@@ -1,8 +1,5 @@
 import type { DashboardStats } from "../../app/shelter/dashboard/DashboardClient";
 import Image from "next/image";
-import ViewIcon from "@/public/tabs/Play-icon.svg";
-import LikeIcon from "@/public/tabs/Heart.svg";
-import PawIcon from "@/public/tabs/at_pet.svg";
 
 type Props = {
   stats: DashboardStats;
@@ -50,10 +47,18 @@ export default function DashboardHeader({ stats }: Props) {
   return (
     <section className="border-b-2 bg-white px-2 py-3">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatCard icon={ViewIcon} value={stats.totalViews} label="Views" />
-        <StatCard icon={LikeIcon} value={stats.totalLikes} label="Likes" />
         <StatCard
-          icon={PawIcon}
+          icon={"/tabs/Play-icon.svg"}
+          value={stats.totalViews}
+          label="Views"
+        />
+        <StatCard
+          icon={"/tabs/Heart.svg"}
+          value={stats.totalLikes}
+          label="Likes"
+        />
+        <StatCard
+          icon={"/tabs/at_pet.svg"}
           value={stats.totalAdoptionsCompleted}
           label="Adoption Completed"
           custom={70}

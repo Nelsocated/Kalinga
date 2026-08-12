@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import BackButton from "../ui/BackButton";
-import Plus from "@/public/icons/Plus.svg";
 
 type Props = {
   petId: string;
@@ -107,7 +106,7 @@ export default function AddPetPhotosModal({ petId, buttonClassName }: Props) {
           buttonClassName,
         ].join(" ")}
       >
-        <Image src={Plus} alt="plus-icon" width={40} height={40} />
+        <Image src={"/icons/Plus.svg"} alt="plus-icon" width={40} height={40} />
       </button>
 
       {/* MODAL */}

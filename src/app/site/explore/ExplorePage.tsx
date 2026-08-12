@@ -7,8 +7,6 @@ import WebTemplate from "@/src/components/template/WebTemplate";
 import PetCard from "@/src/components/cards/PetCard";
 import FosterCard from "@/src/components/cards/FosterCard";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
-import Back from "@/public/buttons/Back(2).svg";
-import Forward from "@/public/buttons/Forward(2).svg";
 
 import type { LongestPet, FosterStory } from "./page";
 
@@ -38,9 +36,19 @@ function SectionHeader({
         aria-label={expanded ? `Collapse ${title}` : `Expand ${title}`}
       >
         {expanded ? (
-          <Image src={Back} alt="back-icon" width={13} height={13} />
+          <Image
+            src={"/buttons/Back(2).svg"}
+            alt="back-icon"
+            width={13}
+            height={13}
+          />
         ) : (
-          <Image src={Forward} alt="forward-icon" width={13} height={13} />
+          <Image
+            src={"/buttons/Forward(2).svg"}
+            alt="forward-icon"
+            width={13}
+            height={13}
+          />
         )}
       </button>
     </div>

@@ -5,7 +5,6 @@ import React, { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Input from "@/src/components/ui/Input";
 import Button from "@/src/components/ui/Button";
-import kalinga_logo from "@/public/kalinga_logo.svg";
 import Image from "next/image";
 
 function LoginPageContent() {
@@ -57,7 +56,7 @@ function LoginPageContent() {
           <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-16">
             <div className="hidden min-h-0 flex-col items-center justify-center lg:flex">
               <Image
-                src={kalinga_logo}
+                src={"/kalinga_logo.svg"}
                 alt="kalinga-logo"
                 width={300}
                 height={300}

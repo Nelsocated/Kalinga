@@ -1,6 +1,4 @@
 import Image from "next/image";
-import mail from "@/public/tabs/mail.svg";
-import at_play from "@/public/tabs/at_pet.svg";
 
 type ViewMode = "inbox" | "compose";
 
@@ -20,12 +18,17 @@ export default function MessagesTabs({ mode, setMode }: Props) {
           label="Inbox"
         />
         <span className="absolute rounded-full bg-white">
-          <Image src={mail} alt="mail" width={36} height={36} />
+          <Image src={"/tabs/mail.svg"} alt="mail" width={36} height={36} />
         </span>
       </div>
       <div className="relative flex items-center hover:scale-105 ">
         <span className="absolute">
-          <Image src={at_play} alt="at_play" width={41} height={41} />
+          <Image
+            src={"/tabs/at_pet.svg"}
+            alt="at_play"
+            width={41}
+            height={41}
+          />
         </span>
         <TabButton
           active={mode === "compose"}

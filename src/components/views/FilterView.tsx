@@ -1,10 +1,10 @@
 "use client";
 import type { ShelterAdoptionStatus } from "../../app/shelter/notification/NotifShelter";
-export type SpeciesFilter = "dog" | "cat";
 import Button from "../ui/Button";
 import Image from "next/image";
-import Cat from "@/public/icons/Cat.svg";
-import Dog from "@/public/icons/Dog.svg";
+
+export type SpeciesFilter = "dog" | "cat";
+
 type Props = {
   species: SpeciesFilter;
   status: ShelterAdoptionStatus;
@@ -134,9 +134,11 @@ export default function FilterView({
 
 export function getIcon(species: string) {
   if (species == "cat") {
-    return <Image src={Cat} alt={`cat-icon`} width={40} height={40} />;
+    return (
+      <Image src={"/icons/Cat.svg"} alt={`cat-icon`} width={40} height={40} />
+    );
   }
   if (species == "dog") {
-    return <Image src={Dog} alt={`dog`} width={30} height={30} />;
+    return <Image src={"/icons/Dog.svg"} alt={`dog`} width={30} height={30} />;
   }
 }

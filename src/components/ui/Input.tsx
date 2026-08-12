@@ -11,7 +11,7 @@ type InputProps = {
   placeholder?: string;
   autoComplete?: string;
   disabled?: boolean;
-  readOnly?: boolean; // ✅ ADD THIS
+  readOnly?: boolean;
   required?: boolean;
   error?: string;
   hint?: string;

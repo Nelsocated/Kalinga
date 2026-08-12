@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Caption from "./Caption";
-import playIcon from "@/public/icons/Play-icon.svg";
 import type { FeedItem } from "@/src/lib/services/feedService";
 
 type Props = {
@@ -74,7 +73,7 @@ export default function ViewPort({ item, isActive }: Props) {
 
       {isPaused && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <Image src={playIcon} alt="play" />
+          <Image src={"/icons/Play-icon.svg"} alt="play" />
         </div>
       )}
 

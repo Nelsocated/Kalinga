@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/src/components/ui/Input";
 import Button from "@/src/components/ui/Button";
-import kalinga_logo from "@/public/kalinga_logo.svg";
 import Image from "next/image";
 
 export default function SignupPage() {
@@ -58,7 +57,7 @@ export default function SignupPage() {
           <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-16">
             <div className="hidden h-full min-h-0 flex-col items-center justify-center lg:flex">
               <Image
-                src={kalinga_logo}
+                src={"/kalinga_logo.svg"}
                 alt="kalinga-logo"
                 width={300}
                 height={300}

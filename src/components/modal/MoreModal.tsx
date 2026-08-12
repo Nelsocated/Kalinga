@@ -8,10 +8,6 @@ import { getAuthUser, type AuthUser } from "@/src/lib/utils/clientAuth";
 import Button from "../ui/Button";
 import BackButton from "../ui/BackButton";
 import LogoutButton from "../ui/LogoutButton";
-import More from "@/public/icons/More.svg";
-import Home from "@/public/icons/Home(ver3).svg";
-import Setting from "@/public/icons/Setting.svg";
-import About from "@/public/icons/About.svg";
 
 export default function MoreModal() {
   const router = useRouter();
@@ -62,7 +58,12 @@ export default function MoreModal() {
           onClick={() => setOpen(true)}
           className="flex w-full gap-3 border-none hover:scale-105"
         >
-          <Image src={More} alt="more-icon" width={25} height={25} />
+          <Image
+            src={"/icons/More.svg"}
+            alt="more-icon"
+            width={25}
+            height={25}
+          />
           <span>More</span>
         </Button>
       )}
@@ -86,7 +87,12 @@ export default function MoreModal() {
               onClick={() => router.push("/shelterSignup")}
               className={buttonStyle}
             >
-              <Image src={Home} alt="home-icon" width={25} height={25} />
+              <Image
+                src={"/icons/Home(ver3).svg"}
+                alt="home-icon"
+                width={25}
+                height={25}
+              />
               <span>Create Shelter</span>
             </Button>
           ) : (
@@ -97,7 +103,12 @@ export default function MoreModal() {
             onClick={() => router.push("/about")}
             className={buttonStyle}
           >
-            <Image src={About} alt="about-icon" width={25} height={25} />
+            <Image
+              src={"/icons/About.svg"}
+              alt="about-icon"
+              width={25}
+              height={25}
+            />
             <span>About</span>
           </Button>
           <Button
@@ -105,7 +116,12 @@ export default function MoreModal() {
             onClick={() => router.push("/site/settings")}
             className={buttonStyle}
           >
-            <Image src={Setting} alt="setting-icon" width={25} height={25} />
+            <Image
+              src={"/icons/Setting.svg"}
+              alt="setting-icon"
+              width={25}
+              height={25}
+            />
             <span>Settings</span>
           </Button>
           <LogoutButton />

@@ -10,8 +10,6 @@ import PetCard from "../cards/PetCard";
 import Button from "../ui/Button";
 import FilterControls from "../ui/FilterControls";
 
-import Filter from "@/public/icons/Filter.svg";
-
 type ViewKey = "filters" | "results";
 
 function toggleArrayValue<T extends string>(value: T, values: T[]): T[] {
@@ -121,7 +119,12 @@ export default function FilterModal() {
         className="border hover:scale-105"
       >
         <div className="flex gap-3">
-          <Image src={Filter} alt="filter-icon" width={25} height={25} />
+          <Image
+            src={"/icons/Filter.svg"}
+            alt="filter-icon"
+            width={25}
+            height={25}
+          />
           Lookup
         </div>
       </Button>

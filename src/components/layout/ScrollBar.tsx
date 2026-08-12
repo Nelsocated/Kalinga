@@ -1,6 +1,4 @@
 import Image from "next/image";
-import up_button from "@/public/buttons/Up.svg";
-import down_button from "@/public/buttons/Down.svg";
 import ShelterLinks from "../template/ShelterLink";
 import BackButton from "../ui/BackButton";
 
@@ -55,7 +53,7 @@ export default function ScrollBar({
             hasPrev ? "" : "pointer-events-none opacity-50"
           }`}
         >
-          <Image src={up_button} alt="up-button" />
+          <Image src={"/buttons/Up.svg"} alt="up-button" />
         </button>
 
         <button
@@ -65,7 +63,7 @@ export default function ScrollBar({
             hasNext ? "" : "pointer-events-none opacity-50"
           }`}
         >
-          <Image src={down_button} alt="down-button" />
+          <Image src={"/buttons/Down.svg"} alt="down-button" />
         </button>
       </div>
 

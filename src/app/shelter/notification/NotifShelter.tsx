@@ -9,7 +9,6 @@ import FilterView, {
 import type { PetGender } from "@/src/lib/types/shelters";
 import NotifShelterCard from "@/src/components/cards/NotifShelterCard";
 import Button from "@/src/components/ui/Button";
-import Filter from "@/public/icons/Filter.svg";
 import Image from "next/image";
 
 export type ShelterAdoptionStatus =
@@ -124,7 +123,7 @@ export default function NotifShelter({ items = [] }: Props) {
                   className="rounded-[15px] border bg-transparent px-3 py-1 text-sm font-semibold text-black"
                 >
                   <Image
-                    src={Filter}
+                    src={"/icons/Filter.svg"}
                     alt="filter-icon"
                     width={30}
                     height={30}

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import copy_button from "@/public/buttons/Copy.svg";
 
 type ShareType = "pet" | "video" | "shelter";
 
@@ -53,7 +52,12 @@ export default function ShareButton({ id, type, className }: Props) {
       {copied ? (
         <span className="text-xs font-semibold">Copied</span>
       ) : (
-        <Image src={copy_button} alt="copy-link" width={43} height={43} />
+        <Image
+          src={"/buttons/Copy.svg"}
+          alt="copy-link"
+          width={43}
+          height={43}
+        />
       )}
     </button>
   );

@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import BackButton from "../../ui/BackButton";
 import Input from "../../ui/Input";
-import Edit from "@/public/buttons/Edit(2).svg";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
 
 type Field = {
@@ -161,7 +160,12 @@ export default function EditProfileModal({
         className="flex w-fit items-center gap-2 rounded-[15px] border border-black/50 bg-primary px-7 py-1 text-description text-secondary font-semibold hover:scale-105"
       >
         {triggerLabel}
-        <Image src={Edit} alt="edit-button" width={15} height={15} />
+        <Image
+          src={"/buttons/Edit(2).svg"}
+          alt="edit-button"
+          width={15}
+          height={15}
+        />
       </button>
 
       {open && (

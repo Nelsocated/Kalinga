@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import QR from "@/public/buttons/QR.svg";
-import Donate from "@/public/buttons/Donate.svg";
 import Image from "next/image";
 import BackButton from "../ui/BackButton";
 
@@ -99,7 +97,12 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
           buttonClassName,
         ].join(" ")}
       >
-        <Image src={Donate} alt="donate-icon" width={42} height={42} />
+        <Image
+          src={"/buttons/Donate.svg"}
+          alt="donate-icon"
+          width={42}
+          height={42}
+        />
       </button>
 
       {isOpen && (
@@ -193,7 +196,7 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
                               }
                             >
                               <Image
-                                src={QR}
+                                src={"/buttons/QR.svg"}
                                 alt="qr-icon"
                                 width={23}
                                 height={23}

@@ -6,9 +6,6 @@ import ChangePasswordView from "@/src/components/views/ChangePasswordView";
 import DeleteAccountView from "@/src/components/views/DeleteAccountView";
 import WebTemplate from "@/src/components/template/WebTemplate";
 
-import CheckUser from "@/public/icons/CheckUser.svg";
-import Setting from "@/public/icons/Setting.svg";
-
 export default function SettingsPage() {
   return <WebTemplate header={<div>Settings</div>} main={SettingsTabsView()} />;
 }
@@ -29,7 +26,12 @@ function SettingsTabsView() {
           className={`flex items-center hover:scale-105`}
         >
           <div className="bg-primary rounded-full w-12 h-12 flex items-center justify-center absolute">
-            <Image src={Setting} alt="setting-icon" width={25} height={25} />
+            <Image
+              src={"/icons/Setting.svg"}
+              alt="setting-icon"
+              width={25}
+              height={25}
+            />
           </div>
           <span
             className={`${buttonStyle} ${activeTab === "change-password" ? "bg-primary" : "bg-white"}`}
@@ -45,7 +47,7 @@ function SettingsTabsView() {
         >
           <div className="bg-primary rounded-full w-12 h-12 flex items-center justify-center absolute">
             <Image
-              src={CheckUser}
+              src={"/icons/CheckUser.svg"}
               alt="checkuser-icon"
               width={25}
               height={25}

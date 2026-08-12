@@ -1,9 +1,6 @@
 "use client";
-
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import BackIcon from "@/public/buttons/Back(2).svg";
-import WhiteBack from "@/public/buttons/WhiteBack.svg";
 
 type Props = {
   onClick?: () => void;
@@ -38,7 +35,7 @@ export default function BackButton({
       className={`flex items-center justify-center hover:scale-110 ${className ?? ""}`}
     >
       <Image
-        src={isModal ? WhiteBack : BackIcon}
+        src={isModal ? "/buttons/WhiteBack.svg" : "/buttons/Back(2).svg"}
         alt="Back"
         width={15}
         height={15}

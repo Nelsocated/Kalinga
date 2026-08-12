@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Input from "@/src/components/ui/Input";
 import Button from "@/src/components/ui/Button";
-import kalinga_logo from "@/public/kalinga_logo.svg";
 import { getAuthUser } from "@/src/lib/utils/clientAuth";
 
 type Step = 1 | 2 | 3;
@@ -231,7 +230,7 @@ function ShelterSignupPageContent() {
             <div className="hidden h-full items-center justify-center lg:flex">
               <div className="flex max-w-md flex-col items-center justify-center">
                 <Image
-                  src={kalinga_logo}
+                  src={"/kalinga_logo.svg"}
                   alt="kalinga-logo"
                   width={300}
                   height={300}

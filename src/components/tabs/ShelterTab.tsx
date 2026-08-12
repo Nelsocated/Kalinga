@@ -3,11 +3,6 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import at_play from "@/public/tabs/at_play.svg";
-import at_pet from "@/public/tabs/at_pet.svg";
-import play from "@/public/tabs/play.svg";
-import pet from "@/public/tabs/pet.svg";
-
 import VideoCard from "../cards/VideoCard";
 import PetCard from "../cards/PetCard";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
@@ -21,15 +16,15 @@ export type TabsKey = "videos" | "pets";
 
 const TAB_META = {
   videos: {
-    icon: play,
-    iconActive: at_play,
+    icon: "/tabs/play.svg",
+    iconActive: "/tabs/at_play.svg",
     alt: "play",
     altActive: "at-play",
     label: "Videos",
   },
   pets: {
-    icon: pet,
-    iconActive: at_pet,
+    icon: "/tabs/pet.svg",
+    iconActive: "/tabs/at_pet.svg",
     alt: "pet",
     altActive: "at-pet",
     label: "Pets",
@@ -37,8 +32,8 @@ const TAB_META = {
 } satisfies Record<
   TabsKey,
   {
-    icon: typeof play;
-    iconActive: typeof play;
+    icon: string;
+    iconActive: string;
     alt: string;
     altActive: string;
     label: string;

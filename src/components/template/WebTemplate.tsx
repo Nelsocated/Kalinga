@@ -6,8 +6,8 @@ import BackButton from "../ui/BackButton";
 type Props = {
   header?: React.ReactNode;
   main: React.ReactNode;
-  side?: React.ReactNode; // 👈 NEW
-  top?: React.ReactNode; // 👈 optional like pet template
+  side?: React.ReactNode;
+  top?: React.ReactNode;
   scrollable?: boolean;
 };
 
@@ -18,7 +18,7 @@ export default function WebTemplate({
   top,
   scrollable = true,
 }: Props) {
-  const isPetLayout = !!side; // 👈 auto enable if side exists
+  const isPetLayout = !!side;
 
   return (
     <div className="min-h-screen bg-background flex overflow-hidden">

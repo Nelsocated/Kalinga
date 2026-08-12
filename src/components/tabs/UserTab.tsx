@@ -3,13 +3,6 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import at_play from "@/public/tabs/at_play.svg";
-import at_home from "@/public/tabs/at_home.svg";
-import at_pet from "@/public/tabs/at_pet.svg";
-import play from "@/public/tabs/play.svg";
-import home from "@/public/tabs/home.svg";
-import pet from "@/public/tabs/pet.svg";
-
 import type { LikedMiniItem } from "@/src/lib/types/likes";
 
 import VideoCard from "../cards/VideoCard";
@@ -21,22 +14,22 @@ export type TabsKey = "videos" | "pets" | "shelters";
 type LikedKind = "video" | "pet" | "shelter";
 const TAB_META = {
   videos: {
-    icon: play,
-    iconActive: at_play,
+    icon: "/tabs/play.svg",
+    iconActive: "/tabs/at_play.svg",
     alt: "play",
     altActive: "at-play",
     label: "Videos",
   },
   shelters: {
-    icon: home,
-    iconActive: at_home,
+    icon: "/tabs/home.svg",
+    iconActive: "/tabs/at_home.svg",
     alt: "home",
     altActive: "at-home",
     label: "Shelters",
   },
   pets: {
-    icon: pet,
-    iconActive: at_pet,
+    icon: "/tabs/pet.svg",
+    iconActive: "/tabs/at_pet.svg",
     alt: "pet",
     altActive: "at-pet",
     label: "Pets",
@@ -44,8 +37,8 @@ const TAB_META = {
 } satisfies Record<
   TabsKey,
   {
-    icon: typeof play;
-    iconActive: typeof play;
+    icon: string;
+    iconActive: string;
     alt: string;
     altActive: string;
     label: string;

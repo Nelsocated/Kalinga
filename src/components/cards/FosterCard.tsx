@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { ReactNode } from "react";
 import Image from "next/image";
-import Forward from "@/public/buttons/Forward(2).svg";
 
 type FosterCardProps = {
-  href: string; // for foster profile button
+  href: string;
   title: string;
   description: string;
   children: ReactNode;
@@ -38,7 +37,12 @@ export default function FosterCard({
         </div>
         <div className="flex justify-end items-center mr-5">
           <Link href={href}>
-            <Image src={Forward} alt="forward-icon" width={15} height={15} />
+            <Image
+              src={"/buttons/Forward(2).svg"}
+              alt="forward-icon"
+              width={15}
+              height={15}
+            />
           </Link>
         </div>
       </div>

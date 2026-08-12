@@ -12,10 +12,6 @@ import { createClientSupabase } from "@/src/lib/supabase/client";
 
 import type { NotificationItem } from "./page";
 
-import Species from "@/public/icons/species(ver2).svg";
-import Date from "@/public/icons/Date(ver2).svg";
-import Home from "@/public/icons/Home(ver2).svg";
-
 type Props = {
   notifications: NotificationItem[];
 };
@@ -130,7 +126,12 @@ export default function NotifClient({ notifications }: Props) {
             <div className="grid grid-cols-3 place-items-center gap-15 mb-5">
               <div className="relative flex items-center">
                 <span className="absolute">
-                  <Image src={Home} alt="home-icon" width={50} height={50} />
+                  <Image
+                    src={"/icons/Home(ver2).svg"}
+                    alt="home-icon"
+                    width={50}
+                    height={50}
+                  />
                 </span>
                 <span className={headerStyle}>Shelter</span>
               </div>
@@ -138,7 +139,7 @@ export default function NotifClient({ notifications }: Props) {
               <div className="relative flex items-center">
                 <span className="absolute">
                   <Image
-                    src={Species}
+                    src={"/icons/species(ver2).svg"}
                     alt="species-icon"
                     width={50}
                     height={50}
@@ -149,7 +150,12 @@ export default function NotifClient({ notifications }: Props) {
 
               <div className="relative flex items-center">
                 <span className="absolute rounded-full bg-primary">
-                  <Image src={Date} alt="date-icon" width={50} height={50} />
+                  <Image
+                    src={"/icons/Date(ver2).svg"}
+                    alt="date-icon"
+                    width={50}
+                    height={50}
+                  />
                 </span>
                 <span className={headerStyle}>Date</span>
               </div>

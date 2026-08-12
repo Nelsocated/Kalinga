@@ -3,7 +3,6 @@
 import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import meet_icon from "@/public/icons/meet.svg";
 import Image from "next/image";
 
 type Props = {
@@ -80,7 +79,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
 
                   <div className="flex items-center justify-center">
                     <Image
-                      src={meet_icon}
+                      src={"/icons/meet.svg"}
                       alt="meet-icon"
                       width={50}
                       height={50}

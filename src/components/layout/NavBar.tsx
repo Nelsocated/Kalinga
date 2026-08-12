@@ -8,14 +8,6 @@ import Button from "../ui/Button";
 import FilterModal from "../modal/FilterModal";
 import MoreModal from "../modal/MoreModal";
 
-import kalinga_logo from "@/public/kalinga_logo.svg";
-import fyp_icon from "@/public/icons/play-circle.svg";
-import explore_icon from "@/public/icons/Explore.svg";
-import shelter_icon from "@/public/icons/Home.svg";
-import profile_icon from "@/public/icons/user.svg";
-import notif_icon from "@/public/icons/notifications.svg";
-import messages_icon from "@/public/icons/Messages.svg";
-
 import {
   getAuthUser,
   getProfileRouteByRole,
@@ -23,6 +15,12 @@ import {
   getMsgRouteByRole,
   type AuthUser,
 } from "@/src/lib/utils/clientAuth";
+
+type IconItem = {
+  title: string;
+  image: string;
+  link: string | ((authUser: AuthUser | null) => string | undefined | null);
+};
 
 export default function Navbar() {
   const router = useRouter();
@@ -40,29 +38,51 @@ export default function Navbar() {
 
   const buttonStyle = "flex w-full gap-3 border-none text-lg hover:scale-105";
 
-  function handleProfileClick() {
-    if (!authUser) return;
+  const icons: IconItem[] = [
+    {
+      title: "For You",
+      image: "/icons/play-circle.svg",
+      link: "/site/home",
+    },
+    {
+      title: "Explore",
+      image: "/icons/Explore.svg",
+      link: "/site/explore",
+    },
+    {
+      title: "Shelters",
+      image: "/icons/Home.svg",
+      link: "/site/shelters",
+    },
+    {
+      title: "Profile",
+      image: "/icons/user.svg",
+      link: (user) => (user ? getProfileRouteByRole(user) : undefined),
+    },
+    {
+      title: "Notifications",
+      image: "/icons/notifications.svg",
+      link: (user) => (user ? getNotifRouteByRole(user) : undefined),
+    },
+    {
+      title: "Messages",
+      image: "/icons/Messages.svg",
+      link: (user) => (user ? getMsgRouteByRole(user) : undefined),
+    },
+  ];
 
-    router.push(getProfileRouteByRole(authUser));
-  }
-
-  function handleNotifClick() {
-    if (!authUser) return;
-
-    router.push(getNotifRouteByRole(authUser));
-  }
-
-  function handleMsgClick() {
-    if (!authUser) return;
-
-    router.push(getMsgRouteByRole(authUser));
-  }
+  const handleNavigate = (item: IconItem) => {
+    const route =
+      typeof item.link === "function" ? item.link(authUser) : item.link;
+    if (!route) return;
+    router.push(route);
+  };
 
   return (
     <aside className="max-w-sm">
       <div>
         <Image
-          src={kalinga_logo}
+          src={"/kalinga_logo.svg"}
           alt="kalinga-logo"
           width={100}
           height={100}
@@ -75,60 +95,17 @@ export default function Navbar() {
           <FilterModal />
         </div>
 
-        <Button
-          type="button"
-          className={buttonStyle}
-          onClick={() => router.push("/site/home")}
-        >
-          <Image src={fyp_icon} alt="fyp-icon" width={25} height={25} />
-          <span>For You</span>
-        </Button>
-
-        <Button
-          type="button"
-          className={buttonStyle}
-          onClick={() => router.push("/site/explore")}
-        >
-          <Image src={explore_icon} alt="explore-icon" width={25} height={25} />
-          <span>Explore</span>
-        </Button>
-
-        <Button
-          type="button"
-          className={buttonStyle}
-          onClick={() => router.push("/site/shelters")}
-        >
-          <Image src={shelter_icon} alt="shelter-icon" width={25} height={25} />
-          <span>Shelters</span>
-        </Button>
-
-        <Button
-          type="button"
-          className={buttonStyle}
-          onClick={handleProfileClick}
-        >
-          <Image src={profile_icon} alt="profile-icon" width={25} height={25} />
-          <span>Profile</span>
-        </Button>
-
-        <Button
-          type="button"
-          className={buttonStyle}
-          onClick={handleNotifClick}
-        >
-          <Image src={notif_icon} alt="notif-icon" width={25} height={25} />
-          <span>Notification</span>
-        </Button>
-
-        <Button type="button" className={buttonStyle} onClick={handleMsgClick}>
-          <Image
-            src={messages_icon}
-            alt="messages-icon"
-            width={20}
-            height={20}
-          />
-          <span>Messages</span>
-        </Button>
+        {icons.map((item) => (
+          <Button
+            key={item.title}
+            type="button"
+            className={buttonStyle}
+            onClick={() => handleNavigate(item)}
+          >
+            <Image src={item.image} alt={item.title} width={25} height={25} />
+            <span>{item.title}</span>
+          </Button>
+        ))}
 
         <MoreModal />
       </nav>
