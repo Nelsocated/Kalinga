@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ai models (keep local, never commit weights)
+/models/
+/public/models/
+*.onnx
+*.gguf
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.tflite
+*.pb
+*.bin
