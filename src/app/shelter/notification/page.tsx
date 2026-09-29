@@ -3,7 +3,7 @@ import { getUserId } from "@/src/lib/utils/auth";
 import { getShelterIdByOwnerId } from "@/src/lib/services/shelterService";
 import { getShelterAdoptionNotifications } from "@/src/lib/services/adoptionService";
 import { getPetById } from "@/src/lib/services/petService";
-import { getUserById } from "@/src/lib/services/user/usersService";
+import { getUserById } from "@/src/lib/services/usersService";
 import type { PetGender } from "@/src/lib/types/shelters";
 import type { ShelterNotifItem, ShelterAdoptionStatus } from "./NotifShelter";
 

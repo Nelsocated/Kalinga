@@ -34,11 +34,3 @@ export type UpdateFosterInput = {
   title?: string;
   description?: string;
 };
-
-export type ServiceResult<T> = {
-  ok: boolean;
-  data: T | null;
-  error: string | null;
-  details?: string | null;
-  status: number;
-};

@@ -1,102 +1,72 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import {
   deleteFoster,
   getFosterStoryById,
   updateFoster,
 } from "@/src/lib/services/fosterService";
+import { assertShelterOwnsPet } from "@/src/lib/services/petService";
+import { requireOwnedShelterId } from "@/src/lib/utils/auth";
+import { errorResponse } from "@/src/lib/api";
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id } = await params;
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
 
-  const result = await getFosterStoryById(id);
+const UpdateFosterSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+});
 
-  if (!result.ok) {
-    return NextResponse.json(
-      {
-        error: result.error,
-        details: result.details ?? null,
-      },
-      { status: result.status },
-    );
-  }
+/** Throws unless the caller's shelter owns the story's pet. */
+async function requireOwnedFoster(id: string) {
+  const shelterId = await requireOwnedShelterId();
+  const foster = await getFosterStoryById(id);
 
-  return NextResponse.json(
-    {
-      data: result.data,
-    },
-    { status: 200 },
-  );
+  await assertShelterOwnsPet(shelterId, foster.pet_id);
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id } = await params;
-
+export async function GET(_req: NextRequest, { params }: RouteContext) {
   try {
-    const body = await req.json();
+    const { id } = await params;
 
-    const result = await updateFoster({
-      id,
-      title: body.title,
-      description: body.description,
-    });
+    const data = await getFosterStoryById(id);
 
-    if (!result.ok) {
-      return NextResponse.json(
-        {
-          error: result.error,
-          details: result.details ?? null,
-        },
-        { status: result.status },
-      );
-    }
+    return NextResponse.json({ data }, { status: 200 });
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
+
+export async function PATCH(req: NextRequest, { params }: RouteContext) {
+  try {
+    const { id } = await params;
+    await requireOwnedFoster(id);
+
+    const input = UpdateFosterSchema.parse(await req.json());
+    const data = await updateFoster({ id, ...input });
 
     return NextResponse.json(
-      {
-        message: "Foster story updated successfully",
-        data: result.data,
-      },
-      { status: result.status },
+      { message: "Foster story updated successfully", data },
+      { status: 200 },
     );
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: "Invalid request body",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 400 },
-    );
+    return errorResponse(error);
   }
 }
 
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id } = await params;
+export async function DELETE(_req: NextRequest, { params }: RouteContext) {
+  try {
+    const { id } = await params;
+    await requireOwnedFoster(id);
 
-  const result = await deleteFoster(id);
+    const data = await deleteFoster(id);
 
-  if (!result.ok) {
     return NextResponse.json(
-      {
-        error: result.error,
-        details: result.details ?? null,
-      },
-      { status: result.status },
+      { message: "Foster story deleted successfully", data },
+      { status: 200 },
     );
+  } catch (error) {
+    return errorResponse(error);
   }
-
-  return NextResponse.json(
-    {
-      message: "Foster story deleted successfully",
-      data: result.data,
-    },
-    { status: result.status },
-  );
 }

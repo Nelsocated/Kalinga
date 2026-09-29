@@ -1,53 +1,46 @@
 import { NextResponse } from "next/server";
-import { createServerSupabase } from "@/src/lib/supabase/server";
-import { getMyUser, updateMyUser } from "@/src/lib/services/user/usersService";
-import type { UserUpdatePayload } from "@/src/lib/types/users";
+import { z } from "zod";
+import { getMyUser, updateMyUser } from "@/src/lib/services/usersService";
+import { getUserId } from "@/src/lib/utils/auth";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
-}
+// Only these fields are editable; role and ids are never taken from the body
+const UserUpdateSchema = z.object({
+  full_name: z.string().trim().min(1, "Full name is required").optional(),
+  username: z.string().trim().min(3, "Username is too short").optional(),
+  bio: z.string().optional(),
+  contact_email: z.string().optional(),
+  contact_phone: z.string().optional(),
+  photo_url: z.string().optional(),
+});
 
-async function getUserOrThrow() {
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase.auth.getUser();
+async function requireUserId() {
+  const userId = await getUserId();
 
-  if (error || !data.user) {
-    throw new Error("Unauthorized");
-  }
+  if (!userId) throw new ApiError(401, "Unauthorized");
 
-  return data.user;
+  return userId;
 }
 
 export async function GET() {
   try {
-    const user = await getUserOrThrow();
-    const data = await getMyUser(user.id);
+    const data = await getMyUser(await requireUserId());
 
     return NextResponse.json({ data }, { status: 200 });
-  } catch (error: unknown) {
-    const message = getErrorMessage(error);
-
-    return NextResponse.json(
-      { error: message },
-      { status: message === "Unauthorized" ? 401 : 500 },
-    );
+  } catch (error) {
+    return errorResponse(error);
   }
 }
 
 export async function PATCH(req: Request) {
   try {
-    const user = await getUserOrThrow();
-    const body = (await req.json()) as UserUpdatePayload;
+    const userId = await requireUserId();
+    const input = UserUpdateSchema.parse(await req.json());
 
-    const data = await updateMyUser(user.id, body);
+    const data = await updateMyUser(userId, input);
 
     return NextResponse.json({ data }, { status: 200 });
-  } catch (error: unknown) {
-    const message = getErrorMessage(error);
-
-    return NextResponse.json(
-      { error: message },
-      { status: message === "Unauthorized" ? 401 : 500 },
-    );
+  } catch (error) {
+    return errorResponse(error);
   }
 }

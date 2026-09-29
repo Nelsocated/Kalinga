@@ -107,14 +107,14 @@ async function getDashboardData(): Promise<{
     likeCounts.map((row) => [row.petId, row.count]),
   );
 
-  const viewStatsResult = await getStatsByMediaIds(mediaIds);
-  const viewCountMap = new Map<string, number>();
-
-  if (viewStatsResult.ok && viewStatsResult.data) {
-    for (const row of viewStatsResult.data) {
-      viewCountMap.set(row.media_id, row.totalViews);
-    }
-  }
+  // View counts are decorative, so a failed lookup shows zeros
+  const viewStats = await getStatsByMediaIds(mediaIds).catch((error) => {
+    console.error("[ShelterDashboard] view stats", error);
+    return [];
+  });
+  const viewCountMap = new Map<string, number>(
+    viewStats.map((row) => [row.media_id, row.totalViews]),
+  );
 
   const items: DashboardContentItem[] = media.map((row) => {
     const petName = petNameMap.get(row.pet_id) ?? "Untitled Pet";

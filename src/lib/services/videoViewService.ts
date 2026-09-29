@@ -1,249 +1,124 @@
 import "server-only";
 
 import { createServerSupabase } from "@/src/lib/supabase/server";
+import { ApiError } from "@/src/lib/api";
 import type {
   RecordVideoViewInput,
+  VideoView,
   VideoViewStats,
 } from "@/src/lib/types/videoView";
 
-class VideoViewService {
-  private supabase: Awaited<ReturnType<typeof createServerSupabase>> | null =
-    null;
-  private readonly VIEW_COOLDOWN_MINUTES = 30;
+const VIEW_COOLDOWN_MINUTES = 30;
 
-  private async getSupabase() {
-    if (!this.supabase) {
-      this.supabase = await createServerSupabase();
-    }
-    return this.supabase;
+type ViewRow = { user_id: string | null; session_id: string | null };
+
+function viewerKey(row: ViewRow) {
+  if (row.user_id) return `user:${row.user_id}`;
+  if (row.session_id) return `session:${row.session_id}`;
+  return null;
+}
+
+/** Records a view unless the same viewer saw this video in the cooldown. */
+export async function recordView(
+  input: RecordVideoViewInput,
+): Promise<{ inserted: boolean; view?: VideoView }> {
+  const supabase = await createServerSupabase();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const mediaId = input.mediaId?.trim();
+  const sessionId = input.sessionId?.trim() || null;
+
+  if (!mediaId) throw new ApiError(400, "mediaId is required");
+
+  if (!user && !sessionId) {
+    throw new ApiError(400, "sessionId is required for guest viewers");
   }
 
-  private getCutoffIso(minutes: number) {
-    return new Date(Date.now() - minutes * 60 * 1000).toISOString();
-  }
+  const cutoffIso = new Date(
+    Date.now() - VIEW_COOLDOWN_MINUTES * 60 * 1000,
+  ).toISOString();
 
-  async recordView(input: RecordVideoViewInput) {
-    const supabase = await this.getSupabase();
+  let existingQuery = supabase
+    .from("video_views")
+    .select("id")
+    .eq("media_id", mediaId)
+    .gte("viewed_at", cutoffIso)
+    .limit(1);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  existingQuery = user
+    ? existingQuery.eq("user_id", user.id)
+    : existingQuery.is("user_id", null).eq("session_id", sessionId!);
 
-    const mediaId = input.mediaId?.trim();
-    const sessionId = input.sessionId?.trim() || null;
+  const { data: existingRow, error: existingError } =
+    await existingQuery.maybeSingle();
 
-    if (!mediaId) {
-      return {
-        ok: false,
-        status: 400,
-        error: "mediaId is required",
-      };
-    }
+  if (existingError) throw new Error(existingError.message);
+  if (existingRow) return { inserted: false };
 
-    if (!user?.id && !sessionId) {
-      return {
-        ok: false,
-        status: 400,
-        error: "sessionId is required for guest viewers",
-      };
-    }
-
-    const cutoffIso = this.getCutoffIso(this.VIEW_COOLDOWN_MINUTES);
-
-    let existingQuery = supabase
-      .from("video_views")
-      .select("id")
-      .eq("media_id", mediaId)
-      .gte("viewed_at", cutoffIso)
-      .limit(1);
-
-    if (user?.id) {
-      existingQuery = existingQuery.eq("user_id", user.id);
-    } else if (sessionId) {
-      existingQuery = existingQuery
-        .is("user_id", null)
-        .eq("session_id", sessionId);
-    }
-
-    const { data: existingRow, error: existingError } =
-      await existingQuery.maybeSingle();
-
-    if (existingError) {
-      return {
-        ok: false,
-        status: 500,
-        error: "Failed to check existing view",
-        details: existingError.message,
-      };
-    }
-
-    if (existingRow) {
-      return {
-        ok: true,
-        status: 200,
-        message: "View already counted recently",
-        data: {
-          inserted: false,
-        },
-      };
-    }
-
-    const payload = {
+  const { data, error } = await supabase
+    .from("video_views")
+    .insert({
       media_id: mediaId,
       user_id: user?.id ?? null,
-      session_id: user?.id ? null : sessionId,
-    };
+      session_id: user ? null : sessionId,
+    })
+    .select("*")
+    .single();
 
-    const { data, error } = await supabase
-      .from("video_views")
-      .insert(payload)
-      .select("*")
-      .single();
+  if (error) throw new Error(error.message);
 
-    if (error) {
-      return {
-        ok: false,
-        status: 500,
-        error: "Failed to record view",
-        details: error.message,
-      };
-    }
-
-    return {
-      ok: true,
-      status: 201,
-      message: "View recorded",
-      data: {
-        inserted: true,
-        view: data,
-      },
-    };
-  }
-
-  async getStatsByMediaId(mediaId: string): Promise<{
-    ok: boolean;
-    status: number;
-    error?: string;
-    details?: string;
-    data?: VideoViewStats;
-  }> {
-    const supabase = await this.getSupabase();
-
-    const { data: rows, error } = await supabase
-      .from("video_views")
-      .select("user_id, session_id")
-      .eq("media_id", mediaId);
-
-    if (error) {
-      return {
-        ok: false,
-        status: 500,
-        error: "Failed to fetch view stats",
-        details: error.message,
-      };
-    }
-
-    const totalViews = rows?.length ?? 0;
-
-    const uniqueSet = new Set<string>();
-    for (const row of rows ?? []) {
-      if (row.user_id) {
-        uniqueSet.add(`user:${row.user_id}`);
-      } else if (row.session_id) {
-        uniqueSet.add(`session:${row.session_id}`);
-      }
-    }
-
-    return {
-      ok: true,
-      status: 200,
-      data: {
-        totalViews,
-        uniqueViews: uniqueSet.size,
-      },
-    };
-  }
-
-  async getStatsByMediaIds(mediaIds: string[]) {
-    const supabase = await this.getSupabase();
-
-    if (!mediaIds.length) {
-      return {
-        ok: true,
-        status: 200,
-        data: [] as Array<{
-          media_id: string;
-          totalViews: number;
-          uniqueViews: number;
-        }>,
-      };
-    }
-
-    const { data: rows, error } = await supabase
-      .from("video_views")
-      .select("media_id, user_id, session_id")
-      .in("media_id", mediaIds);
-
-    if (error) {
-      return {
-        ok: false,
-        status: 500,
-        error: "Failed to fetch view stats",
-        details: error.message,
-      };
-    }
-
-    const grouped = new Map<
-      string,
-      { totalViews: number; uniqueSet: Set<string> }
-    >();
-
-    for (const mediaId of mediaIds) {
-      grouped.set(mediaId, {
-        totalViews: 0,
-        uniqueSet: new Set<string>(),
-      });
-    }
-
-    for (const row of rows ?? []) {
-      const bucket = grouped.get(row.media_id);
-      if (!bucket) continue;
-
-      bucket.totalViews += 1;
-
-      if (row.user_id) {
-        bucket.uniqueSet.add(`user:${row.user_id}`);
-      } else if (row.session_id) {
-        bucket.uniqueSet.add(`session:${row.session_id}`);
-      }
-    }
-
-    return {
-      ok: true,
-      status: 200,
-      data: mediaIds.map((mediaId) => {
-        const bucket = grouped.get(mediaId)!;
-        return {
-          media_id: mediaId,
-          totalViews: bucket.totalViews,
-          uniqueViews: bucket.uniqueSet.size,
-        };
-      }),
-    };
-  }
+  return { inserted: true, view: data as VideoView };
 }
 
-export const videoViewService = new VideoViewService();
+export async function getStatsByMediaId(
+  mediaId: string,
+): Promise<VideoViewStats> {
+  const [stats] = await getStatsByMediaIds([mediaId]);
 
-// Backward-compatible exports
-export async function recordView(input: RecordVideoViewInput) {
-  return videoViewService.recordView(input);
+  return { totalViews: stats.totalViews, uniqueViews: stats.uniqueViews };
 }
 
-export async function getStatsByMediaId(mediaId: string) {
-  return videoViewService.getStatsByMediaId(mediaId);
-}
+export async function getStatsByMediaIds(
+  mediaIds: string[],
+): Promise<Array<VideoViewStats & { media_id: string }>> {
+  if (!mediaIds.length) return [];
 
-export async function getStatsByMediaIds(mediaIds: string[]) {
-  return videoViewService.getStatsByMediaIds(mediaIds);
+  const supabase = await createServerSupabase();
+
+  const { data: rows, error } = await supabase
+    .from("video_views")
+    .select("media_id, user_id, session_id")
+    .in("media_id", mediaIds);
+
+  if (error) throw new Error(error.message);
+
+  const grouped = new Map(
+    mediaIds.map((id) => [
+      id,
+      { totalViews: 0, uniqueSet: new Set<string>() },
+    ]),
+  );
+
+  for (const row of rows ?? []) {
+    const bucket = grouped.get(row.media_id);
+    if (!bucket) continue;
+
+    bucket.totalViews += 1;
+
+    const key = viewerKey(row);
+    if (key) bucket.uniqueSet.add(key);
+  }
+
+  return mediaIds.map((mediaId) => {
+    const bucket = grouped.get(mediaId)!;
+
+    return {
+      media_id: mediaId,
+      totalViews: bucket.totalViews,
+      uniqueViews: bucket.uniqueSet.size,
+    };
+  });
 }

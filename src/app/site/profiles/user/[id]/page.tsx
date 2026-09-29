@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import UserProfilePage from "./UserProfilePage";
 import ProfileTabs from "@/src/components/tabs/ProfileTab";
-import { getUserById } from "@/src/lib/services/user/usersService";
+import { getUserById } from "@/src/lib/services/usersService";
 
 export default async function Page({
   params,

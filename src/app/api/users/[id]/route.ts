@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getUserById } from "@/src/lib/services/user/usersService";
+import { getUserById } from "@/src/lib/services/usersService";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
 type RouteContext = {
   params: Promise<{
@@ -7,29 +8,16 @@ type RouteContext = {
   }>;
 };
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
-}
-
 export async function GET(_req: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
 
-    if (!id) {
-      return NextResponse.json({ error: "Missing user id" }, { status: 400 });
-    }
-
     const user = await getUserById(id);
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    if (!user) throw new ApiError(404, "User not found");
 
     return NextResponse.json({ data: user }, { status: 200 });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 },
-    );
+  } catch (error) {
+    return errorResponse(error);
   }
 }

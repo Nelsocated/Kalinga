@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getShelterInboxThreads } from "@/src/lib/services/messageService";
 import { getMyShelterProfile } from "@/src/lib/services/shelterService";
-import { getUserById } from "@/src/lib/services/user/usersService";
+import { getUserById } from "@/src/lib/services/usersService";
 import { requireOwnedShelterId } from "@/src/lib/utils/auth";
 import ShelterMessagesClient from "./ShelterMessageClient";
 import type { PersonCard, ThreadWithMeta } from "@/src/lib/types/messages";

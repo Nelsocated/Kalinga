@@ -6,7 +6,7 @@ import {
   fetchMyUserProfile,
   patchMyUserProfile,
   uploadMyUserAvatar,
-} from "@/src/lib/services/user/userClient";
+} from "@/src/lib/services/userClient";
 
 export default function UserEditProfileModal() {
   const router = useRouter();

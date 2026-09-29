@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import UserMessagesClient from "./UserMessagesClient";
 import { getUserId } from "@/src/lib/utils/auth";
 import { getUserInboxThreads } from "@/src/lib/services/messageService";
-import { getUserById } from "@/src/lib/services/user/usersService";
+import { getUserById } from "@/src/lib/services/usersService";
 import { fetchShelterById } from "@/src/lib/services/shelterService";
 import { getLikedIdsByUser } from "@/src/lib/services/likeService";
 import type { ThreadWithMeta } from "@/src/lib/types/messages";

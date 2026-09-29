@@ -1,65 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import {
   createFoster,
   getFosterStories,
 } from "@/src/lib/services/fosterService";
+import { assertShelterOwnsPet } from "@/src/lib/services/petService";
+import { requireOwnedShelterId } from "@/src/lib/utils/auth";
+import { errorResponse } from "@/src/lib/api";
+
+const CreateFosterSchema = z.object({
+  petId: z.string().trim().min(1, "Pet is required"),
+  title: z.string().trim().min(1, "Title is required"),
+  description: z.string().trim().min(1, "Story is required"),
+  // The form's "not available" option marks the pet as pending
+  adoptionStatus: z
+    .enum(["available", "not_available", ""])
+    .optional()
+    .transform((value) =>
+      value === "available"
+        ? "available"
+        : value === "not_available"
+          ? "pending"
+          : undefined,
+    ),
+});
 
 export async function GET() {
-  const result = await getFosterStories();
+  try {
+    const data = await getFosterStories();
 
-  if (!result.ok) {
-    return NextResponse.json(
-      {
-        error: result.error,
-        details: result.details ?? null,
-      },
-      { status: result.status },
-    );
+    return NextResponse.json({ data }, { status: 200 });
+  } catch (error) {
+    return errorResponse(error);
   }
-
-  return NextResponse.json(
-    {
-      data: result.data,
-    },
-    { status: 200 },
-  );
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const shelterId = await requireOwnedShelterId();
+    const input = CreateFosterSchema.parse(await req.json());
 
-    const result = await createFoster({
-      petId: body.petId,
-      title: body.title,
-      description: body.description,
-      adoptionStatus: body.adoptionStatus,
-    });
+    await assertShelterOwnsPet(shelterId, input.petId);
 
-    if (!result.ok) {
-      return NextResponse.json(
-        {
-          error: result.error,
-          details: result.details ?? null,
-        },
-        { status: result.status },
-      );
-    }
+    const data = await createFoster(input);
 
     return NextResponse.json(
-      {
-        message: "Foster story created successfully",
-        data: result.data,
-      },
-      { status: result.status },
+      { message: "Foster story created successfully", data },
+      { status: 201 },
     );
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: "Invalid request body",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 400 },
-    );
+    return errorResponse(error);
   }
 }
