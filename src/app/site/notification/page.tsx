@@ -1,7 +1,7 @@
 import NotifClient from "./NotifClient";
 import { getUserId } from "@/src/lib/utils/auth";
 import { getUserAdoptionNotifications } from "@/src/lib/services/adoption/adoptionService";
-import { fetchShelterById } from "@/src/lib/services/shelter/shelterService";
+import { fetchShelterById } from "@/src/lib/services/shelterService";
 import { getPetById } from "@/src/lib/services/petService";
 
 export type NotificationStatus =

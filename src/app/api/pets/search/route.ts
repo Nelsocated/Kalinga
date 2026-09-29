@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { errorResponse } from "@/src/lib/api";
 import { z } from "zod";
 
 import { getAvailablePets } from "@/src/lib/services/petService";
 import type { PetFilters } from "@/src/lib/types/pets";
-import { getSheltersByIds } from "@/src/lib/services/shelter/shelterService";
+import { getSheltersByIds } from "@/src/lib/services/shelterService";
 import type { SearchPetCardItem } from "@/src/lib/types/pets";
 
 const SearchPetsSchema = z.object({
@@ -14,10 +15,6 @@ const SearchPetsSchema = z.object({
     .optional(),
   size: z.array(z.enum(["small", "medium", "large"])).optional(),
 });
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Failed to search pets.";
-}
 
 export async function POST(req: Request) {
   try {
@@ -59,10 +56,7 @@ export async function POST(req: Request) {
     }));
 
     return NextResponse.json({ data });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 },
-    );
+  } catch (error) {
+    return errorResponse(error);
   }
 }

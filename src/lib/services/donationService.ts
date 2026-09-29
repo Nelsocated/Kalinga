@@ -1,8 +1,10 @@
 import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
-import type { Donations } from "../types/donation";
+import type { CreateDonationInput, Donations } from "../types/donation";
 
-export async function getShelterDonations(shelterId: string) {
+export async function getShelterDonations(
+  shelterId: string,
+): Promise<Donations[]> {
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
@@ -11,21 +13,24 @@ export async function getShelterDonations(shelterId: string) {
     .eq("shelter_id", shelterId)
     .eq("is_active", true);
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 
-  return data ?? [];
+  return (data ?? []) as Donations[];
 }
 
-export async function createShelterDonation(payload: Donations) {
+export async function createShelterDonation(
+  shelterId: string,
+  input: CreateDonationInput,
+): Promise<Donations> {
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
     .from("donation")
-    .insert(payload)
+    .insert({ ...input, shelter_id: shelterId })
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 
-  return data;
+  return data as Donations;
 }

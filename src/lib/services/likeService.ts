@@ -9,7 +9,7 @@ import type {
 } from "@/src/lib/types/likes";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
 import { getPetsByIds } from "./petService";
-import { getSheltersByIds } from "./shelter/shelterService";
+import { getSheltersByIds } from "./shelterService";
 import { getVideosByPetIds } from "./petMediaService";
 
 class LikeService {

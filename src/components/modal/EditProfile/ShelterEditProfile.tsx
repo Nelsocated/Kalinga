@@ -6,7 +6,7 @@ import {
   fetchMyShelterProfile,
   patchMyShelterProfile,
   uploadMyShelterAvatar,
-} from "@/src/lib/services/shelter/shelterClient";
+} from "@/src/lib/services/shelterClient";
 
 export default function ShelterEditProfileModal() {
   const router = useRouter();

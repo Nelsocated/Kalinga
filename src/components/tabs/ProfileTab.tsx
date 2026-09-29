@@ -4,7 +4,7 @@ import ShelterTab from "./ShelterTab";
 import {
   getShelterPostedVideos,
   getShelterPostedPets,
-} from "@/src/lib/services/shelter/shelterService";
+} from "@/src/lib/services/shelterService";
 
 export type TabsKey = "videos" | "pets" | "shelters";
 export type ViewerRole = "user" | "shelter";

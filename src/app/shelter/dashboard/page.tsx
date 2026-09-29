@@ -7,7 +7,7 @@ import DashboardPage, {
 import {
   fetchShelterById,
   getShelterIdByOwnerId,
-} from "@/src/lib/services/shelter/shelterService";
+} from "@/src/lib/services/shelterService";
 import { getVideosByPetIds } from "@/src/lib/services/petMediaService";
 import { getPetLikeCounts } from "@/src/lib/services/likeService";
 import { getStatsByMediaIds } from "@/src/lib/services/videoViewService";

@@ -4,7 +4,7 @@ import ShelterProfileClient, {
 } from "./ShelterProfileClient";
 import ProfileTabs from "@/src/components/tabs/ProfileTab";
 import { requireShelter } from "@/src/lib/utils/auth";
-import { getShelterPetProps } from "@/src/lib/services/shelter/shelterService";
+import { getShelterPetProps } from "@/src/lib/services/shelterService";
 export const dynamic = "force-dynamic";
 
 export default async function Page() {

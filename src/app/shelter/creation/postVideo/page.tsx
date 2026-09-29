@@ -4,7 +4,7 @@ import { getUserId } from "@/src/lib/utils/auth";
 import {
   getShelterPets,
   getShelterIdByOwnerId,
-} from "@/src/lib/services/shelter/shelterService";
+} from "@/src/lib/services/shelterService";
 import type { PetCardProps } from "@/src/lib/types/shelters";
 
 export const dynamic = "force-dynamic";

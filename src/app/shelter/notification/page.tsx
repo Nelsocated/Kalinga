@@ -1,6 +1,6 @@
 import NotifShelter from "./NotifShelter";
 import { getUserId } from "@/src/lib/utils/auth";
-import { getShelterIdByOwnerId } from "@/src/lib/services/shelter/shelterService";
+import { getShelterIdByOwnerId } from "@/src/lib/services/shelterService";
 import { getShelterAdoptionNotifications } from "@/src/lib/services/adoption/adoptionService";
 import { getPetById } from "@/src/lib/services/petService";
 import { getUserById } from "@/src/lib/services/user/usersService";

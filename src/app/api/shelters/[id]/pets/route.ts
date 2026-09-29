@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getShelterPostedPets } from "@/src/lib/services/shelter/shelterService";
+import { errorResponse } from "@/src/lib/api";
+import { getShelterPostedPets } from "@/src/lib/services/shelterService";
 
 type RouteContext = {
   params: Promise<{
@@ -15,11 +16,6 @@ export async function GET(_: Request, { params }: RouteContext) {
 
     return NextResponse.json(pets, { status: 200 });
   } catch (error) {
-    console.error("[GET /api/shelters/[id]/pets]", error);
-
-    return NextResponse.json(
-      { message: "Failed to fetch shelter pets" },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }

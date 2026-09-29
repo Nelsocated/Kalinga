@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import {
   getShelterDonations,
   createShelterDonation,
 } from "@/src/lib/services/donationService";
+import { requireOwnedShelterId } from "@/src/lib/utils/auth";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
 type RouteContext = {
   params: Promise<{
@@ -10,59 +13,43 @@ type RouteContext = {
   }>;
 };
 
+const CreateDonationSchema = z.object({
+  type: z.enum(["goods", "monetary"]),
+  instruction_note: z.string().trim().nullish(),
+  item_name: z.array(z.string().trim()).nullish(),
+  method: z.string().trim().nullish(),
+  account_name: z.string().trim().nullish(),
+  account_number: z.string().trim().nullish(),
+  qr_url: z.string().trim().nullish(),
+  is_active: z.boolean().optional(),
+});
+
 export async function GET(_req: Request, { params }: RouteContext) {
   try {
     const { id: shelterId } = await params;
 
-    if (!shelterId) {
-      return NextResponse.json(
-        { error: "Missing shelter id" },
-        { status: 400 },
-      );
-    }
-
     const data = await getShelterDonations(shelterId);
 
     return NextResponse.json({ data }, { status: 200 });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Failed to fetch donations",
-      },
-      { status: 500 },
-    );
+  } catch (error) {
+    return errorResponse(error);
   }
 }
 
 export async function POST(req: Request, { params }: RouteContext) {
   try {
     const { id: shelterId } = await params;
+    const ownShelterId = await requireOwnedShelterId();
 
-    if (!shelterId) {
-      return NextResponse.json(
-        { error: "Missing shelter id" },
-        { status: 400 },
-      );
+    if (ownShelterId !== shelterId) {
+      throw new ApiError(403, "You can only add donations to your own shelter");
     }
 
-    const body = await req.json();
-
-    const payload = {
-      ...body,
-      shelter_id: shelterId,
-    };
-
-    const data = await createShelterDonation(payload);
+    const input = CreateDonationSchema.parse(await req.json());
+    const data = await createShelterDonation(shelterId, input);
 
     return NextResponse.json({ data }, { status: 201 });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Failed to create donation",
-      },
-      { status: 500 },
-    );
+  } catch (error) {
+    return errorResponse(error);
   }
 }

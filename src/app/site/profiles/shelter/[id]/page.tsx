@@ -4,7 +4,7 @@ import ProfileTabs from "@/src/components/tabs/ProfileTab";
 import {
   fetchShelterById,
   getShelterPostedPets,
-} from "@/src/lib/services/shelter/shelterService";
+} from "@/src/lib/services/shelterService";
 
 type PageProps = {
   params: Promise<{

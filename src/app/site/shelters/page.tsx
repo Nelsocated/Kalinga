@@ -1,6 +1,6 @@
 import WebTemplate from "@/src/components/template/WebTemplate";
 import ShelterCard from "@/src/components/cards/ShelterCard";
-import { getSheltersWithStats } from "@/src/lib/services/shelter/shelterService";
+import { getSheltersWithStats } from "@/src/lib/services/shelterService";
 
 export default async function Explore() {
   const shelters = await getSheltersWithStats().catch(() => []);

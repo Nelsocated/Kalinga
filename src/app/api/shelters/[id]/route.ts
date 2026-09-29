@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { fetchShelterById } from "@/src/lib/services/shelter/shelterService";
+import { ApiError, errorResponse } from "@/src/lib/api";
+import { fetchShelterById } from "@/src/lib/services/shelterService";
 
 type RouteContext = {
   params: Promise<{
@@ -13,20 +14,10 @@ export async function GET(_: Request, { params }: RouteContext) {
 
     const shelter = await fetchShelterById(id);
 
-    if (!shelter) {
-      return NextResponse.json(
-        { message: "Shelter not found" },
-        { status: 404 },
-      );
-    }
+    if (!shelter) throw new ApiError(404, "Shelter not found");
 
     return NextResponse.json(shelter, { status: 200 });
   } catch (error) {
-    console.error("[GET /api/shelters/[id]]", error);
-
-    return NextResponse.json(
-      { message: "Failed to fetch shelter" },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }
