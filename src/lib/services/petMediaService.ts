@@ -80,6 +80,26 @@ export async function getVideosByPetIds(
   return ((data ?? []) as VideoRow[]).map(toVideoWithPet);
 }
 
+export async function getVideosByIds(
+  mediaIds: string[],
+): Promise<VideoWithPet[]> {
+  const uniqueIds = [...new Set(mediaIds)].filter(Boolean);
+  if (uniqueIds.length === 0) return [];
+
+  const supabase = await createServerSupabase();
+
+  const { data, error } = await supabase
+    .from("pet_media")
+    .select(VIDEO_WITH_PET_SELECT)
+    .eq("type", "video")
+    .in("id", uniqueIds)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  return ((data ?? []) as VideoRow[]).map(toVideoWithPet);
+}
+
 export async function getPetVideosByShelterId(
   shelterId: string,
 ): Promise<VideoWithShelterPet[]> {

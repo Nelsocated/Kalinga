@@ -1,145 +1,70 @@
 import { NextResponse } from "next/server";
-import { createServerSupabase } from "@/src/lib/supabase/server";
+import { z } from "zod";
 import {
   getInitialLikedByUser,
   setLikedByUser,
 } from "@/src/lib/services/likeService";
+import { getUserId } from "@/src/lib/utils/auth";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
-type LikeTargetType = "pet" | "shelter" | "video";
+const LikeTargetSchema = z.object({
+  targetType: z.enum(["pet", "shelter", "video"], {
+    message: "Invalid targetType or targetId",
+  }),
+  targetId: z.string().min(1, "Invalid targetType or targetId"),
+});
 
-type Body = {
-  targetType: LikeTargetType;
-  targetId: string;
-};
+async function requireUserId(action: "like" | "unlike") {
+  const userId = await getUserId();
 
-function isValidTargetType(value: unknown): value is LikeTargetType {
-  return value === "pet" || value === "shelter" || value === "video";
-}
+  if (!userId) throw new ApiError(401, `You must be logged in to ${action}.`);
 
-async function getUserOrNull() {
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error || !data.user) {
-    return null;
-  }
-
-  return data.user;
+  return userId;
 }
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
 
-    const targetType = searchParams.get("targetType");
-    const targetId = searchParams.get("targetId");
-
-    if (!isValidTargetType(targetType) || !targetId) {
-      return NextResponse.json(
-        { message: "Invalid targetType or targetId" },
-        { status: 400 },
-      );
-    }
-
-    const user = await getUserOrNull();
-
-    if (!user) {
-      return NextResponse.json({ liked: false }, { status: 200 });
-    }
-
-    const liked = await getInitialLikedByUser({
-      userId: user.id,
-      targetType,
-      targetId,
+    const target = LikeTargetSchema.parse({
+      targetType: searchParams.get("targetType"),
+      targetId: searchParams.get("targetId"),
     });
+
+    const userId = await getUserId();
+
+    if (!userId) return NextResponse.json({ liked: false }, { status: 200 });
+
+    const liked = await getInitialLikedByUser({ userId, ...target });
 
     return NextResponse.json({ liked }, { status: 200 });
   } catch (error) {
-    console.error("[GET /api/likes]", error);
-
-    return NextResponse.json(
-      { message: "Failed to fetch like status" },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as Body;
+    const target = LikeTargetSchema.parse(await request.json());
+    const userId = await requireUserId("like");
 
-    if (!isValidTargetType(body?.targetType) || !body?.targetId) {
-      return NextResponse.json(
-        { message: "Invalid targetType or targetId" },
-        { status: 400 },
-      );
-    }
-
-    const user = await getUserOrNull();
-
-    if (!user) {
-      return NextResponse.json(
-        { message: "You must be logged in to like." },
-        { status: 401 },
-      );
-    }
-
-    await setLikedByUser(
-      {
-        userId: user.id,
-        targetType: body.targetType,
-        targetId: body.targetId,
-      },
-      true,
-    );
+    await setLikedByUser({ userId, ...target }, true);
 
     return NextResponse.json({ success: true, liked: true }, { status: 200 });
   } catch (error) {
-    console.error("[POST /api/likes]", error);
-
-    return NextResponse.json(
-      { message: "Failed to like item" },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }
 
 export async function DELETE(request: Request) {
   try {
-    const body = (await request.json()) as Body;
+    const target = LikeTargetSchema.parse(await request.json());
+    const userId = await requireUserId("unlike");
 
-    if (!isValidTargetType(body?.targetType) || !body?.targetId) {
-      return NextResponse.json(
-        { message: "Invalid targetType or targetId" },
-        { status: 400 },
-      );
-    }
-
-    const user = await getUserOrNull();
-
-    if (!user) {
-      return NextResponse.json(
-        { message: "You must be logged in to unlike." },
-        { status: 401 },
-      );
-    }
-
-    await setLikedByUser(
-      {
-        userId: user.id,
-        targetType: body.targetType,
-        targetId: body.targetId,
-      },
-      false,
-    );
+    await setLikedByUser({ userId, ...target }, false);
 
     return NextResponse.json({ success: true, liked: false }, { status: 200 });
   } catch (error) {
-    console.error("[DELETE /api/likes]", error);
-
-    return NextResponse.json(
-      { message: "Failed to unlike item" },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }

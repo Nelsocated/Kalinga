@@ -9,6 +9,7 @@ import VideoCard from "../cards/VideoCard";
 import PetCard from "../cards/PetCard";
 import ShelterCard from "../cards/ShelterCard";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
+import { fetchJson } from "@/src/lib/fetchJson";
 
 export type TabsKey = "videos" | "pets" | "shelters";
 type LikedKind = "video" | "pet" | "shelter";
@@ -56,16 +57,7 @@ function toPetGender(value?: string | null): "male" | "female" {
 }
 
 async function fetchLikedStuff(): Promise<LikedMiniItem[]> {
-  const res = await fetch("/api/likes/me", {
-    method: "GET",
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch liked items");
-  }
-
-  return res.json();
+  return fetchJson<LikedMiniItem[]>("/api/likes/me", { cache: "no-store" });
 }
 
 export default function UserTab() {

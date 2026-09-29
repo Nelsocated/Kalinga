@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { fetchJson } from "@/src/lib/fetchJson";
 
 export type LikeTargetType = "pet" | "shelter" | "video";
 
@@ -32,16 +33,11 @@ async function fetchInitialLiked(
     targetId,
   });
 
-  const res = await fetch(`/api/likes/status?${params.toString()}`, {
-    method: "GET",
-    cache: "no-store",
-  });
+  const body = await fetchJson<{ liked?: boolean }>(
+    `/api/likes?${params.toString()}`,
+    { cache: "no-store" },
+  );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch like status");
-  }
-
-  const body = await res.json();
   return !!body.liked;
 }
 
@@ -50,7 +46,7 @@ async function updateLiked(
   targetId: string,
   nextLiked: boolean,
 ) {
-  const res = await fetch("/api/likes", {
+  await fetchJson("/api/likes", {
     method: nextLiked ? "POST" : "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -60,12 +56,6 @@ async function updateLiked(
       targetId,
     }),
   });
-
-  const body = await res.json().catch(() => ({}));
-
-  if (!res.ok) {
-    throw new Error(body?.message ?? "Failed to update like");
-  }
 }
 
 function LikeSvg({ className = "" }: { className?: string }) {
