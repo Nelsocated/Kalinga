@@ -1,5 +1,8 @@
 import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
+import { createAdminClient } from "@/src/lib/supabase/admin";
+import { ApiError } from "@/src/lib/api";
+import { SHELTER_DOCUMENT_BUCKET } from "./authService";
 
 export type ShelterApplicationStatus = "under_review" | "approved" | "rejected";
 
@@ -23,335 +26,187 @@ export type ShelterApplicationItem = {
   cert_url: string | null;
 };
 
-type ServiceResult<T> = {
-  ok: boolean;
-  data: T | null;
-  error: string | null;
-  status: number;
-};
+const SIGNED_URL_SECONDS = 10 * 60;
+
+const APPLICATION_LIST_SELECT = `
+  id,
+  owner_id,
+  shelter_name,
+  logo_url,
+  location,
+  contact_email,
+  contact_phone,
+  application_status,
+  application_submitted_at,
+  application_reviewed_at,
+  application_review_note,
+  created_at,
+  updated_at
+`;
+
+const APPLICATION_DETAIL_SELECT = `
+  ${APPLICATION_LIST_SELECT},
+  lease_url,
+  id_url,
+  photo_url,
+  cert_url
+`;
 
 function normalizeShelterApplication(
   row: Record<string, unknown>,
 ): ShelterApplicationItem {
+  const text = (value: unknown) => (typeof value === "string" ? value : null);
+
   return {
     id: String(row.id ?? ""),
-    shelterName:
-      typeof row.shelter_name === "string"
-        ? row.shelter_name
-        : "Unnamed Shelter",
-    logoUrl: typeof row.logo_url === "string" ? row.logo_url : null,
-    location: typeof row.location === "string" ? row.location : null,
-
-    contactEmail:
-      typeof row.contact_email === "string" ? row.contact_email : null,
-    contactPhone:
-      typeof row.contact_phone === "string" ? row.contact_phone : null,
+    shelterName: text(row.shelter_name) ?? "Unnamed Shelter",
+    logoUrl: text(row.logo_url),
+    location: text(row.location),
+    contactEmail: text(row.contact_email),
+    contactPhone: text(row.contact_phone),
     applicationStatus:
       row.application_status === "under_review" ||
       row.application_status === "approved" ||
       row.application_status === "rejected"
         ? row.application_status
         : "under_review",
-    applicationSubmittedAt:
-      typeof row.application_submitted_at === "string"
-        ? row.application_submitted_at
-        : null,
-    applicationReviewedAt:
-      typeof row.application_reviewed_at === "string"
-        ? row.application_reviewed_at
-        : null,
-    applicationReviewNote:
-      typeof row.application_review_note === "string"
-        ? row.application_review_note
-        : null,
-    createdAt: typeof row.created_at === "string" ? row.created_at : null,
-    updatedAt: typeof row.updated_at === "string" ? row.updated_at : null,
-    owner_id: typeof row.owner_id === "string" ? row.owner_id : null,
-    lease_url: typeof row.lease_url === "string" ? row.lease_url : null,
-    id_url: typeof row.id_url === "string" ? row.id_url : null,
-    photo_url: typeof row.photo_url === "string" ? row.photo_url : null,
-    cert_url: typeof row.cert_url === "string" ? row.cert_url : null,
+    applicationSubmittedAt: text(row.application_submitted_at),
+    applicationReviewedAt: text(row.application_reviewed_at),
+    applicationReviewNote: text(row.application_review_note),
+    createdAt: text(row.created_at),
+    updatedAt: text(row.updated_at),
+    owner_id: text(row.owner_id),
+    lease_url: text(row.lease_url),
+    id_url: text(row.id_url),
+    photo_url: text(row.photo_url),
+    cert_url: text(row.cert_url),
   };
 }
 
-export async function getShelterApplications(
-  status?: ShelterApplicationStatus | "all",
-): Promise<ServiceResult<ShelterApplicationItem[]>> {
-  try {
-    const supabase = await createServerSupabase();
+/**
+ * New applications store private storage paths; older rows still hold full
+ * public URLs, which are shown as-is until they are moved.
+ */
+async function signDocument(value: string | null): Promise<string | null> {
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
 
-    let query = supabase
-      .from("shelter")
-      .select(
-        `
-        id,
-        owner_id,
-        shelter_name,
-        logo_url,
-        location,
-        contact_email,
-        contact_phone,
-        application_status,
-        application_submitted_at,
-        application_reviewed_at,
-        application_review_note,
-        created_at,
-        updated_at
-        `,
-      )
-      .order("application_submitted_at", {
-        ascending: false,
-        nullsFirst: false,
-      })
-      .order("created_at", { ascending: false });
+  const { data, error } = await createAdminClient()
+    .storage.from(SHELTER_DOCUMENT_BUCKET)
+    .createSignedUrl(value, SIGNED_URL_SECONDS);
 
-    if (status && status !== "all") {
-      query = query.eq("application_status", status);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      return {
-        ok: false,
-        data: null,
-        error: error.message,
-        status: 500,
-      };
-    }
-
-    const items = Array.isArray(data)
-      ? data.map((row) =>
-          normalizeShelterApplication(row as Record<string, unknown>),
-        )
-      : [];
-
-    return {
-      ok: true,
-      data: items,
-      error: null,
-      status: 200,
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      data: null,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch shelter applications.",
-      status: 500,
-    };
+  if (error) {
+    console.error("[signDocument]", value, error.message);
+    return null;
   }
+
+  return data.signedUrl;
+}
+
+/** Callers must have checked requireAdmin() first. */
+async function withSignedDocuments(
+  item: ShelterApplicationItem,
+): Promise<ShelterApplicationItem> {
+  const [cert_url, id_url, lease_url] = await Promise.all([
+    signDocument(item.cert_url),
+    signDocument(item.id_url),
+    signDocument(item.lease_url),
+  ]);
+
+  return { ...item, cert_url, id_url, lease_url };
+}
+
+export async function getShelterApplications(
+  status: ShelterApplicationStatus | "all" = "all",
+): Promise<ShelterApplicationItem[]> {
+  const supabase = await createServerSupabase();
+
+  let query = supabase
+    .from("shelter")
+    .select(APPLICATION_LIST_SELECT)
+    .order("application_submitted_at", {
+      ascending: false,
+      nullsFirst: false,
+    })
+    .order("created_at", { ascending: false });
+
+  if (status !== "all") {
+    query = query.eq("application_status", status);
+  }
+
+  const { data, error } = await query;
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((row) =>
+    normalizeShelterApplication(row as Record<string, unknown>),
+  );
 }
 
 export async function getShelterApplicationById(
   id: string,
-): Promise<ServiceResult<ShelterApplicationItem>> {
-  try {
-    const supabase = await createServerSupabase();
+): Promise<ShelterApplicationItem> {
+  const supabase = await createServerSupabase();
 
-    const { data, error } = await supabase
-      .from("shelter")
-      .select(
-        `
-        id,
-        owner_id,
-        shelter_name,
-        logo_url,
-        location,
-        contact_email,
-        contact_phone,
-        application_status,
-        application_submitted_at,
-        application_reviewed_at,
-        application_review_note,
-        lease_url,
-        id_url,
-        photo_url,
-        cert_url,
-        created_at,
-        updated_at
-        `,
-      )
-      .eq("id", id)
-      .maybeSingle();
+  const { data, error } = await supabase
+    .from("shelter")
+    .select(APPLICATION_DETAIL_SELECT)
+    .eq("id", id)
+    .maybeSingle();
 
-    if (error) {
-      return {
-        ok: false,
-        data: null,
-        error: error.message,
-        status: 500,
-      };
-    }
+  if (error) throw new Error(error.message);
+  if (!data) throw new ApiError(404, "Shelter application not found.");
 
-    if (!data) {
-      return {
-        ok: false,
-        data: null,
-        error: "Shelter application not found.",
-        status: 404,
-      };
-    }
-
-    return {
-      ok: true,
-      data: normalizeShelterApplication(data as Record<string, unknown>),
-      error: null,
-      status: 200,
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      data: null,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch shelter application.",
-      status: 500,
-    };
-  }
+  return withSignedDocuments(
+    normalizeShelterApplication(data as Record<string, unknown>),
+  );
 }
 
-export async function approveShelterApplication(input: {
+export async function updateShelterApplicationStatus(input: {
   id: string;
-  reviewNote?: string | null;
-  reviewedBy?: string | null;
-}): Promise<ServiceResult<ShelterApplicationItem>> {
-  try {
-    const supabase = await createServerSupabase();
+  status: ShelterApplicationStatus;
+  reviewNote: string | null;
+  reviewedBy: string;
+}): Promise<ShelterApplicationItem> {
+  const supabase = await createServerSupabase();
 
+  if (input.status === "approved") {
     const { data, error } = await supabase.rpc("approve_shelter_application", {
       p_shelter_id: input.id,
-      p_review_note: input.reviewNote ?? null,
-      p_reviewed_by: input.reviewedBy ?? null,
+      p_review_note: input.reviewNote,
+      p_reviewed_by: input.reviewedBy,
     });
 
-    if (error) {
-      return {
-        ok: false,
-        data: null,
-        error: error.message,
-        status: 500,
-      };
-    }
+    if (error) throw new Error(error.message);
 
     const row = Array.isArray(data) ? data[0] : null;
 
-    if (!row) {
-      return {
-        ok: false,
-        data: null,
-        error: "Approval failed.",
-        status: 500,
-      };
-    }
+    if (!row) throw new Error("Approval failed.");
 
-    return {
-      ok: true,
-      data: normalizeShelterApplication(row as Record<string, unknown>),
-      error: null,
-      status: 200,
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      data: null,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Failed to approve shelter application.",
-      status: 500,
-    };
+    return withSignedDocuments(
+      normalizeShelterApplication(row as Record<string, unknown>),
+    );
   }
-}
 
-type UpdateShelterApplicationStatusInput = {
-  id: string;
-  status: ShelterApplicationStatus;
-  reviewNote?: string | null;
-  reviewedBy?: string | null;
-};
+  const now = new Date().toISOString();
 
-export async function updateShelterApplicationStatus(
-  input: UpdateShelterApplicationStatusInput,
-): Promise<ServiceResult<ShelterApplicationItem>> {
-  try {
-    if (input.status === "approved") {
-      return await approveShelterApplication({
-        id: input.id,
-        reviewNote: input.reviewNote,
-        reviewedBy: input.reviewedBy,
-      });
-    }
-
-    const supabase = await createServerSupabase();
-
-    const payload = {
+  const { data, error } = await supabase
+    .from("shelter")
+    .update({
       application_status: input.status,
-      application_review_note: input.reviewNote ?? null,
-      application_reviewed_at: new Date().toISOString(),
-      reviewed_by: input.reviewedBy ?? null,
-      updated_at: new Date().toISOString(),
-    };
+      application_review_note: input.reviewNote,
+      application_reviewed_at: now,
+      reviewed_by: input.reviewedBy,
+      updated_at: now,
+    })
+    .eq("id", input.id)
+    .select(APPLICATION_DETAIL_SELECT)
+    .maybeSingle();
 
-    const { data, error } = await supabase
-      .from("shelter")
-      .update(payload)
-      .eq("id", input.id)
-      .select(
-        `
-        id,
-        owner_id,
-        shelter_name,
-        logo_url,
-        location,
-        contact_email,
-        contact_phone,
-        application_status,
-        application_submitted_at,
-        application_reviewed_at,
-        application_review_note,
-        created_at,
-        updated_at
-        `,
-      )
-      .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new ApiError(404, "Shelter application not found.");
 
-    if (error) {
-      return {
-        ok: false,
-        data: null,
-        error: error.message,
-        status: 500,
-      };
-    }
-
-    if (!data) {
-      return {
-        ok: false,
-        data: null,
-        error: "Shelter application not found or update failed.",
-        status: 404,
-      };
-    }
-
-    return {
-      ok: true,
-      data: normalizeShelterApplication(data as Record<string, unknown>),
-      error: null,
-      status: 200,
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      data: null,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Failed to update application status.",
-      status: 500,
-    };
-  }
+  return withSignedDocuments(
+    normalizeShelterApplication(data as Record<string, unknown>),
+  );
 }

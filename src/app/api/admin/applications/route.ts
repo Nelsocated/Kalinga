@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getShelterApplications } from "@/src/lib/services/adminService";
+import { requireAdmin } from "@/src/lib/utils/auth";
+import { errorResponse } from "@/src/lib/api";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status");
+    await requireAdmin();
+
+    const status = req.nextUrl.searchParams.get("status");
 
     const validStatus =
       status === "under_review" ||
@@ -14,27 +17,10 @@ export async function GET(req: NextRequest) {
         ? status
         : "all";
 
-    const result = await getShelterApplications(validStatus);
+    const data = await getShelterApplications(validStatus);
 
-    return NextResponse.json(
-      {
-        ok: result.ok,
-        data: result.data ?? [],
-        error: result.error,
-      },
-      { status: result.status },
-    );
+    return NextResponse.json({ ok: true, data, error: null });
   } catch (error) {
-    return NextResponse.json(
-      {
-        ok: false,
-        data: [],
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to load shelter applications.",
-      },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }

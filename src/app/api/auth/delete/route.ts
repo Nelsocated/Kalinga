@@ -1,30 +1,23 @@
 import { NextResponse } from "next/server";
-import { authService } from "@/src/lib/services/authService";
+import {
+  deleteAccount,
+  getSessionUser,
+} from "@/src/lib/services/authService";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
 export async function DELETE() {
   try {
-    const result = await authService.deleteAccount();
+    const user = await getSessionUser();
 
-    if (!result.ok) {
-      return NextResponse.json(
-        {
-          error: result.error,
-          details: result.details ?? null,
-        },
-        { status: result.status },
-      );
-    }
+    if (!user) throw new ApiError(401, "Unauthorized");
+
+    await deleteAccount(user.id);
 
     return NextResponse.json(
       { message: "Account deleted successfully" },
       { status: 200 },
     );
   } catch (error) {
-    console.error("[DELETE /api/auth/delete-account]", error);
-
-    return NextResponse.json(
-      { error: "Failed to delete account" },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }

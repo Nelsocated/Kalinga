@@ -1,24 +1,16 @@
 import { NextResponse } from "next/server";
-import { authService } from "@/src/lib/services/authService";
+import { logout } from "@/src/lib/services/authService";
+import { errorResponse } from "@/src/lib/api";
 
 export async function POST() {
   try {
-    const result = await authService.logout();
-
-    if (!result.ok) {
-      return NextResponse.json(
-        { error: result.error, details: result.details ?? null },
-        { status: result.status },
-      );
-    }
+    await logout();
 
     return NextResponse.json(
       { message: "Logged out successfully" },
       { status: 200 },
     );
   } catch (error) {
-    console.error("[POST /api/auth/logout]", error);
-
-    return NextResponse.json({ error: "Failed to logout" }, { status: 500 });
+    return errorResponse(error);
   }
 }

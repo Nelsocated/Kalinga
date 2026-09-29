@@ -1,94 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import {
   getShelterApplicationById,
   updateShelterApplicationStatus,
 } from "@/src/lib/services/adminService";
+import { requireAdmin } from "@/src/lib/utils/auth";
+import { errorResponse } from "@/src/lib/api";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
+const ReviewSchema = z.object({
+  status: z.enum(["under_review", "approved", "rejected"], {
+    message: "Valid status is required.",
+  }),
+  reviewNote: z.string().nullish(),
+});
+
 export async function GET(_: NextRequest, context: RouteContext) {
   try {
+    await requireAdmin();
     const { id } = await context.params;
 
-    const result = await getShelterApplicationById(id);
+    const data = await getShelterApplicationById(id);
 
-    return NextResponse.json(
-      {
-        ok: result.ok,
-        data: result.data,
-        error: result.error,
-      },
-      { status: result.status },
-    );
+    return NextResponse.json({ ok: true, data, error: null });
   } catch (error) {
-    return NextResponse.json(
-      {
-        ok: false,
-        data: null,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch shelter application.",
-      },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }
 
-type PatchBody = {
-  status?: "under_review" | "approved" | "rejected";
-  reviewNote?: string | null;
-  reviewedBy?: string | null;
-};
-
 export async function PATCH(req: NextRequest, context: RouteContext) {
   try {
+    const admin = await requireAdmin();
     const { id } = await context.params;
-    const body = (await req.json()) as PatchBody;
+    const input = ReviewSchema.parse(await req.json());
 
-    if (
-      body.status !== "under_review" &&
-      body.status !== "approved" &&
-      body.status !== "rejected"
-    ) {
-      return NextResponse.json(
-        {
-          ok: false,
-          data: null,
-          error: "Valid status is required.",
-        },
-        { status: 400 },
-      );
-    }
-
-    const result = await updateShelterApplicationStatus({
+    const data = await updateShelterApplicationStatus({
       id,
-      status: body.status,
-      reviewNote: body.reviewNote ?? null,
-      reviewedBy: body.reviewedBy ?? null,
+      status: input.status,
+      reviewNote: input.reviewNote ?? null,
+      reviewedBy: admin.id,
     });
 
-    return NextResponse.json(
-      {
-        ok: result.ok,
-        data: result.data,
-        error: result.error,
-      },
-      { status: result.status },
-    );
+    return NextResponse.json({ ok: true, data, error: null });
   } catch (error) {
-    return NextResponse.json(
-      {
-        ok: false,
-        data: null,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to update shelter application.",
-      },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }

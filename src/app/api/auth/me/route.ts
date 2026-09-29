@@ -1,17 +1,15 @@
 import { NextResponse } from "next/server";
-import { me } from "@/src/lib/services/authService";
+import { getSessionUser } from "@/src/lib/services/authService";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
 export async function GET() {
-  const result = await me();
+  try {
+    const user = await getSessionUser();
 
-  if (!result.ok) {
-    return NextResponse.json(
-      { error: result.error, details: result.details },
-      { status: result.status },
-    );
+    if (!user) throw new ApiError(401, "Unauthorized");
+
+    return NextResponse.json({ user });
+  } catch (error) {
+    return errorResponse(error);
   }
-
-  return NextResponse.json({
-    user: result.data.user,
-  });
 }

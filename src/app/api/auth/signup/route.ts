@@ -1,20 +1,13 @@
 import { NextResponse } from "next/server";
 import { signup } from "@/src/lib/services/authService";
+import { errorResponse } from "@/src/lib/api";
 
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => null);
+  try {
+    const { user, session } = await signup(await req.json());
 
-  const result = await signup(body);
-
-  if (!result.ok) {
-    return NextResponse.json(
-      { error: result.error, details: result.details },
-      { status: result.status },
-    );
+    return NextResponse.json({ user, session });
+  } catch (error) {
+    return errorResponse(error);
   }
-
-  return NextResponse.json({
-    user: result.data.user,
-    session: result.data.session,
-  });
 }
