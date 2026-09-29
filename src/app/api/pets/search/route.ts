@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getAvailablePets } from "@/src/lib/services/pet/petService";
+import { getAvailablePets } from "@/src/lib/services/petService";
 import type { PetFilters } from "@/src/lib/types/pets";
 import { getSheltersByIds } from "@/src/lib/services/shelter/shelterService";
 import type { SearchPetCardItem } from "@/src/lib/types/pets";

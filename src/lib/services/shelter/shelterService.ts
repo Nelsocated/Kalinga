@@ -16,7 +16,7 @@ import type {
   ShelterProfileUI,
   ShelterPetUI,
 } from "@/src/app/shelter/profiles/shelter/ShelterProfileClient";
-import { getPetsByShelter } from "../pet/petService";
+import { getPetsByShelter } from "../petService";
 import { getPetVideosByShelterId } from "../petMediaService";
 
 type UploadShelterAvatarResult =

@@ -45,17 +45,8 @@ export type VideoRow = {
 
 export type CreateVideoInput = {
   petId: string;
-  title?: string | null;
+  caption?: string | null;
   file: File;
-};
-
-export type ServiceResult<T> = {
-  ok: boolean;
-  status: number;
-  message?: string;
-  error?: string;
-  details?: unknown;
-  data?: T;
 };
 
 export type UploadPetPhotoInput = {

@@ -1,33 +1,31 @@
-import { uploadPetPhoto } from "@/src/lib/services/petMediaService";
-import { getPetPhotosByPetId } from "@/src/lib/services/petMediaService";
+import { NextResponse } from "next/server";
+import {
+  getPetPhotosByPetId,
+  uploadPetPhoto,
+} from "@/src/lib/services/petMediaService";
+import { assertShelterOwnsPet } from "@/src/lib/services/petService";
+import { requireOwnedShelterId } from "@/src/lib/utils/auth";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
 export async function POST(req: Request) {
   try {
+    const shelterId = await requireOwnedShelterId();
     const formData = await req.formData();
 
-    const file = formData.get("file") as File;
-    const petId = formData.get("petId") as string;
+    const file = formData.get("file");
+    const petId = String(formData.get("petId") ?? "").trim();
 
-    if (!file || !petId) {
-      return Response.json({ error: "Missing file or petId" }, { status: 400 });
+    if (!(file instanceof File) || !petId) {
+      throw new ApiError(400, "Missing file or petId");
     }
 
-    const result = await uploadPetPhoto({ file, petId });
+    await assertShelterOwnsPet(shelterId, petId);
 
-    if (!result.ok) {
-      return Response.json(
-        { error: result.error, details: result.details },
-        { status: result.status },
-      );
-    }
+    const { url } = await uploadPetPhoto({ file, petId });
 
-    return Response.json({
-      success: true,
-      url: result.data?.url,
-    });
-  } catch (err) {
-    console.error("GET /api/pets error:", err);
-    return Response.json({ error: "Upload failed" }, { status: 500 });
+    return NextResponse.json({ success: true, url });
+  } catch (error) {
+    return errorResponse(error);
   }
 }
 
@@ -36,20 +34,17 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const petId = searchParams.get("petId");
 
-    if (!petId) {
-      return Response.json({ error: "Missing petId" }, { status: 400 });
-    }
+    if (!petId) throw new ApiError(400, "Missing petId");
 
     const photos = await getPetPhotosByPetId(petId);
 
-    return Response.json({
+    return NextResponse.json({
       photos: photos.map((p) => ({
         id: p.id,
         url: p.url,
       })),
     });
-  } catch (err) {
-    console.error("GET /api/pets error:", err);
-    return Response.json({ error: "Failed to fetch photos" }, { status: 500 });
+  } catch (error) {
+    return errorResponse(error);
   }
 }

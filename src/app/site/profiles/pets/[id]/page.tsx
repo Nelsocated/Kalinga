@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import PetProfileClient from "./PetProfileClient";
-import { getPetById } from "@/src/lib/services/pet/petService";
+import { getPetById } from "@/src/lib/services/petService";
 import { getPetPhotosByPetId } from "@/src/lib/services/petMediaService";
 import { fetchShelterById } from "@/src/lib/services/shelter/shelterService";
 

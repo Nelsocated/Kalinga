@@ -12,7 +12,7 @@ import { getVideosByPetIds } from "@/src/lib/services/petMediaService";
 import { getPetLikeCounts } from "@/src/lib/services/likeService";
 import { getStatsByMediaIds } from "@/src/lib/services/videoViewService";
 import { getAdoptedCountByPetIds } from "@/src/lib/services/adoption/adoptionService";
-import { getPetsByShelterDashboard } from "@/src/lib/services/pet/petService";
+import { getPetsByShelterDashboard } from "@/src/lib/services/petService";
 import type { Dashboard } from "@/src/lib/types/pets";
 import { requireShelter } from "@/src/lib/utils/auth";
 import type { AuthUser } from "@/src/lib/utils/clientAuth";

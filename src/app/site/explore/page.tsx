@@ -2,7 +2,7 @@ import ExplorePageView from "./ExplorePage";
 import {
   getLongestStayPets,
   getPetsByIds,
-} from "@/src/lib/services/pet/petService";
+} from "@/src/lib/services/petService";
 import { getSheltersByIds } from "@/src/lib/services/shelter/shelterService";
 import { getAll } from "@/src/lib/services/fosterService";
 

@@ -90,5 +90,6 @@ export type CreatePetInput = {
   spayed_neutered?: boolean;
 
   photo_url?: string | null;
-  years_inShelter?: number | null;
+  /** The year the pet arrived at the shelter, e.g. 2021. */
+  year_inShelter?: number | null;
 };

@@ -1,50 +1,32 @@
 import { NextResponse } from "next/server";
 import { createVideo } from "@/src/lib/services/petMediaService";
+import { assertShelterOwnsPet } from "@/src/lib/services/petService";
+import { requireOwnedShelterId } from "@/src/lib/utils/auth";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
 export async function POST(req: Request) {
   try {
+    const shelterId = await requireOwnedShelterId();
     const formData = await req.formData();
 
-    const petId = String(formData.get("petId") ?? "");
-    const title = String(formData.get("title") ?? "");
+    const petId = String(formData.get("petId") ?? "").trim();
+    const caption = String(formData.get("caption") ?? "");
     const file = formData.get("file");
 
+    if (!petId) throw new ApiError(400, "Pet ID is required");
     if (!(file instanceof File)) {
-      return NextResponse.json(
-        { error: "Video file is required" },
-        { status: 400 },
-      );
+      throw new ApiError(400, "Video file is required");
     }
 
-    const result = await createVideo({
-      petId,
-      title,
-      file,
-    });
+    await assertShelterOwnsPet(shelterId, petId);
 
-    if (!result.ok) {
-      return NextResponse.json(
-        {
-          error: result.error,
-          details: result.details ?? null,
-        },
-        { status: result.status },
-      );
-    }
+    const data = await createVideo({ petId, caption, file });
 
     return NextResponse.json(
-      {
-        message: result.message,
-        data: result.data,
-      },
-      { status: result.status },
+      { message: "Video uploaded successfully", data },
+      { status: 201 },
     );
   } catch (error) {
-    console.error("[POST /api/videos]", error);
-
-    return NextResponse.json(
-      { error: "Failed to upload video" },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }

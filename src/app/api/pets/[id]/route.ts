@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getPetById } from "@/src/lib/services/pet/petService";
+import { getPetById } from "@/src/lib/services/petService";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
 type RouteContext = {
   params: Promise<{
@@ -13,17 +14,10 @@ export async function GET(_: Request, { params }: RouteContext) {
 
     const pet = await getPetById(id);
 
-    if (!pet) {
-      return NextResponse.json({ message: "Pet not found" }, { status: 404 });
-    }
+    if (!pet) throw new ApiError(404, "Pet not found");
 
     return NextResponse.json(pet, { status: 200 });
   } catch (error) {
-    console.error("[GET /api/pets/[id]]", error);
-
-    return NextResponse.json(
-      { message: "Failed to fetch pet" },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }
