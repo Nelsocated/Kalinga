@@ -1,96 +1,85 @@
+import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
+import { ApiError } from "@/src/lib/api";
 import type { Role, AuthUser } from "./clientAuth";
 
-class Auth {
-  private supabase: Awaited<ReturnType<typeof createServerSupabase>> | null =
-    null;
+export async function getUserId(): Promise<string | null> {
+  const supabase = await createServerSupabase();
 
-  private async getSupabase() {
-    if (!this.supabase) {
-      this.supabase = await createServerSupabase();
-    }
-    return this.supabase;
-  }
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  async getAuthUser(): Promise<AuthUser | null> {
-    const supabase = await this.getSupabase();
+  if (error || !user) return null;
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return null;
-
-    const { data, error } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (error || !data) return null;
-
-    return {
-      id: user.id,
-      role: data.role as Role,
-    };
-  }
-
-  async requireAuth(): Promise<AuthUser> {
-    const user = await this.getAuthUser();
-
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    return user;
-  }
-
-  async requireRole(allowed: Role[]): Promise<AuthUser> {
-    const user = await this.requireAuth();
-
-    if (!allowed.includes(user.role)) {
-      throw new Error("Forbidden");
-    }
-
-    return user;
-  }
-
-  async requireUser(): Promise<AuthUser> {
-    return this.requireRole(["user"]);
-  }
-
-  async requireShelter(): Promise<AuthUser> {
-    return this.requireRole(["shelter"]);
-  }
-
-  async requireAdmin(): Promise<AuthUser> {
-    return this.requireRole(["admin"]);
-  }
+  return user.id;
 }
 
-const authService = new Auth();
-
-// Backward-compatible exports - call these directly
 export async function getAuthUser(): Promise<AuthUser | null> {
-  return authService.getAuthUser();
+  const supabase = await createServerSupabase();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    id: user.id,
+    role: data.role as Role,
+  };
 }
 
 export async function requireAuth(): Promise<AuthUser> {
-  return authService.requireAuth();
+  const user = await getAuthUser();
+
+  if (!user) throw new ApiError(401, "Unauthorized");
+
+  return user;
 }
 
 export async function requireRole(allowed: Role[]): Promise<AuthUser> {
-  return authService.requireRole(allowed);
+  const user = await requireAuth();
+
+  if (!allowed.includes(user.role)) throw new ApiError(403, "Forbidden");
+
+  return user;
 }
 
 export async function requireUser(): Promise<AuthUser> {
-  return authService.requireUser();
+  return requireRole(["user"]);
 }
 
 export async function requireShelter(): Promise<AuthUser> {
-  return authService.requireShelter();
+  return requireRole(["shelter"]);
 }
 
 export async function requireAdmin(): Promise<AuthUser> {
-  return authService.requireAdmin();
+  return requireRole(["admin"]);
+}
+
+/** Returns the id of the shelter owned by the signed-in shelter account. */
+export async function requireOwnedShelterId(): Promise<string> {
+  const user = await requireShelter();
+  const supabase = await createServerSupabase();
+
+  const { data, error } = await supabase
+    .from("shelter")
+    .select("id")
+    .eq("owner_id", user.id)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) throw new ApiError(404, "Shelter profile not found");
+
+  return data.id as string;
 }

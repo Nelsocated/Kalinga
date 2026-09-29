@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getUserSentMessages } from "@/src/lib/services/messageService";
-import { getUserId } from "@/src/lib/utils/getUserId";
+import { getUserId } from "@/src/lib/utils/auth";
 
 export async function GET() {
   try {

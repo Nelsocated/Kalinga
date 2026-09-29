@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import PostVideoClient from "./PostVideoClient";
-import { getUserId } from "@/src/lib/utils/getUserId";
+import { getUserId } from "@/src/lib/utils/auth";
 import {
   getShelterPets,
   getShelterIdByOwnerId,

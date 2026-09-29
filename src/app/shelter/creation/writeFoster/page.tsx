@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import WriteFosterClient from "./WriteFosterClient";
-import { getUserId } from "@/src/lib/utils/getUserId";
+import { getUserId } from "@/src/lib/utils/auth";
 import {
   getShelterPets,
   getShelterIdByOwnerId,
