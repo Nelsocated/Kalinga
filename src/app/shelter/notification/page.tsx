@@ -1,7 +1,7 @@
 import NotifShelter from "./NotifShelter";
 import { getUserId } from "@/src/lib/utils/auth";
 import { getShelterIdByOwnerId } from "@/src/lib/services/shelterService";
-import { getShelterAdoptionNotifications } from "@/src/lib/services/adoption/adoptionService";
+import { getShelterAdoptionNotifications } from "@/src/lib/services/adoptionService";
 import { getPetById } from "@/src/lib/services/petService";
 import { getUserById } from "@/src/lib/services/user/usersService";
 import type { PetGender } from "@/src/lib/types/shelters";

@@ -11,7 +11,7 @@ import {
 import { getVideosByPetIds } from "@/src/lib/services/petMediaService";
 import { getPetLikeCounts } from "@/src/lib/services/likeService";
 import { getStatsByMediaIds } from "@/src/lib/services/videoViewService";
-import { getAdoptedCountByPetIds } from "@/src/lib/services/adoption/adoptionService";
+import { getAdoptedCountByPetIds } from "@/src/lib/services/adoptionService";
 import { getPetsByShelterDashboard } from "@/src/lib/services/petService";
 import type { Dashboard } from "@/src/lib/types/pets";
 import { requireShelter } from "@/src/lib/utils/auth";

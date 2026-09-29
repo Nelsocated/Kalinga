@@ -7,7 +7,7 @@ import BackButton from "../ui/BackButton";
 import {
   createPetAdoptionRequest,
   fetchPetAdoptionStatus,
-} from "@/src/lib/services/adoption/adoptionClient";
+} from "@/src/lib/services/adoptionClient";
 import { PetStatus } from "@/src/lib/types/adoptionRequests";
 
 type Props = {

@@ -9,7 +9,7 @@ import type {
   ThreadWithMeta,
   ShelterMailboxFilter,
 } from "@/src/lib/types/messages";
-import { getAdoptionMetaMap } from "./adoption/adoptionService";
+import { getAdoptionMetaMap } from "./adoptionService";
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";

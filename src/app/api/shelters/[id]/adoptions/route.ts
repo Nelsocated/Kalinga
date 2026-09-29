@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { getShelterAdoptionNotifications } from "@/src/lib/services/adoption/adoptionService";
+import { getShelterAdoptionNotifications } from "@/src/lib/services/adoptionService";
+import { requireOwnedShelterId } from "@/src/lib/utils/auth";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
 type RouteContext = {
   params: Promise<{
@@ -7,28 +9,22 @@ type RouteContext = {
   }>;
 };
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
-}
-
 export async function GET(_req: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
+    const shelterId = await requireOwnedShelterId();
 
-    if (!id) {
-      return NextResponse.json(
-        { error: "Shelter id is required." },
-        { status: 400 },
+    if (shelterId !== id) {
+      throw new ApiError(
+        403,
+        "You can only view your own shelter's adoption requests.",
       );
     }
 
     const notifications = await getShelterAdoptionNotifications(id);
 
     return NextResponse.json({ data: notifications }, { status: 200 });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 },
-    );
+  } catch (error) {
+    return errorResponse(error);
   }
 }

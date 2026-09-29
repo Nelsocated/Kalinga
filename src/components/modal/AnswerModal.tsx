@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
 import Back_Button from "../ui/BackButton";
-import { fetchAdoptionAnswer } from "@/src/lib/services/adoption/adoptionClient";
+import { fetchAdoptionAnswer } from "@/src/lib/services/adoptionClient";
 import type { answer } from "@/src/lib/types/adoptionRequests";
 type Props = {
   isOpen: boolean;

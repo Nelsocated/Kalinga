@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { getUserAdoptionNotifications } from "@/src/lib/services/adoption/adoptionService";
+import { getUserAdoptionNotifications } from "@/src/lib/services/adoptionService";
+import { requireAuth } from "@/src/lib/utils/auth";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
 type RouteContext = {
   params: Promise<{
@@ -7,28 +9,19 @@ type RouteContext = {
   }>;
 };
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
-}
-
 export async function GET(_: Request, { params }: RouteContext) {
   try {
     const { id: userId } = await params;
+    const caller = await requireAuth();
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User id is required." },
-        { status: 400 },
-      );
+    if (caller.id !== userId) {
+      throw new ApiError(403, "You can only view your own adoption requests.");
     }
 
     const notifications = await getUserAdoptionNotifications(userId);
 
     return NextResponse.json({ data: notifications }, { status: 200 });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 },
-    );
+  } catch (error) {
+    return errorResponse(error);
   }
 }
