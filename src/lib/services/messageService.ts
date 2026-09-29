@@ -1,131 +1,134 @@
 import "server-only";
 
 import { createServerSupabase } from "@/src/lib/supabase/server";
+import { ApiError } from "@/src/lib/api";
+import type { AuthUser } from "@/src/lib/utils/clientAuth";
 import type {
   Message,
   MessageThread,
   CreateMessageThreadInput,
-  ReplyToThreadInput,
   ThreadWithMeta,
   ShelterMailboxFilter,
+  SentMessageItem,
 } from "@/src/lib/types/messages";
 import { getAdoptionMetaMap } from "./adoptionService";
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
-}
+type SenderSide = "user" | "shelter";
 
 function buildPreview(body: string, max = 120) {
   const cleaned = body.replace(/\s+/g, " ").trim();
   return cleaned.length <= max ? cleaned : `${cleaned.slice(0, max)}...`;
 }
 
-async function getAuthUserId() {
-  const supabase = await createServerSupabase();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  if (error) throw new Error(error.message);
-  if (!user) throw new Error("Unauthorized");
-
-  return user.id;
+function buildMessageInsert(
+  threadId: string,
+  side: SenderSide,
+  senderId: string,
+  body: string,
+  now: string,
+) {
+  return {
+    thread_id: threadId,
+    sender_user_id: side === "user" ? senderId : null,
+    sender_shelter_id: side === "shelter" ? senderId : null,
+    body: body.trim(),
+    created_at: now,
+    read_by_user: side === "user",
+    read_by_shelter: side === "shelter",
+  };
 }
 
-async function getOwnedShelterIds(authUserId: string): Promise<string[]> {
+async function getOwnedShelterId(ownerId: string): Promise<string | null> {
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
     .from("shelter")
     .select("id")
-    .eq("owner_id", authUserId); // ← was user_id
+    .eq("owner_id", ownerId)
+    .maybeSingle();
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []).map((row) => row.id as string);
+  return data?.id ?? null;
+}
+
+/**
+ * Works out which side of a conversation the caller is on:
+ * a user sends as themselves, a shelter account as the shelter it owns.
+ */
+export async function getSenderIdentity(
+  caller: AuthUser,
+): Promise<{ side: SenderSide; id: string }> {
+  if (caller.role === "user") return { side: "user", id: caller.id };
+
+  if (caller.role === "shelter") {
+    const shelterId = await getOwnedShelterId(caller.id);
+    if (shelterId) return { side: "shelter", id: shelterId };
+  }
+
+  throw new ApiError(403, "This account can't send messages");
 }
 
 export async function createMessageThread(
   input: CreateMessageThreadInput,
 ): Promise<{ thread: MessageThread; message: Message }> {
   const supabase = await createServerSupabase();
-  const authUserId = await getAuthUserId();
-
   const threadType = input.threadType ?? "general";
 
-  if (threadType === "adoption" && !input.adoptionRequestId) {
-    throw new Error("adoptionRequestId is required for adoption threads");
-  }
-
-  if (threadType === "general" && input.adoptionRequestId) {
-    throw new Error("General threads cannot have adoptionRequestId");
-  }
-
-  if (input.senderSide === "user" && authUserId !== input.userId) {
-    throw new Error("You can only create a user thread for yourself");
-  }
-
-  if (input.senderSide === "shelter") {
-    const shelterIds = await getOwnedShelterIds(authUserId);
-
-    if (!shelterIds.includes(input.shelterId)) {
-      throw new Error("You do not own this shelter");
+  if (threadType === "adoption") {
+    if (!input.adoptionRequestId) {
+      throw new ApiError(
+        400,
+        "adoptionRequestId is required for adoption threads",
+      );
     }
+
+    // The adoption request must be between this user and this shelter
+    const { data: request, error } = await supabase
+      .from("adoption_requests")
+      .select("id")
+      .eq("id", input.adoptionRequestId)
+      .eq("user_id", input.userId)
+      .eq("shelter_id", input.shelterId)
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (!request) throw new ApiError(404, "Adoption request not found");
+  } else if (input.adoptionRequestId) {
+    throw new ApiError(400, "General threads cannot have adoptionRequestId");
   }
 
   const now = new Date().toISOString();
 
-  const threadInsert = {
-    user_id: input.userId,
-    shelter_id: input.shelterId,
-    adoption_request_id:
-      threadType === "adoption" ? (input.adoptionRequestId ?? null) : null,
-    thread_type: threadType,
-    subject: input.subject.trim(),
-    created_at: now,
-    updated_at: now,
-    last_message_at: now,
-  };
-
   const { data: thread, error: threadError } = await supabase
     .from("message_threads")
-    .insert(threadInsert)
+    .insert({
+      user_id: input.userId,
+      shelter_id: input.shelterId,
+      adoption_request_id:
+        threadType === "adoption" ? (input.adoptionRequestId ?? null) : null,
+      thread_type: threadType,
+      subject: input.subject.trim(),
+      created_at: now,
+      updated_at: now,
+      last_message_at: now,
+    })
     .select("*")
     .single();
 
   if (threadError) throw new Error(threadError.message);
-  if (!thread) throw new Error("Failed to create message thread");
 
-  const messageInsert =
-    input.senderSide === "user"
-      ? {
-          thread_id: thread.id,
-          sender_user_id: input.userId,
-          sender_shelter_id: null,
-          body: input.body.trim(),
-          created_at: now,
-          read_by_user: true,
-          read_by_shelter: false,
-        }
-      : {
-          thread_id: thread.id,
-          sender_user_id: null,
-          sender_shelter_id: input.shelterId,
-          body: input.body.trim(),
-          created_at: now,
-          read_by_user: false,
-          read_by_shelter: true,
-        };
+  const senderId = input.senderSide === "user" ? input.userId : input.shelterId;
 
   const { data: message, error: messageError } = await supabase
     .from("messages")
-    .insert(messageInsert)
+    .insert(
+      buildMessageInsert(thread.id, input.senderSide, senderId, input.body, now),
+    )
     .select("*")
     .single();
 
   if (messageError) throw new Error(messageError.message);
-  if (!message) throw new Error("Failed to create first message");
 
   return {
     thread: thread as MessageThread,
@@ -133,87 +136,57 @@ export async function createMessageThread(
   };
 }
 
-export async function replyToThread(
-  input: ReplyToThreadInput,
-): Promise<Message> {
+/**
+ * Loads a thread the caller takes part in. Returns 404 for anyone else so
+ * thread ids can't be probed.
+ */
+export async function getThreadForCaller(
+  threadId: string,
+  caller: AuthUser,
+): Promise<{ thread: MessageThread; side: SenderSide; senderId: string }> {
   const supabase = await createServerSupabase();
-  const authUserId = await getAuthUserId();
 
-  const { data: thread, error: threadError } = await supabase
+  const { data: thread, error } = await supabase
     .from("message_threads")
     .select("*")
-    .eq("id", input.threadId)
-    .single();
+    .eq("id", threadId)
+    .maybeSingle();
 
-  if (threadError) throw new Error(threadError.message);
-  if (!thread) throw new Error("Thread not found");
+  if (error) throw new Error(error.message);
 
-  const now = new Date().toISOString();
+  if (thread) {
+    if (caller.role === "user" && thread.user_id === caller.id) {
+      return { thread, side: "user", senderId: caller.id };
+    }
 
-  let messageInsert:
-    | {
-        thread_id: string;
-        sender_user_id: string;
-        sender_shelter_id: null;
-        body: string;
-        created_at: string;
-        read_by_user: boolean;
-        read_by_shelter: boolean;
+    if (caller.role === "shelter") {
+      const shelterId = await getOwnedShelterId(caller.id);
+
+      if (shelterId && thread.shelter_id === shelterId) {
+        return { thread, side: "shelter", senderId: shelterId };
       }
-    | {
-        thread_id: string;
-        sender_user_id: null;
-        sender_shelter_id: string;
-        body: string;
-        created_at: string;
-        read_by_user: boolean;
-        read_by_shelter: boolean;
-      };
-
-  if (input.senderSide === "user") {
-    if (thread.user_id !== authUserId) {
-      throw new Error("Unauthorized to reply as user");
     }
-
-    messageInsert = {
-      thread_id: input.threadId,
-      sender_user_id: authUserId,
-      sender_shelter_id: null,
-      body: input.body.trim(),
-      created_at: now,
-      read_by_user: true,
-      read_by_shelter: false,
-    };
-  } else {
-    const shelterIds = await getOwnedShelterIds(authUserId);
-    const senderShelterId = input.senderShelterId ?? thread.shelter_id;
-
-    if (
-      !shelterIds.includes(senderShelterId) ||
-      senderShelterId !== thread.shelter_id
-    ) {
-      throw new Error("Unauthorized to reply as shelter");
-    }
-
-    messageInsert = {
-      thread_id: input.threadId,
-      sender_user_id: null,
-      sender_shelter_id: senderShelterId,
-      body: input.body.trim(),
-      created_at: now,
-      read_by_user: false,
-      read_by_shelter: true,
-    };
   }
+
+  throw new ApiError(404, "Thread not found");
+}
+
+export async function replyToThread(
+  threadId: string,
+  caller: AuthUser,
+  body: string,
+): Promise<Message> {
+  const { side, senderId } = await getThreadForCaller(threadId, caller);
+  const supabase = await createServerSupabase();
+  const now = new Date().toISOString();
 
   const { data: message, error: messageError } = await supabase
     .from("messages")
-    .insert(messageInsert)
+    .insert(buildMessageInsert(threadId, side, senderId, body, now))
     .select("*")
     .single();
 
   if (messageError) throw new Error(messageError.message);
-  if (!message) throw new Error("Failed to send reply");
 
   const { error: updateThreadError } = await supabase
     .from("message_threads")
@@ -223,30 +196,11 @@ export async function replyToThread(
       user_archived: false,
       shelter_archived: false,
     })
-    .eq("id", input.threadId);
+    .eq("id", threadId);
 
   if (updateThreadError) throw new Error(updateThreadError.message);
 
   return message as Message;
-}
-
-export async function getThreadById(
-  threadId: string,
-): Promise<MessageThread | null> {
-  const supabase = await createServerSupabase();
-
-  const { data, error } = await supabase
-    .from("message_threads")
-    .select("*")
-    .eq("id", threadId)
-    .single();
-
-  if (error) {
-    if (error.code === "PGRST116") return null;
-    throw new Error(error.message);
-  }
-
-  return data as MessageThread;
 }
 
 export async function getThreadMessages(threadId: string): Promise<Message[]> {
@@ -266,9 +220,9 @@ export async function getThreadMessages(threadId: string): Promise<Message[]> {
 async function getLatestPreviewMap(
   threadIds: string[],
 ): Promise<Map<string, string | null>> {
-  const supabase = await createServerSupabase();
-
   if (threadIds.length === 0) return new Map();
+
+  const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
     .from("messages")
@@ -291,36 +245,11 @@ async function getLatestPreviewMap(
   return map;
 }
 
-async function getAdoptionStatusMap(
-  adoptionRequestIds: string[],
-): Promise<Map<string, string | null>> {
-  const supabase = await createServerSupabase();
-
-  if (adoptionRequestIds.length === 0) return new Map();
-
-  const { data, error } = await supabase
-    .from("adoption_requests")
-    .select("id, status")
-    .in("id", adoptionRequestIds);
-
-  if (error) throw new Error(error.message);
-
-  const map = new Map<string, string | null>();
-
-  for (const row of data ?? []) {
-    map.set(row.id as string, (row.status as string) ?? null);
-  }
-
-  return map;
-}
-
+/** `userId` must come from the session. */
 export async function getUserInboxThreads(
   userId: string,
 ): Promise<ThreadWithMeta[]> {
   const supabase = await createServerSupabase();
-  const authUserId = await getAuthUserId();
-
-  if (authUserId !== userId) throw new Error("Unauthorized");
 
   const { data, error } = await supabase
     .from("message_threads")
@@ -331,18 +260,19 @@ export async function getUserInboxThreads(
   if (error) throw new Error(error.message);
 
   const threads = (data ?? []) as MessageThread[];
-  const threadIds = threads.map((t) => t.id);
   const adoptionRequestIds = threads
     .map((t) => t.adoption_request_id)
     .filter((id): id is string => Boolean(id));
 
-  const previewMap = await getLatestPreviewMap(threadIds);
-  const adoptionStatusMap = await getAdoptionStatusMap(adoptionRequestIds);
+  const [previewMap, adoptionMetaMap] = await Promise.all([
+    getLatestPreviewMap(threads.map((t) => t.id)),
+    getAdoptionMetaMap(adoptionRequestIds),
+  ]);
 
   return threads.map((thread) => ({
     ...thread,
     adoption_status: thread.adoption_request_id
-      ? (adoptionStatusMap.get(thread.adoption_request_id) ?? null)
+      ? (adoptionMetaMap.get(thread.adoption_request_id)?.status ?? null)
       : null,
     last_message_preview: previewMap.get(thread.id) ?? null,
     unread_count: 0,
@@ -350,15 +280,12 @@ export async function getUserInboxThreads(
   }));
 }
 
+/** `shelterId` must be the caller's own shelter. */
 export async function getShelterInboxThreads(
   shelterId: string,
   filter: ShelterMailboxFilter = "inbox",
 ): Promise<ThreadWithMeta[]> {
   const supabase = await createServerSupabase();
-  const authUserId = await getAuthUserId();
-  const shelterIds = await getOwnedShelterIds(authUserId);
-
-  if (!shelterIds.includes(shelterId)) throw new Error("Unauthorized");
 
   const { data, error } = await supabase
     .from("message_threads")
@@ -377,13 +304,10 @@ export async function getShelterInboxThreads(
   const adoptionMetaMap = await getAdoptionMetaMap(adoptionRequestIds);
 
   const filteredThreads = threads.filter((thread) => {
-    const adoptionMeta = thread.adoption_request_id
-      ? adoptionMetaMap.get(thread.adoption_request_id)
+    const status = thread.adoption_request_id
+      ? (adoptionMetaMap.get(thread.adoption_request_id)?.status ?? null)
       : null;
 
-    const status = adoptionMeta?.status ?? null;
-
-    if (filter === "inbox") return true;
     if (filter === "contacting_applicant")
       return status === "contacting_applicant";
     if (filter === "decision")
@@ -394,8 +318,9 @@ export async function getShelterInboxThreads(
     return true;
   });
 
-  const filteredThreadIds = filteredThreads.map((t) => t.id);
-  const previewMap = await getLatestPreviewMap(filteredThreadIds);
+  const previewMap = await getLatestPreviewMap(
+    filteredThreads.map((t) => t.id),
+  );
 
   return filteredThreads.map((thread) => {
     const adoptionMeta = thread.adoption_request_id
@@ -413,67 +338,17 @@ export async function getShelterInboxThreads(
   });
 }
 
-export async function markThreadAsReadForUser(threadId: string): Promise<void> {
-  const supabase = await createServerSupabase();
-  const authUserId = await getAuthUserId();
-
-  const { data: thread, error: threadError } = await supabase
-    .from("message_threads")
-    .select("id, user_id")
-    .eq("id", threadId)
-    .single();
-
-  if (threadError) throw new Error(threadError.message);
-  if (!thread || thread.user_id !== authUserId) {
-    throw new Error("Unauthorized");
-  }
-
-  const { error } = await supabase
-    .from("messages")
-    .update({ read_by_user: true })
-    .eq("thread_id", threadId)
-    .neq("sender_user_id", authUserId);
-
-  if (error) throw new Error(error.message);
-}
-
-export async function markThreadAsReadByUser(threadId: string) {
-  const supabase = await createServerSupabase();
-  const { error } = await supabase.from("message_thread_reads").upsert(
-    {
-      thread_id: threadId,
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-      read_at: new Date().toISOString(),
-    },
-    { onConflict: "thread_id,user_id" },
-  );
-
-  if (error) throw new Error(error.message);
-}
-
-export async function safeCreateMessageThread(input: CreateMessageThreadInput) {
-  try {
-    return await createMessageThread(input);
-  } catch (error) {
-    throw new Error(getErrorMessage(error));
-  }
-}
-
-export async function safeReplyToThread(input: ReplyToThreadInput) {
-  try {
-    return await replyToThread(input);
-  } catch (error) {
-    throw new Error(getErrorMessage(error));
-  }
-}
-
-export async function getUserSentMessages(userId: string) {
+/** Messages the caller sent, with the other side of each thread as receiver. */
+export async function getSentMessages(
+  side: SenderSide,
+  senderId: string,
+): Promise<SentMessageItem[]> {
   const supabase = await createServerSupabase();
 
   const { data: messages, error } = await supabase
     .from("messages")
     .select("id, body, created_at, thread_id")
-    .eq("sender_user_id", userId)
+    .eq(side === "user" ? "sender_user_id" : "sender_shelter_id", senderId)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
@@ -483,32 +358,57 @@ export async function getUserSentMessages(userId: string) {
 
   const { data: threads, error: threadError } = await supabase
     .from("message_threads")
-    .select("id, subject, shelter_id")
+    .select("id, subject, user_id, shelter_id")
     .in("id", threadIds);
 
   if (threadError) throw new Error(threadError.message);
 
-  const shelterIds = [
-    ...new Set(
-      (threads ?? []).map((t) => t.shelter_id as string).filter(Boolean),
-    ),
+  const threadMap = new Map((threads ?? []).map((t) => [t.id, t]));
+  const receiverIdOf = (thread?: { user_id: string; shelter_id: string }) =>
+    (side === "user" ? thread?.shelter_id : thread?.user_id) ?? "";
+
+  const receiverIds = [
+    ...new Set((threads ?? []).map(receiverIdOf).filter(Boolean)),
   ];
 
-  const { data: shelters, error: shelterError } = await supabase
-    .from("shelter")
-    .select("id, shelter_name, logo_url")
-    .in("id", shelterIds.length > 0 ? shelterIds : ["__none__"]);
+  const receivers = new Map<
+    string,
+    { name: string | null; image: string | null }
+  >();
 
-  if (shelterError) throw new Error(shelterError.message);
+  if (receiverIds.length > 0 && side === "user") {
+    const { data, error: shelterError } = await supabase
+      .from("shelter")
+      .select("id, shelter_name, logo_url")
+      .in("id", receiverIds);
 
-  const threadMap = new Map((threads ?? []).map((t) => [t.id, t]));
-  const shelterMap = new Map((shelters ?? []).map((s) => [s.id, s]));
+    if (shelterError) throw new Error(shelterError.message);
+
+    for (const s of data ?? []) {
+      receivers.set(s.id, { name: s.shelter_name, image: s.logo_url });
+    }
+  }
+
+  if (receiverIds.length > 0 && side === "shelter") {
+    const { data, error: userError } = await supabase
+      .from("users")
+      .select("id, full_name, username, photo_url")
+      .in("id", receiverIds);
+
+    if (userError) throw new Error(userError.message);
+
+    for (const u of data ?? []) {
+      receivers.set(u.id, {
+        name: u.full_name ?? u.username,
+        image: u.photo_url,
+      });
+    }
+  }
 
   return messages.map((msg) => {
     const thread = threadMap.get(msg.thread_id as string);
-    const shelter = thread?.shelter_id
-      ? shelterMap.get(thread.shelter_id)
-      : null;
+    const receiverId = receiverIdOf(thread);
+    const receiver = receivers.get(receiverId);
 
     return {
       id: msg.id as string,
@@ -516,9 +416,11 @@ export async function getUserSentMessages(userId: string) {
       created_at: msg.created_at as string,
       subject: thread?.subject ?? null,
       receiver: {
-        id: shelter?.id ?? thread?.shelter_id ?? "",
-        name: shelter?.shelter_name ?? "Unknown Shelter",
-        image: shelter?.logo_url ?? null,
+        id: receiverId,
+        name:
+          receiver?.name ??
+          (side === "user" ? "Unknown Shelter" : "Unknown User"),
+        image: receiver?.image ?? null,
         subtitle: null,
       },
     };

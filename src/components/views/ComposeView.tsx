@@ -114,15 +114,14 @@ export default function ComposeView({
 
     try {
       if (mode === "reply") {
-        const res = await fetch("/api/messages/reply", {
+        if (!lockedThreadId) {
+          throw new Error("Missing thread to reply to.");
+        }
+
+        const res = await fetch(`/api/messages/threads/${lockedThreadId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            threadId: lockedThreadId,
-            body,
-            senderSide,
-            senderShelterId: senderSide === "shelter" ? senderShelterId : null,
-          }),
+          body: JSON.stringify({ body }),
         });
 
         const data = await res.json().catch(() => null);
@@ -131,9 +130,7 @@ export default function ComposeView({
           throw new Error(data?.error || "Failed to reply");
         }
 
-        if (lockedThreadId) {
-          onCreated?.(lockedThreadId);
-        }
+        onCreated?.(lockedThreadId);
       } else {
         let payload:
           | {

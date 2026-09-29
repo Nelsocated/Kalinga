@@ -1,67 +1,46 @@
 import { NextResponse } from "next/server";
-import { safeCreateMessageThread } from "@/src/lib/services/messageService";
+import { z } from "zod";
+import {
+  createMessageThread,
+  getSenderIdentity,
+} from "@/src/lib/services/messageService";
+import { requireAuth } from "@/src/lib/utils/auth";
+import { ApiError, errorResponse } from "@/src/lib/api";
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
-}
-
-type CreateThreadBody = {
-  senderSide: "user" | "shelter";
-  userId: string; // applicant's user ID
-  shelterId: string;
-  subject: string;
-  body: string;
-  threadType?: "general" | "adoption";
-  adoptionRequestId?: string | null;
-};
+// The sender's own id comes from the session; only the recipient is read
+// from the body (shelterId when a user writes, userId when a shelter writes).
+const ComposeSchema = z.object({
+  userId: z.string().optional(),
+  shelterId: z.string().optional(),
+  subject: z.string().trim().min(1, "subject is required"),
+  body: z.string().trim().min(1, "body is required"),
+  threadType: z.enum(["general", "adoption"]).optional(),
+  adoptionRequestId: z.string().nullish(),
+});
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as CreateThreadBody;
+    const caller = await requireAuth();
+    const sender = await getSenderIdentity(caller);
+    const input = ComposeSchema.parse(await req.json());
 
-    if (
-      !body.userId ||
-      !body.shelterId ||
-      !body.subject?.trim() ||
-      !body.body?.trim() ||
-      !body.senderSide
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "userId, shelterId, senderSide, subject, and body are required",
-        },
-        { status: 400 },
-      );
-    }
+    const userId = sender.side === "user" ? sender.id : input.userId;
+    const shelterId = sender.side === "shelter" ? sender.id : input.shelterId;
 
-    const result = await safeCreateMessageThread({
-      userId: body.userId,
-      shelterId: body.shelterId,
-      subject: body.subject.trim(),
-      body: body.body.trim(),
-      threadType: body.threadType ?? "general",
-      adoptionRequestId: body.adoptionRequestId ?? null,
-      senderSide: body.senderSide, // ← pass through instead of hardcoding
+    if (!userId || !shelterId) throw new ApiError(400, "Recipient is required");
+
+    const data = await createMessageThread({
+      senderSide: sender.side,
+      userId,
+      shelterId,
+      subject: input.subject,
+      body: input.body,
+      threadType: input.threadType ?? "general",
+      adoptionRequestId: input.adoptionRequestId ?? null,
     });
 
-    return NextResponse.json({ data: result }, { status: 201 });
+    return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
-    const message = getErrorMessage(error);
-    console.error("[POST /api/messages/compose]", error);
-
-    if (message === "Unauthorized") {
-      return NextResponse.json({ error: message }, { status: 401 });
-    }
-
-    if (
-      message.includes("only create a user thread for yourself") ||
-      message.includes("do not own this shelter") ||
-      message.includes("Unauthorized")
-    ) {
-      return NextResponse.json({ error: message }, { status: 403 });
-    }
-
-    return NextResponse.json({ error: message }, { status: 500 });
+    return errorResponse(error);
   }
 }

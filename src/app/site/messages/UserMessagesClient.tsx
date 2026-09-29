@@ -48,13 +48,13 @@ export default function UserMessagesClient({
   );
 
   const fetchThreads = useCallback(async () => {
-    const res = await fetch(`/api/messages/threads?userId=${userId}`, {
+    const res = await fetch("/api/messages/threads", {
       cache: "no-store",
     });
     const result = await res.json();
     if (!res.ok) throw new Error(result.error || "Failed to load threads");
     return (result.data ?? []) as ThreadWithMeta[];
-  }, [userId]);
+  }, []);
 
   const fetchThread = useCallback(async (threadId: string) => {
     const res = await fetch(`/api/messages/threads/${threadId}`, {

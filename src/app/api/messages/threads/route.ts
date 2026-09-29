@@ -1,37 +1,24 @@
 import { NextResponse } from "next/server";
 import {
-  getUserInboxThreads,
+  getSenderIdentity,
   getShelterInboxThreads,
+  getUserInboxThreads,
 } from "@/src/lib/services/messageService";
+import { requireAuth } from "@/src/lib/utils/auth";
+import { errorResponse } from "@/src/lib/api";
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
-}
-
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const shelterId = searchParams.get("shelterId");
+    const caller = await requireAuth();
+    const { side, id } = await getSenderIdentity(caller);
 
-    if (shelterId) {
-      const threads = await getShelterInboxThreads(shelterId);
-      return NextResponse.json({ data: threads }, { status: 200 });
-    }
+    const threads =
+      side === "shelter"
+        ? await getShelterInboxThreads(id)
+        : await getUserInboxThreads(id);
 
-    if (userId) {
-      const threads = await getUserInboxThreads(userId);
-      return NextResponse.json({ data: threads }, { status: 200 });
-    }
-
-    return NextResponse.json(
-      { error: "userId or shelterId is required" },
-      { status: 400 },
-    );
+    return NextResponse.json({ data: threads }, { status: 200 });
   } catch (error) {
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }

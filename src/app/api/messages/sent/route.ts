@@ -1,23 +1,20 @@
 import { NextResponse } from "next/server";
-import { getUserSentMessages } from "@/src/lib/services/messageService";
-import { getUserId } from "@/src/lib/utils/auth";
+import {
+  getSenderIdentity,
+  getSentMessages,
+} from "@/src/lib/services/messageService";
+import { requireAuth } from "@/src/lib/utils/auth";
+import { errorResponse } from "@/src/lib/api";
 
 export async function GET() {
   try {
-    const userId = await getUserId();
+    const caller = await requireAuth();
+    const { side, id } = await getSenderIdentity(caller);
 
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const messages = await getUserSentMessages(userId);
+    const messages = await getSentMessages(side, id);
 
     return NextResponse.json({ data: messages });
   } catch (error) {
-    console.error("[GET sent messages]", error);
-    return NextResponse.json(
-      { error: "Failed to fetch sent messages" },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }

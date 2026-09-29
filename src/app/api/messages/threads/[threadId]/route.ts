@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import {
-  getThreadById,
+  getThreadForCaller,
   getThreadMessages,
-  safeReplyToThread,
+  replyToThread,
 } from "@/src/lib/services/messageService";
-
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
-}
+import { requireAuth } from "@/src/lib/utils/auth";
+import { errorResponse } from "@/src/lib/api";
 
 type RouteContext = {
   params: Promise<{
@@ -15,59 +14,34 @@ type RouteContext = {
   }>;
 };
 
-type ReplyBody = {
-  body: string;
-};
+const ReplySchema = z.object({
+  body: z.string().trim().min(1, "body is required"),
+});
 
 export async function GET(_req: Request, { params }: RouteContext) {
   try {
     const { threadId } = await params;
+    const caller = await requireAuth();
 
-    const thread = await getThreadById(threadId);
-
-    if (!thread) {
-      return NextResponse.json({ error: "Thread not found" }, { status: 404 });
-    }
-
+    const { thread } = await getThreadForCaller(threadId, caller);
     const messages = await getThreadMessages(threadId);
 
-    return NextResponse.json(
-      {
-        data: {
-          thread,
-          messages,
-        },
-      },
-      { status: 200 },
-    );
+    return NextResponse.json({ data: { thread, messages } }, { status: 200 });
   } catch (error) {
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }
 
 export async function POST(req: Request, { params }: RouteContext) {
   try {
     const { threadId } = await params;
-    const body = (await req.json()) as ReplyBody;
+    const caller = await requireAuth();
+    const { body } = ReplySchema.parse(await req.json());
 
-    if (!body.body?.trim()) {
-      return NextResponse.json({ error: "body is required" }, { status: 400 });
-    }
-
-    const message = await safeReplyToThread({
-      threadId,
-      body: body.body,
-      senderSide: "user",
-    });
+    const message = await replyToThread(threadId, caller, body);
 
     return NextResponse.json({ data: message }, { status: 201 });
   } catch (error) {
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 },
-    );
+    return errorResponse(error);
   }
 }

@@ -28,13 +28,13 @@ export default function ShelterMessagesClient({
   );
 
   const fetchThreads = useCallback(async (): Promise<ThreadWithMeta[]> => {
-    const res = await fetch(`/api/messages/threads?shelterId=${shelterId}`, {
+    const res = await fetch("/api/messages/threads", {
       cache: "no-store",
     });
     const result = await res.json();
     if (!res.ok) throw new Error(result.error ?? "Failed to load threads");
     return (result.data ?? []) as ThreadWithMeta[];
-  }, [shelterId]);
+  }, []);
 
   const fetchThread = useCallback(
     async (threadId: string): Promise<ThreadResponse> => {
