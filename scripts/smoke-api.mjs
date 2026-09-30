@@ -24,7 +24,7 @@ const CHECKS = [
   { method: "POST", path: "/api/pets/photos", status: 401, shape: "error" },
   { method: "POST", path: "/api/users/avatar", status: 401, shape: "error" },
   { method: "POST", path: "/api/shelters/me/avatar", status: 401, shape: "error" },
-  // Bad input
+  // Removed in Task 5 (now Server Actions)
   { method: "POST", path: "/api/auth/login", body: {}, status: 404 },
   { method: "POST", path: "/api/auth/logout", status: 404 },
   // Removed in Task 3
@@ -32,10 +32,15 @@ const CHECKS = [
   { method: "GET", path: "/api/shelters", status: 404 },
   { method: "GET", path: `/api/shelters/${Z}`, status: 404 },
   { method: "GET", path: `/api/pets/${Z}`, status: 404 },
-  { method: "GET", path: "/api/pets", status: 405 },
+  { method: "GET", path: "/api/pets", status: 404 },
   { method: "GET", path: `/api/users/${Z}`, status: 404 },
-  { method: "GET", path: "/api/foster", status: 405 },
+  { method: "GET", path: "/api/foster", status: 404 },
   { method: "POST", path: `/api/shelters/${Z}/donation`, body: {}, status: 405 },
+  // Removed in Task 6
+  { method: "POST", path: "/api/pets", body: {}, status: 404 },
+  { method: "POST", path: "/api/foster", body: {}, status: 404 },
+  { method: "PATCH", path: "/api/users", body: {}, status: 405 },
+  { method: "PATCH", path: "/api/shelters/me", body: {}, status: 405 },
 ];
 
 let failed = 0;

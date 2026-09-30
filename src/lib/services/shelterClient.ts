@@ -1,4 +1,6 @@
 import { fetchJson } from "@/src/lib/fetchJson";
+import { unwrap } from "@/src/lib/actionResult";
+import { updateMyShelterAction } from "@/src/app/actions/profile";
 import type {
   ShelterProfile,
   ShelterUpdatePayload,
@@ -16,14 +18,7 @@ export async function fetchMyShelterProfile(): Promise<ShelterProfile> {
 export async function patchMyShelterProfile(
   payload: ShelterUpdatePayload,
 ): Promise<ShelterProfile> {
-  const json = await fetchJson<{ data: ShelterProfile }>("/api/shelters/me", {
-    method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  return json.data;
+  return unwrap(await updateMyShelterAction(payload));
 }
 
 export async function uploadMyShelterAvatar(file: File): Promise<string> {

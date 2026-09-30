@@ -10,6 +10,7 @@ import { getSexIcon } from "@/src/app/site/profiles/pets/[id]/PetProfileClient";
 import Input from "@/src/components/ui/Input";
 import Button from "@/src/components/ui/Button";
 import type { PetCardProps } from "@/src/lib/types/shelters";
+import { createFosterAction } from "@/src/app/actions/content";
 
 type Props = {
   pets: PetCardProps[];
@@ -85,24 +86,14 @@ export default function WriteFosterClient({ pets, initialError }: Props) {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/foster", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          petId,
-          title: title.trim(),
-          description: description.trim(),
-          adoptionStatus,
-        }),
+      const result = await createFosterAction({
+        petId,
+        title: title.trim(),
+        description: description.trim(),
+        adoptionStatus,
       });
 
-      const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result.error || "Failed to create foster story");
-      }
+      if (!result.ok) throw new Error(result.error);
 
       setTitle("");
       setDescription("");

@@ -1,4 +1,6 @@
 import { fetchJson } from "@/src/lib/fetchJson";
+import { unwrap } from "@/src/lib/actionResult";
+import { updateMyUserAction } from "@/src/app/actions/profile";
 import type { Users, UserUpdatePayload } from "@/src/lib/types/users";
 
 export function getErrorMessage(error: unknown, fallback: string): string {
@@ -19,16 +21,7 @@ export async function fetchMyUserProfile(): Promise<Users> {
 export async function patchMyUserProfile(
   payload: UserUpdatePayload,
 ): Promise<Users> {
-  const json = await fetchJson<{ data?: Users }>("/api/users", {
-    method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!json.data) throw new Error("Invalid profile update response.");
-
-  return json.data;
+  return unwrap(await updateMyUserAction(payload));
 }
 
 export async function uploadMyUserAvatar(file: File): Promise<string> {

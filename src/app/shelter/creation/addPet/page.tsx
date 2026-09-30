@@ -9,6 +9,7 @@ import WebTemplate from "@/src/components/template/WebTemplate";
 import Button from "@/src/components/ui/Button";
 import FilterControls from "@/src/components/ui/FilterControls";
 import { createClientSupabase } from "@/src/lib/supabase/client";
+import { createPetAction } from "@/src/app/actions/content";
 
 type Species = "dog" | "cat";
 type Sex = "male" | "female";
@@ -143,31 +144,21 @@ export default function Page() {
     try {
       const photoUrl = await uploadPhoto();
 
-      const res = await fetch("/api/pets", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          breed: form.breed.trim() || null,
-          description: form.description.trim() || null,
-          species: form.species,
-          sex: form.sex,
-          age: form.age,
-          size: form.size,
-          vaccinated: form.vaccinated,
-          spayed_neutered: form.spayed_neutered,
-          photo_url: photoUrl,
-          year_inShelter: form.year_inShelter,
-        }),
+      const result = await createPetAction({
+        name: form.name.trim(),
+        breed: form.breed.trim() || null,
+        description: form.description.trim() || null,
+        species: form.species,
+        sex: form.sex,
+        age: form.age,
+        size: form.size,
+        vaccinated: form.vaccinated,
+        spayed_neutered: form.spayed_neutered,
+        photo_url: photoUrl,
+        year_inShelter: form.year_inShelter,
       });
 
-      const result = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        throw new Error(result?.error || "Failed to create pet.");
-      }
+      if (!result.ok) throw new Error(result.error);
 
       router.push("/shelter/profiles/shelter");
       router.refresh();
