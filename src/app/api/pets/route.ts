@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getPets, createPet } from "@/src/lib/services/petService";
-import type { PetFilters } from "@/src/lib/types/pets";
+import { createPet } from "@/src/lib/services/petService";
 import { requireOwnedShelterId } from "@/src/lib/utils/auth";
 import { errorResponse } from "@/src/lib/api";
 
@@ -36,32 +35,6 @@ export async function POST(req: NextRequest) {
       { message: "Pet created successfully", data },
       { status: 201 },
     );
-  } catch (error) {
-    return errorResponse(error);
-  }
-}
-
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-
-    const getMulti = (key: string) => {
-      const values = searchParams.getAll(key).filter(Boolean);
-      if (values.length === 0) return undefined;
-      return values.length === 1 ? values[0] : values;
-    };
-
-    const filters: PetFilters = {
-      species: getMulti("species") as PetFilters["species"],
-      sex: getMulti("sex") as PetFilters["sex"],
-      age: getMulti("age") as PetFilters["age"],
-      size: getMulti("size") as PetFilters["size"],
-      status: getMulti("status") as PetFilters["status"],
-    };
-
-    const pets = await getPets(filters);
-
-    return NextResponse.json(pets, { status: 200 });
   } catch (error) {
     return errorResponse(error);
   }

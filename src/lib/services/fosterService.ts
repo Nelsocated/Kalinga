@@ -1,11 +1,9 @@
 import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
-import { ApiError } from "@/src/lib/api";
 import type {
   Fosters,
   CreateFosterInput,
   FosterItem,
-  UpdateFosterInput,
   FosterRow,
 } from "@/src/lib/types/foster";
 
@@ -41,34 +39,6 @@ export async function getAll(limit = 20): Promise<Fosters[]> {
   return (data ?? []).map(normalizeFoster);
 }
 
-export async function getFosterStories(): Promise<FosterItem[]> {
-  const supabase = await createServerSupabase();
-
-  const { data, error } = await supabase
-    .from("foster")
-    .select(FOSTER_SELECT)
-    .order("created_at", { ascending: false });
-
-  if (error) throw new Error(error.message);
-
-  return data ?? [];
-}
-
-export async function getFosterStoryById(id: string): Promise<FosterItem> {
-  const supabase = await createServerSupabase();
-
-  const { data, error } = await supabase
-    .from("foster")
-    .select(FOSTER_SELECT)
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error) throw new Error(error.message);
-  if (!data) throw new ApiError(404, "Foster story not found");
-
-  return data;
-}
-
 export async function createFoster(
   input: CreateFosterInput,
 ): Promise<FosterItem> {
@@ -99,39 +69,4 @@ export async function createFoster(
   }
 
   return data;
-}
-
-export async function updateFoster(
-  input: UpdateFosterInput,
-): Promise<FosterItem> {
-  const supabase = await createServerSupabase();
-
-  const payload: { title?: string; description?: string } = {};
-
-  if (input.title !== undefined) payload.title = input.title.trim();
-  if (input.description !== undefined) {
-    payload.description = input.description.trim();
-  }
-
-  const { data, error } = await supabase
-    .from("foster")
-    .update(payload)
-    .eq("id", input.id)
-    .select(FOSTER_SELECT)
-    .maybeSingle();
-
-  if (error) throw new Error(error.message);
-  if (!data) throw new ApiError(404, "Foster story not found");
-
-  return data;
-}
-
-export async function deleteFoster(id: string): Promise<{ id: string }> {
-  const supabase = await createServerSupabase();
-
-  const { error } = await supabase.from("foster").delete().eq("id", id);
-
-  if (error) throw new Error(error.message);
-
-  return { id };
 }

@@ -26,6 +26,15 @@ const CHECKS = [
   { method: "POST", path: "/api/shelters/me/avatar", status: 401, shape: "error" },
   // Bad input
   { method: "POST", path: "/api/auth/login", body: "not json", status: 400, shape: "error" },
+  // Removed in Task 3
+  { method: "GET", path: "/api/auth/me", status: 404 },
+  { method: "GET", path: "/api/shelters", status: 404 },
+  { method: "GET", path: `/api/shelters/${Z}`, status: 404 },
+  { method: "GET", path: `/api/pets/${Z}`, status: 404 },
+  { method: "GET", path: "/api/pets", status: 405 },
+  { method: "GET", path: `/api/users/${Z}`, status: 404 },
+  { method: "GET", path: "/api/foster", status: 405 },
+  { method: "POST", path: `/api/shelters/${Z}/donation`, body: {}, status: 405 },
 ];
 
 let failed = 0;

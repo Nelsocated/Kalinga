@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import {
-  createFoster,
-  getFosterStories,
-} from "@/src/lib/services/fosterService";
+import { createFoster } from "@/src/lib/services/fosterService";
 import { assertShelterOwnsPet } from "@/src/lib/services/petService";
 import { requireOwnedShelterId } from "@/src/lib/utils/auth";
 import { errorResponse } from "@/src/lib/api";
@@ -24,16 +21,6 @@ const CreateFosterSchema = z.object({
           : undefined,
     ),
 });
-
-export async function GET() {
-  try {
-    const data = await getFosterStories();
-
-    return NextResponse.json({ data }, { status: 200 });
-  } catch (error) {
-    return errorResponse(error);
-  }
-}
 
 export async function POST(req: NextRequest) {
   try {

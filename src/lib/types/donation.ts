@@ -11,17 +11,3 @@ export interface Donations {
   is_active: boolean | null;
   created_at: string;
 }
-
-export type CreateDonationInput = Partial<
-  Pick<
-    Donations,
-    | "instruction_note"
-    | "item_name"
-    | "method"
-    | "account_name"
-    | "account_number"
-    | "qr_url"
-    | "is_active"
-  >
-> &
-  Pick<Donations, "type">;

@@ -28,9 +28,3 @@ export type CreateFosterInput = {
   description: string;
   adoptionStatus?: "available" | "pending";
 };
-
-export type UpdateFosterInput = {
-  id: string;
-  title?: string;
-  description?: string;
-};
