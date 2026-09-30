@@ -1,20 +1,9 @@
 import NotifShelter from "./NotifShelter";
 import { getUserId } from "@/src/lib/utils/auth";
 import { getShelterIdByOwnerId } from "@/src/lib/services/shelterService";
-import { getShelterAdoptionNotifications } from "@/src/lib/services/adoptionService";
-import { getPetById } from "@/src/lib/services/petService";
-import { getUserById } from "@/src/lib/services/usersService";
+import { getShelterAdoptionFeed } from "@/src/lib/services/adoptionService";
 import type { PetGender } from "@/src/lib/types/shelters";
 import type { ShelterNotifItem, ShelterAdoptionStatus } from "./NotifShelter";
-
-type RawNotification = {
-  id: string;
-  pet_id: string | null;
-  user_id: string;
-  created_at: string | null;
-  updated_at: string | null;
-  status: string;
-};
 
 function normalizeSpecies(
   value: string | null | undefined,
@@ -93,39 +82,32 @@ function formatDate(dateString: string) {
 async function getNotifications(
   shelterId: string,
 ): Promise<ShelterNotifItem[]> {
-  const data = (await getShelterAdoptionNotifications(
-    shelterId,
-  )) as RawNotification[];
+  const data = await getShelterAdoptionFeed(shelterId);
 
-  return Promise.all(
-    data.map(async (item) => {
-      const [pet, applicant] = await Promise.all([
-        item.pet_id ? getPetById(item.pet_id) : Promise.resolve(null),
-        item.user_id ? getUserById(item.user_id) : Promise.resolve(null),
-      ]);
+  return data.map((item) => {
+    const { pet, applicant } = item;
 
-      const fallbackDate =
-        item.updated_at ?? item.created_at ?? new Date().toISOString();
+    const fallbackDate =
+      item.updated_at ?? item.created_at ?? new Date().toISOString();
 
-      return {
-        id: item.id,
-        petId: item.pet_id ?? "",
-        petName: pet?.pet_name ?? "Unknown Pet",
-        petPhotoUrl: pet?.photo_url ?? null,
-        species: normalizeSpecies(pet?.species),
-        applicantId: item.user_id,
-        applicantName:
-          applicant?.full_name ?? applicant?.username ?? "Unknown User",
-        applicantPhotoUrl: applicant?.photo_url ?? null,
-        status: normalizeStatus(item.status),
-        shelterId: shelterId,
-        sex: normalizeSex(pet?.sex),
-        submittedAt: item.created_at ?? null,
-        updatedAt: item.updated_at ?? null,
-        date: formatDate(fallbackDate),
-      };
-    }),
-  );
+    return {
+      id: item.id,
+      petId: item.pet_id ?? "",
+      petName: pet?.name ?? "Unknown Pet",
+      petPhotoUrl: pet?.photo_url ?? null,
+      species: normalizeSpecies(pet?.species),
+      applicantId: item.user_id,
+      applicantName:
+        applicant?.full_name ?? applicant?.username ?? "Unknown User",
+      applicantPhotoUrl: applicant?.photo_url ?? null,
+      status: normalizeStatus(item.status),
+      shelterId: shelterId,
+      sex: normalizeSex(pet?.sex),
+      submittedAt: item.created_at ?? null,
+      updatedAt: item.updated_at ?? null,
+      date: formatDate(fallbackDate),
+    };
+  });
 }
 
 export default async function Page() {

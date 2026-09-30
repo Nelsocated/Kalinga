@@ -92,36 +92,61 @@ export async function createAdoptionRequest(
   return data as AdoptionRequestRow;
 }
 
-export async function getUserAdoptionNotifications(
+export type UserAdoptionFeedItem = Adoption_Requests & {
+  pet: { name: string | null } | null;
+  shelter: { shelter_name: string | null } | null;
+};
+
+export type ShelterAdoptionFeedItem = Adoption_Requests & {
+  pet: {
+    name: string | null;
+    photo_url: string | null;
+    species: string | null;
+    sex: string;
+  } | null;
+  applicant: {
+    full_name: string;
+    username: string;
+    photo_url: string | null;
+  } | null;
+};
+
+/** A user's adoption requests with the pet and shelter names joined in. */
+export async function getUserAdoptionFeed(
   userId: string,
-): Promise<Adoption_Requests[]> {
+): Promise<UserAdoptionFeedItem[]> {
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
     .from("adoption_requests")
-    .select("*")
+    .select("*, pet:pets(name), shelter:shelter(shelter_name)")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []) as Adoption_Requests[];
+  // Embedded to-one joins; the untyped client can't infer their shape
+  return (data ?? []) as UserAdoptionFeedItem[];
 }
 
-export async function getShelterAdoptionNotifications(
+/** A shelter's incoming requests with the pet and applicant joined in. */
+export async function getShelterAdoptionFeed(
   shelterId: string,
-): Promise<Adoption_Requests[]> {
+): Promise<ShelterAdoptionFeedItem[]> {
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
     .from("adoption_requests")
-    .select("*")
+    .select(
+      "*, pet:pets(name, photo_url, species, sex), applicant:users(full_name, username, photo_url)",
+    )
     .eq("shelter_id", shelterId)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []) as Adoption_Requests[];
+  // Embedded to-one joins; the untyped client can't infer their shape
+  return (data ?? []) as ShelterAdoptionFeedItem[];
 }
 
 export async function getAdoptedCountByPetIds(

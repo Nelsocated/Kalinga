@@ -3,7 +3,7 @@ import UserMessagesClient from "./UserMessagesClient";
 import { getUserId } from "@/src/lib/utils/auth";
 import { getUserInboxThreads } from "@/src/lib/services/messageService";
 import { getUserById } from "@/src/lib/services/usersService";
-import { fetchShelterById } from "@/src/lib/services/shelterService";
+import { getSheltersBasicByIds } from "@/src/lib/services/shelterService";
 import { getLikedIdsByUser } from "@/src/lib/services/likeService";
 import type { ThreadWithMeta } from "@/src/lib/types/messages";
 
@@ -20,12 +20,6 @@ export type ShelterOption = {
   location: string | null;
   logo_url: string | null;
 };
-
-function isShelterOption(
-  shelter: ShelterOption | null,
-): shelter is ShelterOption {
-  return shelter !== null;
-}
 
 async function getMessagePageData() {
   const userId = await getUserId();
@@ -50,28 +44,14 @@ async function getMessagePageData() {
     new Set([...threadShelterIds, ...likedShelterIds]),
   );
 
-  const sheltersData: Array<ShelterOption | null> = await Promise.all(
-    uniqueShelterIds.map(async (shelterId) => {
-      try {
-        const shelter = await fetchShelterById(shelterId);
-
-        return {
-          id: shelterId,
-          name: shelter?.shelter_name || "Unknown Shelter",
-          location: shelter?.location ?? null,
-          logo_url: shelter?.logo_url ?? null,
-        };
-      } catch (error) {
-        console.error(
-          `[Messages/Page] Failed to fetch shelter ${shelterId}`,
-          error,
-        );
-        return null;
-      }
-    }),
-  );
-
-  const allShelters = sheltersData.filter(isShelterOption);
+  const allShelters: ShelterOption[] = (
+    await getSheltersBasicByIds(uniqueShelterIds)
+  ).map((shelter) => ({
+    id: shelter.id,
+    name: shelter.shelter_name || "Unknown Shelter",
+    location: shelter.location ?? null,
+    logo_url: shelter.logo_url ?? null,
+  }));
 
   const shelterMap = new Map(
     allShelters.map((shelter) => [shelter.id, shelter]),

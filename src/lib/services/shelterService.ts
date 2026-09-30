@@ -121,6 +121,30 @@ export async function getSheltersByIds(
   return withPetStats((data ?? []) as ShelterRow[]);
 }
 
+/** Name, location and logo only; no pet stats. */
+export async function getSheltersBasicByIds(ids: string[]): Promise<
+  Array<{
+    id: string;
+    shelter_name: string;
+    location: string | null;
+    logo_url: string | null;
+  }>
+> {
+  const unique = [...new Set(ids)].filter(Boolean);
+  if (!unique.length) return [];
+
+  const supabase = await createServerSupabase();
+
+  const { data, error } = await supabase
+    .from("shelter")
+    .select("id, shelter_name, location, logo_url")
+    .in("id", unique);
+
+  if (error) throw new Error(error.message);
+
+  return data ?? [];
+}
+
 export async function getShelterPostedPets(
   shelterId: string,
 ): Promise<ShelterPetMini[]> {

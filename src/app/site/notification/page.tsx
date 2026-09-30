@@ -1,8 +1,6 @@
 import NotifClient from "./NotifClient";
 import { getUserId } from "@/src/lib/utils/auth";
-import { getUserAdoptionNotifications } from "@/src/lib/services/adoptionService";
-import { fetchShelterById } from "@/src/lib/services/shelterService";
-import { getPetById } from "@/src/lib/services/petService";
+import { getUserAdoptionFeed } from "@/src/lib/services/adoptionService";
 
 export type NotificationStatus =
   | "pending"
@@ -22,15 +20,6 @@ export type NotificationItem = {
   title: string;
   shortMessage: React.ReactNode;
   fullMessage: React.ReactNode;
-};
-
-type RawNotification = {
-  id: string;
-  shelter_id: string | null;
-  pet_id: string | null;
-  created_at: string;
-  updated_at: string;
-  status: string;
 };
 
 function buildNotificationContent(
@@ -234,39 +223,26 @@ async function getNotifications(): Promise<NotificationItem[]> {
     throw new Error("User not authenticated");
   }
 
-  const data = (await getUserAdoptionNotifications(
-    userId,
-  )) as RawNotification[];
+  const data = await getUserAdoptionFeed(userId);
 
-  const notifications = await Promise.all(
-    data.map(async (item) => {
-      const [shelter, pet] = await Promise.all([
-        item.shelter_id
-          ? fetchShelterById(item.shelter_id)
-          : Promise.resolve(null),
-        item.pet_id ? getPetById(item.pet_id) : Promise.resolve(null),
-      ]);
+  return data.map((item) => {
+    const shelterName = item.shelter?.shelter_name || "Unknown Shelter";
+    const petName = item.pet?.name || "Unknown Pet";
+    const status = item.status as NotificationStatus;
 
-      const shelterName = shelter?.shelter_name || "Unknown Shelter";
-      const petName = pet?.pet_name || "Unknown Pet";
-      const status = item.status as NotificationStatus;
+    const content = buildNotificationContent(petName, shelterName, status);
 
-      const content = buildNotificationContent(petName, shelterName, status);
-
-      return {
-        id: item.id,
-        shelter: shelterName,
-        petName,
-        date: formatDate(item.updated_at ?? item.created_at),
-        status,
-        title: content.title,
-        shortMessage: content.shortMessage,
-        fullMessage: content.fullMessage,
-      };
-    }),
-  );
-
-  return notifications;
+    return {
+      id: item.id,
+      shelter: shelterName,
+      petName,
+      date: formatDate(item.updated_at ?? item.created_at),
+      status,
+      title: content.title,
+      shortMessage: content.shortMessage,
+      fullMessage: content.fullMessage,
+    };
+  });
 }
 
 export default async function Page() {

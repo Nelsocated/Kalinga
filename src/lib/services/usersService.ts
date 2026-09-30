@@ -33,6 +33,22 @@ export async function getUserById(userId: string): Promise<Users | null> {
   return (data as Users | null) ?? null;
 }
 
+export async function getUsersByIds(ids: string[]): Promise<Users[]> {
+  const unique = [...new Set(ids)].filter(Boolean);
+  if (!unique.length) return [];
+
+  const supabase = await createServerSupabase();
+
+  const { data, error } = await supabase
+    .from(PROFILES_TABLE)
+    .select(USER_SELECT)
+    .in("id", unique);
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []) as Users[];
+}
+
 /** Returns the caller's profile row, creating it if it's missing. */
 export async function getMyUser(userId: string): Promise<Users> {
   const existing = await getUserById(userId);

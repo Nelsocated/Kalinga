@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getShelterInboxThreads } from "@/src/lib/services/messageService";
 import { getMyShelterProfile } from "@/src/lib/services/shelterService";
-import { getUserById } from "@/src/lib/services/usersService";
+import { getUsersByIds } from "@/src/lib/services/usersService";
 import { requireOwnedShelterId } from "@/src/lib/utils/auth";
 import ShelterMessagesClient from "./ShelterMessageClient";
 import type { PersonCard, ThreadWithMeta } from "@/src/lib/types/messages";
@@ -26,13 +26,9 @@ export default async function Page() {
 
   const rawThreads = await getShelterInboxThreads(shelter.id);
 
-  const userIds = [...new Set(rawThreads.map((t) => t.user_id))];
+  const userProfiles = await getUsersByIds(rawThreads.map((t) => t.user_id));
 
-  const userProfiles = await Promise.all(userIds.map((id) => getUserById(id)));
-
-  const profileMap = new Map(
-    userProfiles.filter(Boolean).map((p) => [p!.id, p!]),
-  );
+  const profileMap = new Map(userProfiles.map((p) => [p.id, p]));
 
   const initialThreads: ThreadWithMeta[] = rawThreads.map((thread) => {
     const profile = profileMap.get(thread.user_id);
