@@ -1,50 +1,68 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Play } from "@phosphor-icons/react";
 import Caption from "./Caption";
 import type { FeedItem } from "@/src/lib/services/feedService";
-import { Play } from "@phosphor-icons/react";
+import { getViewSessionId } from "@/src/lib/session/getViewSessionId";
 
 type Props = {
   item: FeedItem;
   isActive: boolean;
+  preload: "auto" | "none";
+  onDoubleTap?: () => void;
 };
 
-export default function ViewPort({ item, isActive }: Props) {
+const DOUBLE_TAP_MS = 300;
+const VIEW_AFTER_MS = 2000;
+
+export default function ViewPort({ item, isActive, preload, onDoubleTap }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const viewRecorded = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
 
-  const videoUrl = item.url;
-  const caption = item.caption;
-  const shelterName = item.shelter?.shelter_name ?? "Unknown";
-
-  // autoplay control
+  // Only the active video plays
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const run = async () => {
-      if (isActive) {
-        try {
-          await video.play();
-          setIsPaused(false);
-        } catch {
-          setIsPaused(true);
-        }
-      } else {
-        video.pause();
-      }
-    };
-
-    run();
+    if (isActive) {
+      video
+        .play()
+        .then(() => setIsPaused(false))
+        .catch(() => setIsPaused(true));
+    } else {
+      video.pause();
+    }
   }, [isActive]);
+
+  // Count a view once the video has been on screen for 2 seconds
+  useEffect(() => {
+    if (!isActive || viewRecorded.current) return;
+
+    const timer = setTimeout(() => {
+      viewRecorded.current = true;
+      fetch("/api/views", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mediaId: item.media_id, sessionId: getViewSessionId() }),
+      }).catch(() => {});
+    }, VIEW_AFTER_MS);
+
+    return () => clearTimeout(timer);
+  }, [isActive, item.media_id]);
+
+  useEffect(() => () => {
+    if (tapTimer.current) clearTimeout(tapTimer.current);
+  }, []);
 
   function togglePlay() {
     const video = videoRef.current;
     if (!video) return;
 
     if (video.paused) {
-      video.play();
+      video.play().catch(() => {});
       setIsPaused(false);
     } else {
       video.pause();
@@ -52,36 +70,51 @@ export default function ViewPort({ item, isActive }: Props) {
     }
   }
 
+  // A single tap toggles playback; two quick taps like the video instead
+  function handleTap() {
+    if (tapTimer.current) {
+      clearTimeout(tapTimer.current);
+      tapTimer.current = null;
+      onDoubleTap?.();
+      return;
+    }
+
+    tapTimer.current = setTimeout(() => {
+      tapTimer.current = null;
+      togglePlay();
+    }, onDoubleTap ? DOUBLE_TAP_MS : 0);
+  }
+
   return (
-    <div className="relative h-full w-full bg-black overflow-hidden">
-      {videoUrl ? (
+    <div className="relative h-full w-full overflow-hidden bg-ink">
+      {item.url ? (
         <video
           ref={videoRef}
-          src={videoUrl}
+          src={item.url}
+          preload={preload}
           className="h-full w-full object-cover"
           playsInline
           loop
           muted
-          autoPlay
-          onClick={togglePlay}
+          onClick={handleTap}
         />
       ) : (
-        <div className="flex h-full items-center justify-center text-white/60">
-          No video
+        <div className="flex h-full items-center justify-center text-sm text-card/70">
+          This video isn&apos;t available.
         </div>
       )}
 
-      {isPaused && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <Play size={64} weight="fill" className="text-white drop-shadow-lg" aria-hidden="true" />
+      {isPaused ? (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <Play size={72} weight="fill" className="text-card/90 drop-shadow-lg" aria-hidden="true" />
         </div>
-      )}
+      ) : null}
 
       <Caption
         id={item.pet_id}
         name={item.name}
-        shelter_name={shelterName}
-        caption={caption}
+        shelterName={item.shelter?.shelter_name ?? "A Kalinga shelter"}
+        caption={item.caption}
       />
     </div>
   );

@@ -1,91 +1,51 @@
 "use client";
 
-import * as React from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { Handshake } from "@phosphor-icons/react";
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowRight } from "@phosphor-icons/react";
 
 type Props = {
   id: string;
   name: string;
-  shelter_name: string;
+  shelterName: string;
   caption?: string | null;
 };
 
-export default function Caption({ id, name, shelter_name, caption }: Props) {
-  const router = useRouter();
-  const [open, setOpen] = React.useState(false);
-
-  const cleanCaption = (caption ?? "No caption").trim();
-  const hasCaption = cleanCaption.length > 0;
+/** Pet name, shelter and caption over a bottom scrim. */
+export default function Caption({ id, name, shelterName, caption }: Props) {
+  const [open, setOpen] = useState(false);
+  const text = (caption ?? "").trim();
 
   return (
-    <div className="absolute bottom-0 left-0 w-full text-white">
-      <motion.div
-        layout
-        transition={{ type: "tween", stiffness: 320, damping: 30 }}
-        className={[
-          "relative z-10 w-full overflow-hidden rounded-[15px]",
-          open
-            ? "bg-[#795F07]"
-            : "bg-linear-to-t from-black/70 via-black/40 to-transparent",
-        ].join(" ")}
-      >
-        <div
-          className={["px-5 py-2", open ? "flex flex-col h-64" : ""].join(" ")}
+    // pb-24 on phones keeps the text above the bottom tab bar and the action rail
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-ink/80 via-ink/30 to-transparent px-4 pt-16 pb-24 pr-20 text-card md:pb-5 md:pr-4">
+      <div className="pointer-events-auto flex flex-col gap-1">
+        <Link
+          href={`/site/profiles/pets/${id}`}
+          className="flex w-fit items-center gap-1.5 text-xl font-semibold leading-tight hover:underline"
         >
-          <p className="text-subtitle font-bold leading-tight">
-            {shelter_name}
-          </p>
+          {name}
+          <ArrowRight size={18} aria-hidden="true" />
+          <span className="sr-only">Open {name}&apos;s profile</span>
+        </Link>
+        <p className="text-sm text-card/85">{shelterName}</p>
 
-          {hasCaption && (
-            <>
-              {!open && (
-                <p className="text-description text-white/95 line-clamp-2 wrap-break-words truncate">
-                  {cleanCaption}
-                </p>
-              )}
-
-              <AnimatePresence initial={false} mode="wait">
-                {open && (
-                  <motion.p
-                    key="caption"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="mt-2 mb-2 text-description text-white whitespace-pre-wrap wrap-break-words break-all text-justify grow overflow-y-auto"
-                  >
-                    {cleanCaption}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-
-              <div className="mt-2 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => setOpen((v) => !v)}
-                  className="text-description font-medium leading-none hover:underline"
-                >
-                  {open ? "Less" : "More"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => router.push(`/site/profiles/pets/${id}`)}
-                  className="flex items-center gap-2 text-description font-bold text-white hover:underline"
-                >
-                  <span className="leading-none">Meet {name}!</span>
-
-                  <div className="flex items-center justify-center">
-                    <Handshake size={48} className="relative bottom-2" aria-hidden="true" />
-                  </div>
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </motion.div>
+        {text ? (
+          <div className="mt-1 text-sm leading-snug">
+            <p className={open ? "max-h-40 overflow-y-auto whitespace-pre-wrap" : "line-clamp-2"}>
+              {text}
+            </p>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              className="mt-1 font-semibold text-card underline-offset-2 hover:underline"
+            >
+              {open ? "less" : "more"}
+            </button>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

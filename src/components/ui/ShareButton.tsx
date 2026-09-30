@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Copy } from "@phosphor-icons/react";
+import { Check, LinkSimple } from "@phosphor-icons/react";
+import { cn } from "@/src/lib/cn";
 
 type ShareType = "pet" | "video" | "shelter";
 
@@ -11,49 +12,44 @@ type Props = {
   className?: string;
 };
 
+const PATHS: Record<ShareType, string> = {
+  pet: "/site/profiles/pets/",
+  shelter: "/site/profiles/shelter/",
+  video: "/site/home/pet/",
+};
+
+/** Copies a share link to the clipboard. */
 export default function ShareButton({ id, type, className }: Props) {
   const [copied, setCopied] = useState(false);
 
-  const copyLink = async () => {
+  async function copyLink() {
     try {
-      const base = window.location.origin;
-      let shareUrl = base;
-
-      if (type === "pet") {
-        shareUrl = `${base}/site/profiles/pets/${id}`;
-      }
-
-      if (type === "shelter") {
-        shareUrl = `${base}/site/profiles/shelter/${id}`;
-      }
-
-      if (type === "video") {
-        shareUrl = `${base}/site/home/pet/${id}`;
-      }
-
-      await navigator.clipboard.writeText(shareUrl);
-
+      await navigator.clipboard.writeText(`${window.location.origin}${PATHS[type]}${id}`);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1200);
+      setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       console.error("Copy failed:", err);
     }
-  };
+  }
 
   return (
     <button
       type="button"
       onClick={copyLink}
-      className={[
-        "h-10 rounded-full overflow-hidden flex flex-col items-center justify-center transition hover:scale-105",
+      aria-label={copied ? "Link copied" : "Copy link"}
+      className={cn(
+        "flex size-11 items-center justify-center rounded-full transition-[transform,background-color] duration-200 ease-out-expo hover:scale-105",
         className,
-      ].join(" ")}
+      )}
     >
       {copied ? (
-        <span className="text-xs font-semibold">Copied</span>
+        <Check size={24} weight="bold" aria-hidden="true" />
       ) : (
-        <Copy size={43} aria-hidden="true" />
+        <LinkSimple size={24} aria-hidden="true" />
       )}
+      <span role="status" className="sr-only">
+        {copied ? "Link copied" : ""}
+      </span>
     </button>
   );
 }

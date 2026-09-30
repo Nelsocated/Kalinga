@@ -1,10 +1,9 @@
-// components/layout/RightBar.tsx
-import { useRouter, usePathname } from "next/navigation";
-import Image from "next/image";
-import { useEffect } from "react";
+"use client";
 
+import Link from "next/link";
+import { cn } from "@/src/lib/cn";
+import Avatar from "../ui/Avatar";
 import ShareButton from "../ui/ShareButton";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
 import LikeButton from "../ui/LikeButton";
 
 export type ShelterMini = {
@@ -16,39 +15,30 @@ export type ShelterMini = {
 type Props = {
   media_id?: string;
   shelter?: ShelterMini | null;
+  className?: string;
 };
 
-export default function RightBar({ media_id, shelter }: Props) {
-  const router = useRouter();
-  const pathname = usePathname();
-
-  useEffect(() => {}, [pathname]);
-
-  const goToShelter = () => {
-    if (!shelter?.id) return;
-    router.push(`/site/profiles/shelter/${shelter.id}`);
-  };
+/** Shelter, like and share for the active video. */
+export default function RightBar({ media_id, shelter, className }: Props) {
+  const shelterName = shelter?.shelter_name ?? "Shelter";
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6">
-      <button
-        type="button"
-        onClick={goToShelter}
-        className="h-17 w-17 rounded-full border overflow-hidden hover:scale-105"
-      >
-        <Image
-          src={shelter?.logo_url ?? DEFAULT_AVATAR_URL}
-          alt="Shelter"
-          width={110}
-          height={110}
-        />
-      </button>
+    <div className={cn("flex flex-col items-center gap-5", className)}>
+      {shelter?.id ? (
+        <Link
+          href={`/site/profiles/shelter/${shelter.id}`}
+          aria-label={`Open ${shelterName}`}
+          className="rounded-full transition-transform duration-200 ease-out-expo hover:scale-105"
+        >
+          <Avatar src={shelter.logo_url} name={shelterName} size={56} className="ring-2 ring-card" />
+        </Link>
+      ) : null}
 
       {media_id ? (
         <LikeButton
           targetType="video"
           targetId={media_id}
-          className="text-primary h-15"
+          className="size-12 rounded-full bg-card text-ink shadow-lift"
         />
       ) : null}
 
@@ -56,7 +46,7 @@ export default function RightBar({ media_id, shelter }: Props) {
         <ShareButton
           id={media_id}
           type="video"
-          className="w-13 h-13 bg-primary"
+          className="size-12 bg-card text-ink shadow-lift"
         />
       ) : null}
     </div>

@@ -1,25 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Feed from "@/src/components/feed/Feed";
-import RightBar, { ShelterMini } from "@/src/components/layout/RightBar";
-import ScrollBar from "@/src/components/layout/ScrollBar";
-import CreationPageView from "@/src/components/views/CreationPageView";
-
-type FeedNavType = {
-  next: () => void;
-  prev: () => void;
-  hasNext: boolean;
-  hasPrev: boolean;
-  index: number;
-  total: number;
-};
-
-type ActiveItem = {
-  pet_id: string;
-  media_id: string | null;
-  shelter: ShelterMini | null;
-};
+import Link from "next/link";
+import { CaretDown, CaretUp, ClipboardText, FileText, Plus } from "@phosphor-icons/react";
+import Feed, { type ActiveItem, type FeedNav } from "@/src/components/feed/Feed";
+import RightBar from "@/src/components/layout/RightBar";
+import { buttonStyles } from "@/src/components/ui/Button";
+import { cn } from "@/src/lib/cn";
 
 type Props = {
   isShelter: boolean;
@@ -27,84 +14,87 @@ type Props = {
   initialMediaId?: string | null;
 };
 
-export default function HomeClient({
-  isShelter,
-  isAdmin,
-  initialMediaId,
-}: Props) {
-  const [nav, setNav] = useState<FeedNavType | null>(null);
-  const [active, setActive] = useState<ActiveItem | null>(null);
-  const [showCreationPage, setShowCreationPage] = useState(false);
+const roundIcon = buttonStyles({
+  variant: "secondary",
+  size: "icon",
+  className: "disabled:opacity-40",
+});
 
+/** Shortcuts for shelter and admin accounts: create, applications, review. */
+function StaffShortcuts({ isShelter, isAdmin }: { isShelter: boolean; isAdmin: boolean }) {
+  if (!isShelter && !isAdmin) return null;
+
+  return (
+    <div className="flex gap-2 md:flex-col">
+      {isAdmin ? (
+        <Link href="/admin/dashboard" aria-label="Review shelter applications" className={roundIcon}>
+          <ClipboardText aria-hidden="true" />
+        </Link>
+      ) : (
+        <>
+          <Link href="/shelter/creation" aria-label="Create a post" className={buttonStyles({ variant: "primary", size: "icon" })}>
+            <Plus weight="bold" aria-hidden="true" />
+          </Link>
+          <Link href="/shelter/notification" aria-label="Adoption applications" className={roundIcon}>
+            <FileText aria-hidden="true" />
+          </Link>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function HomeClient({ isShelter, isAdmin, initialMediaId }: Props) {
+  const [nav, setNav] = useState<FeedNav | null>(null);
+  const [active, setActive] = useState<ActiveItem | null>(null);
+
+  // The feed is the page: no document scroll behind it
   useEffect(() => {
+    const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = overflow;
     };
   }, []);
 
-  useEffect(() => {
-    if (!nav || showCreationPage) return;
-
-    let lastScroll = 0;
-
-    const handleWheel = (e: WheelEvent) => {
-      const now = Date.now();
-      if (now - lastScroll < 400) return;
-
-      if (e.deltaY > 0 && nav.hasNext) nav.next();
-      if (e.deltaY < 0 && nav.hasPrev) nav.prev();
-
-      lastScroll = now;
-    };
-
-    window.addEventListener("wheel", handleWheel, { passive: true });
-
-    return () => window.removeEventListener("wheel", handleWheel);
-  }, [nav, showCreationPage]);
-
   return (
-    <div className="flex h-svh bg-background px-10">
-      <main className="flex flex-1 items-center justify-center">
-        <div className="flex items-center gap-4">
-          {showCreationPage ? (
-            <div className="h-[85svh] w-[48svh]">
-              <CreationPageView />
-            </div>
-          ) : (
-            <>
-              <Feed
-                onActiveChange={setActive}
-                onNavChange={setNav}
-                initialMediaId={initialMediaId}
-              />
+    <div className="relative flex h-dvh items-center justify-center md:gap-5 md:px-6">
+      <Feed onActiveChange={setActive} onNavChange={setNav} initialMediaId={initialMediaId} />
 
-              {active && (
-                <RightBar
-                  media_id={active.media_id ?? ""}
-                  shelter={active.shelter}
-                />
-              )}
-            </>
-          )}
-        </div>
+      {active ? (
+        <RightBar
+          media_id={active.media_id ?? ""}
+          shelter={active.shelter}
+          className="absolute right-3 bottom-28 z-10 md:static"
+        />
+      ) : null}
 
-        <div className="absolute right-10">
-          {nav && (
-            <ScrollBar
-              onNext={nav.next}
-              onPrev={nav.prev}
-              hasNext={nav.hasNext}
-              hasPrev={nav.hasPrev}
-              isShelter={isShelter}
-              isAdmin={isAdmin}
-              onOpenCreation={() => setShowCreationPage(true)}
-              onCloseCreation={() => setShowCreationPage(false)}
-              isCreationOpen={showCreationPage}
-            />
-          )}
-        </div>
-      </main>
+      {/* Phones: staff shortcuts float over the top of the video */}
+      <div className="absolute top-4 right-3 z-10 md:hidden">
+        <StaffShortcuts isShelter={isShelter} isAdmin={isAdmin} />
+      </div>
+
+      <div
+        className={cn(
+          "hidden h-[calc(100dvh-4rem)] flex-col items-center justify-between md:flex",
+          !isShelter && !isAdmin && "justify-center",
+        )}
+      >
+        <StaffShortcuts isShelter={isShelter} isAdmin={isAdmin} />
+
+        {nav ? (
+          <div className="flex flex-col gap-2">
+            <button type="button" onClick={nav.prev} disabled={!nav.hasPrev} aria-label="Previous video" className={roundIcon}>
+              <CaretUp aria-hidden="true" />
+            </button>
+            <button type="button" onClick={nav.next} disabled={!nav.hasNext} aria-label="Next video" className={roundIcon}>
+              <CaretDown aria-hidden="true" />
+            </button>
+          </div>
+        ) : null}
+
+        {isShelter || isAdmin ? <span aria-hidden="true" /> : null}
+      </div>
     </div>
   );
 }
