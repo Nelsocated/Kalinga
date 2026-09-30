@@ -159,6 +159,12 @@
   scrollbar-gutter: stable;
 }
 
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
