@@ -3,7 +3,7 @@ import type {
   MessageThread,
   Message,
 } from "@/src/lib/types/messages";
-import { ViewSkeleton } from "@/src/app/shelter/messages/loading";
+import ThreadViewSkeleton from "@/src/components/skeletons/ThreadViewSkeleton";
 import Image from "next/image";
 
 type MessageWithSender = Message & {
@@ -34,7 +34,7 @@ export default function ThreadView({
   }
 
   if (loadingThread) {
-    return <ViewSkeleton />;
+    return <ThreadViewSkeleton />;
   }
 
   if (!selectedThread) {

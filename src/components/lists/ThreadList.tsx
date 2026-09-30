@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { ThreadWithMeta } from "@/src/lib/types/messages";
-import { ListSkeleton } from "@/src/app/shelter/messages/loading";
+import ListRowsSkeleton from "@/src/components/skeletons/ListRowsSkeleton";
 import type { PetStatusFull } from "@/src/lib/types/adoptionRequests";
 
 type Props = {
@@ -28,7 +28,7 @@ export default function ThreadList({
 
       <div className="min-h-0 flex-1 overflow-y-auto scroll-stable">
         {loading ? (
-          <ListSkeleton header={false} />
+          <ListRowsSkeleton count={7} />
         ) : threads.length === 0 ? (
           <div className="p-4 text-description text-neutral-500">
             No messages yet.

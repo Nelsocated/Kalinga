@@ -1,6 +1,6 @@
 import type { SentMessageItem } from "@/src/lib/types/messages";
 import { formatShortDate } from "./ThreadList";
-import { ListSkeleton } from "@/src/app/shelter/messages/loading";
+import ListRowsSkeleton from "@/src/components/skeletons/ListRowsSkeleton";
 
 type Props = {
   items: SentMessageItem[];
@@ -21,7 +21,7 @@ export default function SentMessagesList({
 
       <div className="min-h-0 flex-1 overflow-y-auto scroll-stable">
         {loading ? (
-          <ListSkeleton header={false} />
+          <ListRowsSkeleton count={7} />
         ) : (
           <div className="space-y-2 py-3 px-1">
             {items.map((item) => (
