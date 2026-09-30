@@ -25,7 +25,8 @@ const CHECKS = [
   { method: "POST", path: "/api/users/avatar", status: 401, shape: "error" },
   { method: "POST", path: "/api/shelters/me/avatar", status: 401, shape: "error" },
   // Bad input
-  { method: "POST", path: "/api/auth/login", body: "not json", status: 400, shape: "error" },
+  { method: "POST", path: "/api/auth/login", body: {}, status: 404 },
+  { method: "POST", path: "/api/auth/logout", status: 404 },
   // Removed in Task 3
   { method: "GET", path: "/api/auth/me", status: 404 },
   { method: "GET", path: "/api/shelters", status: 404 },

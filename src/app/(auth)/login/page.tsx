@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Input from "@/src/components/ui/Input";
 import Button from "@/src/components/ui/Button";
 import Image from "next/image";
+import { loginAction } from "@/src/app/actions/auth";
 
 function LoginPageContent() {
   const router = useRouter();
@@ -24,16 +25,10 @@ function LoginPageContent() {
     setloading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const result = await loginAction({ email, password });
 
-      const json = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        setFormError(json?.error ?? "Login failed.");
+      if (!result.ok) {
+        setFormError(result.error);
         return;
       }
 

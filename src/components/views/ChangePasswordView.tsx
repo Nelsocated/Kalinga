@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
 import LogoutButton from "../ui/LogoutButton";
+import {
+  changePasswordAction,
+  logoutAction,
+} from "@/src/app/actions/auth";
 
 export default function ChangePasswordView() {
   const [email, setEmail] = useState("");
@@ -98,23 +102,15 @@ export default function ChangePasswordView() {
 
       setLoading(true);
 
-      const res = await fetch("/api/auth/change", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: trimmedEmail,
-          currentPassword,
-          newPassword,
-          confirmNewPassword,
-        }),
+      const result = await changePasswordAction({
+        email: trimmedEmail,
+        currentPassword,
+        newPassword,
+        confirmNewPassword,
       });
 
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        setError(data?.error || "Failed to change password.");
+      if (!result.ok) {
+        setError(result.error);
         return;
       }
 
@@ -134,9 +130,7 @@ export default function ChangePasswordView() {
     try {
       setLoggingOut(true);
 
-      await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+      await logoutAction();
     } catch {
     } finally {
       setSuccessOpen(false);

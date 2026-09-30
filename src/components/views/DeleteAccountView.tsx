@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "../ui/Button";
+import { deleteAccountAction } from "@/src/app/actions/auth";
 
 export default function DeleteAccountView() {
   const router = useRouter();
@@ -17,14 +18,10 @@ export default function DeleteAccountView() {
       setLoading(true);
       setError("");
 
-      const res = await fetch("/api/auth/delete", {
-        method: "DELETE",
-      });
+      const result = await deleteAccountAction();
 
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        setError(data?.error || "Failed to delete account.");
+      if (!result.ok) {
+        setError(result.error);
         return;
       }
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Button from "./Button";
+import { logoutAction } from "@/src/app/actions/auth";
 
 type LogoutButtonProps = {
   redirectTo?: string;
@@ -27,14 +28,10 @@ export default function LogoutButton({
       setLoading(true);
       setError("");
 
-      const res = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+      const result = await logoutAction();
 
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        setError(data?.error || "Failed to logout.");
+      if (!result.ok) {
+        setError(result.error);
         return;
       }
 

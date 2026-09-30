@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Input from "@/src/components/ui/Input";
 import Button from "@/src/components/ui/Button";
 import Image from "next/image";
+import { signupAction } from "@/src/app/actions/auth";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -24,21 +25,15 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-          full_name: fullName,
-          username,
-        }),
+      const result = await signupAction({
+        email,
+        password,
+        full_name: fullName,
+        username,
       });
 
-      const json = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        setFormError(json?.error ?? "Signup failed.");
+      if (!result.ok) {
+        setFormError(result.error);
         return;
       }
 
