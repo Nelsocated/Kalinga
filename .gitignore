@@ -54,5 +54,5 @@ next-env.d.ts
 *.pb
 *.bin
 
-# Local planning docs
-/docs/frontend-spec.md
+# Local planning docs (specs and plans stay on this machine)
+/docs/
