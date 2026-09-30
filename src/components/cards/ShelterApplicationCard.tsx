@@ -1,59 +1,42 @@
 import Link from "next/link";
+import { CaretRight, MapPin } from "@phosphor-icons/react/dist/ssr";
 import type { ShelterApplicationItem } from "@/src/lib/services/adminService";
-import Image from "next/image";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
+import Avatar from "../ui/Avatar";
+import StatusChip from "../ui/StatusChip";
 
 type Props = {
   item: ShelterApplicationItem;
 };
 
-function formatTimeAgo(dateString: string | null) {
-  if (!dateString) return "—";
-
+function formatDate(dateString: string | null) {
+  if (!dateString) return "Date unknown";
   const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return "—";
-
-  const diffMs = Date.now() - date.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffHours < 1) return "Just now";
-  if (diffHours < 24) return `${diffHours} hr${diffHours > 1 ? "s" : ""} ago`;
-  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+  if (Number.isNaN(date.getTime())) return "Date unknown";
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
+/** A shelter application in the admin queue; the whole row opens the review. */
 export default function ShelterApplicationCard({ item }: Props) {
   return (
-    <article className="rounded-[15px] border-2 bg-outerbg p-2">
-      <div className="flex items-center gap-3">
-        <div className="w-25 border rounded-[15px]">
-          <Image
-            src={item.photo_url ?? DEFAULT_AVATAR_URL}
-            alt={`${item.shelterName} photo`}
-            width={500}
-            height={500}
-          />
-        </div>
-
-        <div className="min-w-0 flex-1 items-center pr-2">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="line-clamp-1 text-subtitle font-bold text-black md:text-subtitle">
-              {item.shelterName}
-            </h2>
-
-            <span className="shrink-0 text-sm text-neutral-500">
-              {formatTimeAgo(item.applicationSubmittedAt ?? item.createdAt)}
-            </span>
-          </div>
-
-          <Link
-            href={`/admin/application/${item.id}`}
-            className="mt-2 flex h-8.5 w-full items-center justify-center rounded-[15px] hover:scale-105 border bg-innerbg text-sm font-medium text-black transition"
-          >
-            Review Application
-          </Link>
+    <Link
+      href={`/admin/application/${item.id}`}
+      className="flex items-center gap-4 rounded-lg border border-line bg-card p-4 transition-[box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift"
+    >
+      <Avatar src={item.photo_url ?? item.logoUrl} name={item.shelterName} size={56} className="rounded-md" />
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <p className="truncate font-semibold text-ink">{item.shelterName}</p>
+        <p className="flex min-w-0 items-center gap-1 text-sm text-muted">
+          <MapPin size={14} aria-hidden="true" className="shrink-0" />
+          <span className="truncate">{item.location || "No address given"}</span>
+        </p>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <StatusChip status={item.applicationStatus} />
+          <span className="text-xs text-muted">
+            Submitted {formatDate(item.applicationSubmittedAt ?? item.createdAt)}
+          </span>
         </div>
       </div>
-    </article>
+      <CaretRight size={18} aria-hidden="true" className="shrink-0 text-ink-soft" />
+    </Link>
   );
 }

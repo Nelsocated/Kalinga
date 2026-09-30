@@ -1,94 +1,78 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type {
-  ShelterApplicationItem,
-  ShelterApplicationStatus,
-} from "@/src/lib/services/adminService";
-import ShelterApplicationCard from "../../../components/cards/ShelterApplicationCard";
+import { ClipboardText } from "@phosphor-icons/react";
+import type { ShelterApplicationItem, ShelterApplicationStatus } from "@/src/lib/services/adminService";
+import ShelterApplicationCard from "@/src/components/cards/ShelterApplicationCard";
 import WebTemplate from "@/src/components/template/WebTemplate";
-import Select from "@/src/components/ui/Select";
+import EmptyState from "@/src/components/ui/EmptyState";
+import { cn } from "@/src/lib/cn";
 
 type Props = {
   initialApplications: ShelterApplicationItem[];
   initialError?: string | null;
 };
 
-export default function AdminDashboardClient({
-  initialApplications,
-  initialError = null,
-}: Props) {
-  const [selectedFilter, setSelectedFilter] = useState<
-    ShelterApplicationStatus | "all"
-  >("all");
+type Filter = ShelterApplicationStatus | "all";
 
-  const filteredApplications = useMemo(() => {
-    if (selectedFilter === "all") return initialApplications;
+const FILTERS: { label: string; value: Filter }[] = [
+  { label: "All", value: "all" },
+  { label: "Under review", value: "under_review" },
+  { label: "Approved", value: "approved" },
+  { label: "Rejected", value: "rejected" },
+];
 
-    return initialApplications.filter(
-      (item) => item.applicationStatus === selectedFilter,
-    );
-  }, [initialApplications, selectedFilter]);
+/** The queue of shelter applications, filterable by status. */
+export default function AdminDashboardClient({ initialApplications, initialError = null }: Props) {
+  const [filter, setFilter] = useState<Filter>("all");
 
-  const statusOptions: {
-    label: string;
-    value: ShelterApplicationStatus | "all";
-  }[] = [
-    { label: "All", value: "all" },
-    { label: "Under Review", value: "under_review" },
-    { label: "Approved", value: "approved" },
-    { label: "Rejected", value: "rejected" },
-  ];
+  const filtered = useMemo(
+    () => (filter === "all" ? initialApplications : initialApplications.filter((i) => i.applicationStatus === filter)),
+    [initialApplications, filter],
+  );
+
+  const countFor = (value: Filter) =>
+    value === "all" ? initialApplications.length : initialApplications.filter((i) => i.applicationStatus === value).length;
 
   return (
     <WebTemplate
-      header="Shelter Application"
+      header="Shelter applications"
       main={
-        <>
-          <div className="flex flex-col gap-3 border-b border-primary/20 px-5 py-2 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-black md:text-base">
-                Number of Shelter Applications:
-              </span>
-              <div className="rounded-[15px] border border-primary/40 px-4 py-1 text-lg font-semibold">
-                {filteredApplications.length}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor="status-filter"
-                className="text-sm font-semibold text-black md:text-base"
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-wrap gap-2" aria-label="Filter by status">
+            {FILTERS.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                aria-pressed={filter === f.value}
+                onClick={() => setFilter(f.value)}
+                className={cn(
+                  "flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors",
+                  filter === f.value ? "border-sunshine bg-sunshine text-ink" : "border-line bg-card text-ink hover:bg-sunshine-wash",
+                )}
               >
-                Filter:
-              </label>
-
-              <Select
-                value={selectedFilter}
-                onChange={(val) => setSelectedFilter(val)}
-                options={statusOptions}
-              />
-            </div>
+                {f.label}
+                <span className="tabular-nums text-ink-soft">{countFor(f.value)}</span>
+              </button>
+            ))}
           </div>
 
-          <div className="p-4">
-            {initialError ? (
-              <div className="rounded-[15px] border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {initialError}
-              </div>
-            ) : filteredApplications.length === 0 ? (
-              <div className="rounded-[15px] border border-dashed border-primary/30 px-4 py-10 text-center text-sm text-neutral-500">
-                No shelter applications found.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                {filteredApplications.map((item) => (
-                  <ShelterApplicationCard key={item.id} item={item} />
-                ))}
-              </div>
-            )}
-          </div>
-        </>
+          {initialError ? (
+            <p role="alert" className="rounded-md bg-reject/10 px-4 py-3 text-sm text-reject-text">
+              {initialError}
+            </p>
+          ) : filtered.length === 0 ? (
+            <EmptyState icon={<ClipboardText aria-hidden="true" />} title="No applications here" />
+          ) : (
+            <ul className="grid gap-3 lg:grid-cols-2">
+              {filtered.map((item) => (
+                <li key={item.id}>
+                  <ShelterApplicationCard item={item} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       }
     />
   );

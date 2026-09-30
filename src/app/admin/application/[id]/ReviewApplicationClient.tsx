@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type {
-  ShelterApplicationItem,
-  ShelterApplicationStatus,
-} from "@/src/lib/services/adminService";
-import DocumentModal from "../../../../components/modal/DocumentModal";
+import { CheckCircle, FileText, XCircle } from "@phosphor-icons/react";
+import type { ShelterApplicationItem, ShelterApplicationStatus } from "@/src/lib/services/adminService";
+import DocumentModal, { isImageUrl } from "@/src/components/modal/DocumentModal";
 import WebTemplate from "@/src/components/template/WebTemplate";
 import Button from "@/src/components/ui/Button";
+import Modal from "@/src/components/ui/Modal";
+import StatusChip from "@/src/components/ui/StatusChip";
+import Textarea from "@/src/components/ui/Textarea";
 import { unwrap } from "@/src/lib/actionResult";
 import { reviewApplicationAction } from "@/src/app/actions/admin";
 
@@ -16,118 +17,52 @@ type Props = {
   initialData: ShelterApplicationItem;
 };
 
-type UploadFieldKey =
-  | "registration_certificate"
-  | "owner_valid_id"
-  | "lease_contract"
-  | "shelter_photo";
-
-type ShelterDocumentItem = {
-  key: UploadFieldKey;
-  label: string;
-  url: string | null;
-};
-
 type ExtendedShelterApplicationItem = ShelterApplicationItem & {
   username?: string | null;
-  documentUrls?: Partial<Record<UploadFieldKey, string | null>>;
 };
 
-function getStatusClass(status: ShelterApplicationStatus) {
-  switch (status) {
-    case "approved":
-      return "border-approved bg-approved text-white";
-    case "rejected":
-      return "border-reject bg-reject text-white";
-    case "under_review":
-      return "border-under_review bg-under_review text-white";
-    default:
-      return "border-neutral-300 bg-neutral-100 text-neutral-700";
-  }
-}
+type Decision = Extract<ShelterApplicationStatus, "approved" | "rejected">;
 
+/** Review one shelter application: details, private documents, approve or reject. */
 export default function ReviewApplicationClient({ initialData }: Props) {
   const router = useRouter();
-
-  const [application, setApplication] =
-    useState<ExtendedShelterApplicationItem>(
-      initialData as ExtendedShelterApplicationItem,
-    );
+  const [application, setApplication] = useState<ExtendedShelterApplicationItem>(initialData);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<Decision | null>(null);
+  const [note, setNote] = useState(initialData.applicationReviewNote ?? "");
+  const [openDocument, setOpenDocument] = useState<{ title: string; url: string | null } | null>(null);
 
-  const isApproved = application.applicationStatus === "approved";
-  const isRejected = application.applicationStatus === "rejected";
+  const status = application.applicationStatus;
 
-  const [openDocument, setOpenDocument] = useState<{
-    title: string;
-    url: string | null;
-  } | null>(null);
+  const documents = [
+    { label: "Registration certificate", url: application.cert_url },
+    { label: "Owner's valid ID", url: application.id_url },
+    { label: "Contract of lease", url: application.lease_url },
+    { label: "Shelter photo", url: application.photo_url },
+  ];
 
-  const statusClass = useMemo(
-    () => getStatusClass(application.applicationStatus),
-    [application.applicationStatus],
-  );
+  const details: [string, string | null | undefined][] = [
+    ["Shelter name", application.shelterName],
+    ["Username", application.username],
+    ["Email", application.contactEmail],
+    ["Phone", application.contactPhone],
+    ["Address", application.location],
+  ];
 
-  const documents: ShelterDocumentItem[] = useMemo(
-    () => [
-      {
-        key: "registration_certificate",
-        label: "Registration Certificate",
-        url: application.cert_url ?? null,
-      },
-      {
-        key: "owner_valid_id",
-        label: "Valid ID of the Owner",
-        url: application.id_url ?? null,
-      },
-      {
-        key: "lease_contract",
-        label: "Notarized Contract of lease of occupied Space/Building",
-        url: application.lease_url ?? null,
-      },
-      {
-        key: "shelter_photo",
-        label: "Photos of the Shelter",
-        url: application.photo_url ?? null,
-      },
-    ],
-    [
-      application.cert_url,
-      application.id_url,
-      application.lease_url,
-      application.photo_url,
-    ],
-  );
-
-  async function handleUpdate(status: ShelterApplicationStatus) {
+  async function decide(decision: Decision) {
+    setSubmitting(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
     try {
-      setSubmitting(true);
-      setErrorMsg(null);
-      setSuccessMsg(null);
-
-      const updated = unwrap(
-        await reviewApplicationAction(application.id, status),
-      );
-
+      const updated = unwrap(await reviewApplicationAction(application.id, decision, note.trim() || null));
       setApplication((prev) => ({ ...prev, ...updated }));
-
-      setSuccessMsg(
-        status === "approved"
-          ? "Application approved successfully."
-          : status === "rejected"
-            ? "Application rejected successfully."
-            : "Application updated successfully.",
-      );
-
+      setSuccessMsg(decision === "approved" ? "Application approved. The shelter can now post." : "Application rejected.");
+      setConfirm(null);
       router.refresh();
     } catch (error) {
-      setErrorMsg(
-        error instanceof Error
-          ? error.message
-          : "Failed to update application.",
-      );
+      setErrorMsg(error instanceof Error ? error.message : "Couldn't update the application.");
     } finally {
       setSubmitting(false);
     }
@@ -136,108 +71,124 @@ export default function ReviewApplicationClient({ initialData }: Props) {
   return (
     <>
       <WebTemplate
-        header="Shelter Verification"
+        header={
+          <div className="flex min-w-0 flex-wrap items-center gap-3">
+            <h1 className="min-w-0 truncate text-headline text-ink">{application.shelterName}</h1>
+            <StatusChip status={status} />
+          </div>
+        }
         main={
-          <>
-            <section className="space-y-3 py-2">
-              <div className="mb-4 flex flex-wrap items-center gap-3">
-                <h2 className="text-lg font-bold text-black">
-                  Account Details
-                </h2>
-
-                <span
-                  className={`rounded-[15px] border px-3 py-1 text-description font-semibold capitalize ${statusClass}`}
-                >
-                  {application.applicationStatus.replace("_", " ")}
-                </span>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Email" value={application.contactEmail} />
-                <Field label="Password" value="••••••••••" />
-                <Field label="Shelter Name" value={application.shelterName} />
-                <Field label="Username" value={application.username ?? "—"} />
-                <Field label="Location" value={application.location} />
-                <Field label="Phone" value={application.contactPhone} />
-              </div>
-
-              <h2 className="text-lg font-bold text-black">Documents</h2>
-
-              <div className="space-y-4">
-                {documents.map((doc) => {
-                  const isAvailable = !!doc.url;
-
-                  return (
-                    <div key={doc.key}>
-                      <p className="mb-2 text-descriptipm font-semibold text-black">
-                        {doc.label}
-                      </p>
-
-                      <Button
-                        type="button"
-                        disabled={!isAvailable}
-                        onClick={() =>
-                          setOpenDocument({
-                            title: doc.label,
-                            url: doc.url,
-                          })
-                        }
-                        className="w-full text-center"
-                      >
-                        {isAvailable
-                          ? "View Documents"
-                          : "No Document Uploaded"}
-                      </Button>
-                    </div>
-                  );
-                })}
-              </div>
+          <div className="flex max-w-3xl flex-col gap-8">
+            <section aria-labelledby="details-heading" className="flex flex-col gap-3">
+              <h2 id="details-heading" className="text-lg font-semibold text-ink">
+                Details
+              </h2>
+              <dl className="grid gap-x-8 gap-y-3 rounded-lg border border-line bg-card p-4 sm:grid-cols-[auto_1fr]">
+                {details.map(([label, value]) => (
+                  <div key={label} className="contents">
+                    <dt className="text-sm text-muted">{label}</dt>
+                    <dd className="text-sm font-medium break-words text-ink">{value?.trim() || "Not given"}</dd>
+                  </div>
+                ))}
+              </dl>
             </section>
 
-            <div className="space-y-3 py-3">
-              <button
-                type="button"
-                disabled={submitting || isApproved}
-                onClick={() => handleUpdate("approved")}
-                className={`w-full border border-approved rounded-[15px] text-sm font-bold py-2 hover:scale-105
-                 ${isApproved ? "opacity-50 cursor-not-allowed" : "hover:bg-approved text-black"}`}
-              >
-                {isApproved
-                  ? "Already Approved"
-                  : submitting
-                    ? "Processing..."
-                    : "Approve Application"}
-              </button>
+            <section aria-labelledby="docs-heading" className="flex flex-col gap-3">
+              <h2 id="docs-heading" className="text-lg font-semibold text-ink">
+                Documents
+              </h2>
+              <ul className="grid grid-cols-2 gap-3">
+                {documents.map((doc) => (
+                  <li key={doc.label}>
+                    <button
+                      type="button"
+                      disabled={!doc.url}
+                      onClick={() => setOpenDocument({ title: doc.label, url: doc.url })}
+                      className="group flex w-full flex-col overflow-hidden rounded-lg border border-line bg-card text-left transition-[box-shadow,transform] duration-200 ease-out-expo enabled:hover:-translate-y-0.5 enabled:hover:shadow-lift disabled:opacity-60"
+                    >
+                      <span className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-ground">
+                        {doc.url && isImageUrl(doc.url) ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL
+                          <img src={doc.url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <FileText size={36} className="text-ink-soft" aria-hidden="true" />
+                        )}
+                      </span>
+                      <span className="flex flex-col gap-0.5 p-3">
+                        <span className="text-sm font-semibold text-ink">{doc.label}</span>
+                        <span className="text-xs text-muted">{doc.url ? "Open" : "Not uploaded"}</span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-              <button
-                type="button"
-                disabled={submitting || isRejected}
-                onClick={() => handleUpdate("rejected")}
-                className={`w-full border border-reject rounded-[15px] text-sm font-bold py-2 hover:scale-105
-                ${isRejected ? "opacity-50 cursor-not-allowed" : "hover:bg-reject text-black"}`}
-              >
-                {isRejected
-                  ? "Already Rejected"
-                  : submitting
-                    ? "Processing..."
-                    : "Reject Application"}
-              </button>
-            </div>
-
-            {errorMsg ? (
-              <div className="rounded-[15px] border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {errorMsg}
+            <section aria-labelledby="decision-heading" className="flex flex-col gap-3">
+              <h2 id="decision-heading" className="text-lg font-semibold text-ink">
+                Decision
+              </h2>
+              {errorMsg ? (
+                <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">
+                  {errorMsg}
+                </p>
+              ) : null}
+              {successMsg ? (
+                <p role="status" className="rounded-md bg-approved/14 px-3 py-2 text-sm text-approved-text">
+                  {successMsg}
+                </p>
+              ) : null}
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="primary"
+                  icon={<CheckCircle aria-hidden="true" />}
+                  disabled={status === "approved"}
+                  onClick={() => setConfirm("approved")}
+                >
+                  {status === "approved" ? "Approved" : "Approve"}
+                </Button>
+                <Button
+                  variant="destructive"
+                  icon={<XCircle aria-hidden="true" />}
+                  disabled={status === "rejected"}
+                  onClick={() => setConfirm("rejected")}
+                >
+                  {status === "rejected" ? "Rejected" : "Reject"}
+                </Button>
               </div>
-            ) : null}
-
-            {successMsg ? (
-              <div className="rounded-[15px] border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700">
-                {successMsg}
-              </div>
-            ) : null}
-          </>
+            </section>
+          </div>
         }
       />
+
+      <Modal
+        open={!!confirm}
+        onClose={() => !submitting && setConfirm(null)}
+        title={confirm === "approved" ? `Approve ${application.shelterName}?` : `Reject ${application.shelterName}?`}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setConfirm(null)} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button
+              variant={confirm === "approved" ? "primary" : "destructive"}
+              loading={submitting}
+              onClick={() => confirm && decide(confirm)}
+            >
+              {confirm === "approved" ? "Approve" : "Reject"}
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-ink-soft">
+            {confirm === "approved"
+              ? "The shelter's account becomes a shelter account and it can start posting pets."
+              : "The shelter stays a regular account. You can approve it later."}
+          </p>
+          <Textarea label="Note for the record (optional)" rows={3} value={note} onChange={(e) => setNote(e.target.value)} />
+        </div>
+      </Modal>
 
       <DocumentModal
         isOpen={!!openDocument}
@@ -246,25 +197,5 @@ export default function ReviewApplicationClient({ initialData }: Props) {
         onClose={() => setOpenDocument(null)}
       />
     </>
-  );
-}
-
-function Field({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | null | undefined;
-}) {
-  return (
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-black">
-        {label}
-      </label>
-
-      <div className="flex h-10 items-center rounded-[10px] border px-4 text-sm text-neutral-500">
-        {value && value.trim() ? value : label}
-      </div>
-    </div>
   );
 }

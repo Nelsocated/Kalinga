@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { ArrowSquareOut } from "@phosphor-icons/react";
+import Modal from "../ui/Modal";
+import { LinkButton } from "../ui/Button";
 
 type Props = {
   isOpen: boolean;
@@ -10,93 +12,71 @@ type Props = {
   onClose: () => void;
 };
 
-function isImage(url: string) {
-  return /\.(jpg|jpeg|png|webp|gif|bmp|svg)$/i.test(url);
+/** Signed URLs carry a query string, so test the path only. */
+export function isImageUrl(url: string) {
+  try {
+    return /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(new URL(url).pathname);
+  } catch {
+    return /\.(jpe?g|png|webp|gif|bmp|svg)(\?|$)/i.test(url);
+  }
 }
 
-export default function DocumentModal({
-  isOpen,
-  title,
-  documentUrl,
-  onClose,
-}: Props) {
-  if (!isOpen) return null;
-
-  const showImage = documentUrl ? isImage(documentUrl) : false;
-
+/** A private shelter document: image or PDF, with a link to open it in a new tab. */
+export default function DocumentModal({ isOpen, title, documentUrl, onClose }: Props) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-[15px] bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b px-5 py-4">
-          <h2 className="text-lg font-bold text-black">{title}</h2>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-[15px] border px-3 py-1.5 text-sm font-medium hover:scale-105 "
-          >
-            Close
-          </button>
-        </div>
-
-        <div className="relative min-h-0 flex-1 bg-neutral-100">
-          {documentUrl ? (
-            <DocumentViewer
-              key={documentUrl}
-              title={title}
-              documentUrl={documentUrl}
-              showImage={showImage}
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center px-4 text-sm text-neutral-500">
-              No document available.
-            </div>
-          )}
-        </div>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title={title}
+      className="sm:max-w-4xl"
+      bodyClassName="flex min-h-0 flex-1 flex-col"
+      footer={
+        documentUrl ? (
+          <>
+            <p className="mr-auto text-xs text-muted">Links to private documents expire after 10 minutes.</p>
+            <LinkButton href={documentUrl} target="_blank" rel="noopener noreferrer" variant="secondary" icon={<ArrowSquareOut aria-hidden="true" />}>
+              Open in new tab
+            </LinkButton>
+          </>
+        ) : undefined
+      }
+    >
+      <div className="relative h-[70dvh] overflow-hidden rounded-md bg-ground">
+        {documentUrl ? (
+          <DocumentViewer key={documentUrl} title={title} documentUrl={documentUrl} />
+        ) : (
+          <p className="flex h-full items-center justify-center text-sm text-muted">No document uploaded.</p>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 }
 
-function DocumentViewer({
-  title,
-  documentUrl,
-  showImage,
-}: {
-  title: string;
-  documentUrl: string;
-  showImage: boolean;
-}) {
+function DocumentViewer({ title, documentUrl }: { title: string; documentUrl: string }) {
   const [loading, setLoading] = useState(true);
 
   return (
     <>
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-neutral-100">
-          <div className="text-sm font-medium text-neutral-500">
-            Loading document...
-          </div>
-        </div>
-      )}
-
-      {showImage ? (
-        <Image
+      {loading ? (
+        <p role="status" className="absolute inset-0 flex items-center justify-center text-sm text-muted">
+          Loading document…
+        </p>
+      ) : null}
+      {isImageUrl(documentUrl) ? (
+        // eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL, skip the optimizer
+        <img
           src={documentUrl}
           alt={title}
           onLoad={() => setLoading(false)}
           onError={() => setLoading(false)}
-          width={1000}
-          height={1000}
-          className={`h-full w-full object-contain ${
-            loading ? "invisible" : "visible"
-          }`}
+          className={`h-full w-full object-contain ${loading ? "invisible" : ""}`}
         />
       ) : (
         <iframe
           src={documentUrl}
           title={title}
           onLoad={() => setLoading(false)}
-          className={`h-full w-full ${loading ? "invisible" : "visible"}`}
+          className={`h-full w-full ${loading ? "invisible" : ""}`}
         />
       )}
     </>
