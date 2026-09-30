@@ -1,8 +1,8 @@
+import { getSenderIdentity } from "@/src/lib/services/messages/threads";
 import {
-  getSenderIdentity,
   getShelterInboxThreads,
   getUserInboxThreads,
-} from "@/src/lib/services/messageService";
+} from "@/src/lib/services/messages/inbox";
 import { requireAuth } from "@/src/lib/utils/auth";
 import { handle, ok } from "@/src/lib/api";
 

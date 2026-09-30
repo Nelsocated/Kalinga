@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getShelterInboxThreads } from "@/src/lib/services/messageService";
+import { getShelterInboxThreads } from "@/src/lib/services/messages/inbox";
 import { getMyShelterProfile } from "@/src/lib/services/shelterService";
 import { getUsersByIds } from "@/src/lib/services/usersService";
 import { requireOwnedShelterId } from "@/src/lib/utils/auth";

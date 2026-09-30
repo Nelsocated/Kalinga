@@ -1,7 +1,5 @@
-import {
-  getSenderIdentity,
-  getSentMessages,
-} from "@/src/lib/services/messageService";
+import { getSenderIdentity } from "@/src/lib/services/messages/threads";
+import { getSentMessages } from "@/src/lib/services/messages/sent";
 import { requireAuth } from "@/src/lib/utils/auth";
 import { handle, ok } from "@/src/lib/api";
 

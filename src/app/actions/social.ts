@@ -10,7 +10,7 @@ import {
   createMessageThread,
   getSenderIdentity,
   replyToThread,
-} from "@/src/lib/services/messageService";
+} from "@/src/lib/services/messages/threads";
 
 const LikeTargetSchema = z.object({
   targetType: z.enum(["pet", "shelter", "video"], {
