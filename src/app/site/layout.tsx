@@ -1,4 +1,5 @@
 import Navbar from "@/src/components/layout/NavBar";
+import BottomTabBar from "@/src/components/layout/BottomTabBar";
 
 export default function MainLayout({
   children,
@@ -6,11 +7,10 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-outerbg">
-      <aside className="ml-20 shrink-0 flex pt-13">
-        <Navbar />
-      </aside>
-      <main className="flex-1 min-w-0 ">{children}</main>
+    <div className="flex min-h-dvh">
+      <Navbar />
+      <main className="min-w-0 flex-1 pb-20 md:pb-0">{children}</main>
+      <BottomTabBar />
     </div>
   );
 }

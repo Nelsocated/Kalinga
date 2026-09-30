@@ -5,7 +5,7 @@ import WebTemplate from "@/src/components/template/WebTemplate";
 export default function Loading() {
   return (
     <WebTemplate
-      header={<div>Shelters</div>}
+      header="Shelters"
       main={
         <main className="pt-2">
           <div className="m-4 flex flex-col gap-3 space-y-2">

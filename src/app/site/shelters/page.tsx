@@ -7,7 +7,7 @@ export default async function Explore() {
 
   return (
     <WebTemplate
-      header={<div>Shelters</div>}
+      header="Shelters"
       main={
         <main className="pt-2">
           <div className="m-4 flex flex-col gap-3">

@@ -105,7 +105,7 @@ export default function PetProfileClient({
 
   return (
     <WebTemplate
-      header={<div>Pet Profile</div>}
+      header="Pet Profile"
       side={
         <div className="p-5">
           <PhotoView

@@ -1,112 +1,53 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-
-import { getAuthUser, type AuthUser } from "@/src/lib/utils/clientAuth";
-import Button from "../ui/Button";
-import BackButton from "../ui/BackButton";
-import LogoutButton from "../ui/LogoutButton";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { DotsThreeCircle, Gear, House, Info } from "@phosphor-icons/react";
 
+import { getAuthUser, type AuthUser } from "@/src/lib/utils/clientAuth";
+import Modal from "../ui/Modal";
+import LogoutButton from "../ui/LogoutButton";
+import { sidebarItemClass } from "../layout/navItems";
+
+const rowClass =
+  "flex h-12 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-ink transition-colors hover:bg-sunshine-wash";
+
 export default function MoreModal() {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
-  function GetUserRole(): boolean {
-    useEffect(() => {
-      async function loadAuthUser() {
-        const user = await getAuthUser();
-        setAuthUser(user);
-      }
-
-      loadAuthUser();
-    }, []);
-
-    if (authUser?.role == "user") {
-      return true;
-    }
-    return false;
-  }
-
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    getAuthUser().then(setAuthUser);
   }, []);
 
-  const buttonStyle =
-    "bg-white hover:bg-background hover:scale-105 border-0 flex items-center gap-3";
+  const close = () => setOpen(false);
 
   return (
-    <div ref={wrapperRef} className="relative inline-block w-full">
-      {!open && (
-        <Button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="flex w-full gap-3 border-none hover:scale-105"
-        >
-          <DotsThreeCircle size={25} aria-hidden="true" />
-          <span>More</span>
-        </Button>
-      )}
+    <>
+      <button type="button" onClick={() => setOpen(true)} className={sidebarItemClass()}>
+        <DotsThreeCircle size={24} aria-hidden="true" />
+        <span className="sr-only lg:not-sr-only">More</span>
+      </button>
 
-      <div
-        className={`absolute bottom-0 left-0 z-20 min-w-3xs overflow-hidden rounded-[15px] border bg-white shadow-lg transition-all duration-500 ease-in-out origin-bottom ${
-          open
-            ? "pointer-events-auto max-h-xs opacity-100"
-            : "pointer-events-none max-h-0 opacity-0"
-        }`}
-      >
-        <div className="flex items-center justify-between bg-primary text-innerbg px-5 py-2">
-          <h2 className="text-subtitle font-bold ">More</h2>
-          <BackButton onClick={() => setOpen(false)} />
-        </div>
-
-        <div className="space-y-1 p-2 text-lg text-black flex flex-col">
-          {GetUserRole() ? (
-            <Button
-              type="button"
-              onClick={() => router.push("/shelterSignup")}
-              className={buttonStyle}
-            >
-              <House size={25} aria-hidden="true" />
-              <span>Create Shelter</span>
-            </Button>
-          ) : (
-            ""
-          )}
-          <Button
-            type="button"
-            onClick={() => router.push("/about")}
-            className={buttonStyle}
-          >
-            <Info size={25} aria-hidden="true" />
-            <span>About</span>
-          </Button>
-          <Button
-            type="button"
-            onClick={() => router.push("/site/settings")}
-            className={buttonStyle}
-          >
-            <Gear size={25} aria-hidden="true" />
-            <span>Settings</span>
-          </Button>
-          <LogoutButton />
-        </div>
-      </div>
-    </div>
+      <Modal open={open} onClose={close} title="More" className="sm:max-w-sm">
+        <nav aria-label="More" className="flex flex-col gap-1">
+          {authUser?.role === "user" ? (
+            <Link href="/shelterSignup" onClick={close} className={rowClass}>
+              <House size={22} aria-hidden="true" />
+              Create a shelter
+            </Link>
+          ) : null}
+          <Link href="/about" onClick={close} className={rowClass}>
+            <Info size={22} aria-hidden="true" />
+            About
+          </Link>
+          <Link href="/site/settings" onClick={close} className={rowClass}>
+            <Gear size={22} aria-hidden="true" />
+            Settings
+          </Link>
+          {authUser ? <LogoutButton className={rowClass} /> : null}
+        </nav>
+      </Modal>
+    </>
   );
 }

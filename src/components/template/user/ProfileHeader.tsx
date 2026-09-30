@@ -24,20 +24,26 @@ export default function ProfileHeader({
 
   return (
     <div className="w-full">
-      <div className="flex w-full items-center justify-between gap-8">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <div className="overflow-hidden rounded-full shrink-0">
-            <Image src={src} alt={title} width={80} height={80} />
-          </div>
+      <div className="flex w-full flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <Image
+            src={src}
+            alt=""
+            width={80}
+            height={80}
+            className="size-14 shrink-0 rounded-full object-cover sm:size-20"
+          />
 
-          <div className="min-w-0 flex flex-col pl-2 leading-6">
-            <div className="text-title font-semibold">{title}</div>
-            <div className="text-lg font-medium">{subtitle}</div>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <h1 className="truncate text-headline text-ink">{title}</h1>
+            {subtitle ? (
+              <p className="truncate text-sm text-muted">{subtitle}</p>
+            ) : null}
           </div>
         </div>
 
-        {actions ? <div>{actions}</div> : null}
-        {rightSlot ? <div className="shrink-0 ml-10">{rightSlot}</div> : null}
+        {actions ? <div className="shrink-0">{actions}</div> : null}
+        {rightSlot ? <div className="shrink-0">{rightSlot}</div> : null}
       </div>
     </div>
   );

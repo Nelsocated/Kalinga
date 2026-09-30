@@ -116,7 +116,7 @@ export default function NotifClient({ notifications }: Props) {
 
   return (
     <WebTemplate
-      header={<div>Notifications</div>}
+      header="Notifications"
       main={
         <>
           <div

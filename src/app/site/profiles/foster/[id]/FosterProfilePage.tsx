@@ -47,7 +47,7 @@ export default function FosterProfilePage({
 
   return (
     <WebTemplate
-      header={<div>Foster Story</div>}
+      header="Foster Story"
       side={
         <div className="p-5">
           <PhotoView name={name} photo_url={photo_url} pet_media={pet_media} />

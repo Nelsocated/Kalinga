@@ -1,123 +1,57 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import Image from "next/image";
-import {
-  Bell,
-  ChatCircle,
-  Compass,
-  House,
-  PlayCircle,
-  User,
-  type Icon,
-} from "@phosphor-icons/react";
-
-import Button from "../ui/Button";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getAuthUser, type AuthUser } from "@/src/lib/utils/clientAuth";
 import FilterModal from "../modal/FilterModal";
 import MoreModal from "../modal/MoreModal";
+import { NAV_ITEMS, isActive, sidebarItemClass } from "./navItems";
 
-import {
-  getAuthUser,
-  getProfileRouteByRole,
-  getNotifRouteByRole,
-  getMsgRouteByRole,
-  type AuthUser,
-} from "@/src/lib/utils/clientAuth";
-
-type IconItem = {
-  title: string;
-  icon: Icon;
-  link: string | ((authUser: AuthUser | null) => string | undefined | null);
-};
-
+/** Sidebar for tablets and desktops; phones get BottomTabBar instead. */
 export default function Navbar() {
-  const router = useRouter();
-
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const pathname = usePathname();
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    async function loadAuthUser() {
-      const user = await getAuthUser();
-      setAuthUser(user);
-    }
-
-    loadAuthUser();
+    getAuthUser().then(setUser);
   }, []);
 
-  const buttonStyle = "flex w-full gap-3 border-none text-lg hover:scale-105";
-
-  const icons: IconItem[] = [
-    {
-      title: "For You",
-      icon: PlayCircle,
-      link: "/site/home",
-    },
-    {
-      title: "Explore",
-      icon: Compass,
-      link: "/site/explore",
-    },
-    {
-      title: "Shelters",
-      icon: House,
-      link: "/site/shelters",
-    },
-    {
-      title: "Profile",
-      icon: User,
-      link: (user) => (user ? getProfileRouteByRole(user) : undefined),
-    },
-    {
-      title: "Notifications",
-      icon: Bell,
-      link: (user) => (user ? getNotifRouteByRole(user) : undefined),
-    },
-    {
-      title: "Messages",
-      icon: ChatCircle,
-      link: (user) => (user ? getMsgRouteByRole(user) : undefined),
-    },
-  ];
-
-  const handleNavigate = (item: IconItem) => {
-    const route =
-      typeof item.link === "function" ? item.link(authUser) : item.link;
-    if (!route) return;
-    router.push(route);
-  };
-
   return (
-    <aside className="max-w-sm">
-      <div>
-        <Image
-          src={"/kalinga_logo.svg"}
-          alt="kalinga-logo"
-          width={100}
-          height={100}
-          priority
-        />
-      </div>
+    <aside className="sticky top-0 hidden h-dvh w-20 shrink-0 flex-col gap-6 px-3 py-6 md:flex lg:w-60 lg:px-5">
+      <Link
+        href="/site/home"
+        aria-label="Kalinga home"
+        className="flex items-center justify-center gap-3 rounded-full px-2 lg:justify-start"
+      >
+        <Image src="/kalinga_logo(ver2).svg" alt="" width={40} height={40} priority />
+        <span className="hidden text-xl font-bold text-ink lg:inline">Kalinga</span>
+      </Link>
 
-      <nav className="mt-3 space-y-2 text-xl text-black">
-        <div className="flex">
-          <FilterModal />
-        </div>
-
-        {icons.map((item) => (
-          <Button
-            key={item.title}
-            type="button"
-            className={buttonStyle}
-            onClick={() => handleNavigate(item)}
-          >
-            <item.icon size={25} aria-hidden="true" />
-            <span>{item.title}</span>
-          </Button>
-        ))}
-
-        <MoreModal />
+      <nav aria-label="Main" className="flex flex-col gap-1">
+        {NAV_ITEMS.map(({ key, label, icon: Icon, href }) => {
+          // Auth-only items send signed-out users to login
+          const target = href(user) ?? "/login";
+          const active = isActive(pathname, href(user));
+          return (
+            <Link
+              key={key}
+              href={target}
+              aria-current={active ? "page" : undefined}
+              className={sidebarItemClass(active)}
+            >
+              <Icon size={24} weight={active ? "fill" : "regular"} aria-hidden="true" />
+              <span className="sr-only lg:not-sr-only">{label}</span>
+            </Link>
+          );
+        })}
       </nav>
+
+      <div className="mt-auto flex flex-col gap-1">
+        <FilterModal />
+        <MoreModal />
+      </div>
     </aside>
   );
 }

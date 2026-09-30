@@ -1,18 +1,17 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "@phosphor-icons/react";
+import { buttonStyles } from "./Button";
 
 type Props = {
   onClick?: () => void;
   className?: string;
+  /** Light arrow for dark surfaces. */
   isModal?: boolean;
 };
 
-export default function BackButton({
-  onClick,
-  className,
-  isModal = false,
-}: Props) {
+export default function BackButton({ onClick, className, isModal = false }: Props) {
   const router = useRouter();
 
   function handleClick() {
@@ -21,7 +20,7 @@ export default function BackButton({
       return;
     }
 
-    if (window.history.length > 2) {
+    if (window.history.length > 1) {
       router.back();
     } else {
       router.push("/site/home");
@@ -33,13 +32,15 @@ export default function BackButton({
       type="button"
       onClick={handleClick}
       aria-label="Go back"
-      className={`flex items-center justify-center hover:scale-110 ${className ?? ""}`}
+      className={buttonStyles({
+        variant: "ghost",
+        size: "icon",
+        className: [isModal ? "text-white hover:bg-white/15" : "", className]
+          .filter(Boolean)
+          .join(" "),
+      })}
     >
-      <ArrowLeft
-        size={22}
-        className={isModal ? "text-white" : "text-ink"}
-        aria-hidden="true"
-      />
+      <ArrowLeft size={22} aria-hidden="true" />
     </button>
   );
 }

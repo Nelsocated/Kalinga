@@ -5,7 +5,7 @@ import WebTemplate from "@/src/components/template/WebTemplate";
 export default function Loading() {
   return (
     <WebTemplate
-      header={<div>Explore</div>}
+      header="Explore"
       main={
         <div className="ml-6 flex flex-col gap-7">
           {/* Longest Residents */}

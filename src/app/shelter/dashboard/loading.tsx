@@ -6,7 +6,7 @@ export default function Loading() {
   return (
     <>
       <WebTemplate
-        header={<div>Dashboard</div>}
+        header="Dashboard"
         main={
           <main className="flex h-full min-h-0 flex-col">
             {/* HEADER STATS */}

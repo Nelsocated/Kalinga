@@ -6,7 +6,7 @@ export default function Loading() {
   return (
     <>
       <WebTemplate
-        header={<div>Messages</div>}
+        header="Messages"
         scrollable={false}
         main={
           <div className="grid h-full min-h-0 grid-cols-[320px_1fr] overflow-hidden">

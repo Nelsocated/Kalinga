@@ -51,7 +51,7 @@ export default function Loading() {
   return (
     <>
       <WebTemplate
-        header={<div>Shelter Verification</div>}
+        header="Shelter Verification"
         main={
           <div className="space-y-4">
             <section className="space-y-3 py-2">

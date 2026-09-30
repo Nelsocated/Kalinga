@@ -8,6 +8,8 @@ import { fetchSearchPets } from "@/src/lib/services/petClient";
 import PetCard from "../cards/PetCard";
 import Button from "../ui/Button";
 import FilterControls from "../ui/FilterControls";
+import Modal from "../ui/Modal";
+import { sidebarItemClass } from "../layout/navItems";
 import { Funnel } from "@phosphor-icons/react";
 
 type ViewKey = "filters" | "results";
@@ -99,44 +101,28 @@ export default function FilterModal() {
     setOpen(false);
   }
 
-  function handleBack() {
-    if (activeView === "results") {
-      setActiveView("filters");
-      return;
-    }
-    closeModal();
-  }
-
   return (
     <>
-      <Button
+      <button
         type="button"
         onClick={() => {
           setOpen(true);
           setActiveView("filters");
           setFilterError(null);
         }}
-        className="border hover:scale-105"
+        className={sidebarItemClass()}
       >
-        <div className="flex gap-3">
-          <Funnel size={25} aria-hidden="true" />
-          Lookup
-        </div>
-      </Button>
+        <Funnel size={24} aria-hidden="true" />
+        <span className="sr-only lg:not-sr-only">Lookup</span>
+      </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
-
-          <div className="relative z-10 w-170 max-w-[92%] rounded-[15px] border-2 bg-white">
-            <FilterControls.Header
-              title={
-                activeView === "filters" ? "Find your match" : "Recommendations"
-              }
-              onBack={handleBack}
-            />
-
-            <div className="max-h-[82vh] overflow-y-auto scroll-stable py-3 px-5">
+      <Modal
+        open={open}
+        onClose={closeModal}
+        title={activeView === "filters" ? "Find your match" : "Recommendations"}
+        className="sm:max-w-3xl"
+      >
+            <div className="py-1">
               {activeView === "filters" ? (
                 <div className="space-y-5 flex flex-col">
                   <FilterControls.SpeciesSection
@@ -197,7 +183,7 @@ export default function FilterModal() {
                     <Button
                       type="button"
                       onClick={() => setActiveView("filters")}
-                      className="border border-black/20 bg-white text-black"
+                      variant="secondary"
                     >
                       Back to Filters
                     </Button>
@@ -205,9 +191,7 @@ export default function FilterModal() {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   );
 }

@@ -44,7 +44,7 @@ export default function Loading() {
   return (
     <>
       <WebTemplate
-        header={<div>Shelter Application</div>}
+        header="Shelter Application"
         main={
           <>
             {/* TOP BAR */}

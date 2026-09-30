@@ -112,7 +112,7 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
 
   return (
     <WebTemplate
-      header={<div>Explore</div>}
+      header="Explore"
       main={
         <main>
           <div className="flex flex-col gap-7 ">

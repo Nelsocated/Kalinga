@@ -20,7 +20,7 @@ export default function Loading() {
   return (
     <>
       <WebTemplate
-        header={<div>Foster Story</div>}
+        header="Foster Story"
         side={
           <div className="p-5">
             {/* Main photo */}

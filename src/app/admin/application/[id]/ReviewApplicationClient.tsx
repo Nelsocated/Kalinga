@@ -136,7 +136,7 @@ export default function ReviewApplicationClient({ initialData }: Props) {
   return (
     <>
       <WebTemplate
-        header={<div>Shelter Verification</div>}
+        header="Shelter Verification"
         main={
           <>
             <section className="space-y-3 py-2">

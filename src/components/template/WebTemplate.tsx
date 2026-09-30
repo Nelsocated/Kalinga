@@ -1,82 +1,52 @@
 "use client";
 
-import React from "react";
 import BackButton from "../ui/BackButton";
+import { cn } from "@/src/lib/cn";
 
 type Props = {
+  /** A page title string, or a richer header node (profile headers). */
   header?: React.ReactNode;
   main: React.ReactNode;
   side?: React.ReactNode;
   top?: React.ReactNode;
+  /** Rendered to the right of the title. */
+  actions?: React.ReactNode;
   scrollable?: boolean;
 };
 
+/** Page shell: title row on the ground, then content; optional side column on lg. */
 export default function WebTemplate({
   header,
   main,
   side,
   top,
+  actions,
   scrollable = true,
 }: Props) {
-  const isPetLayout = !!side;
-
   return (
-    <div className="min-h-screen bg-background flex overflow-hidden">
-      <div className="flex-1 flex justify-center pl-20 py-5">
-        <div className="w-full max-w-240 max-h-[94vh] rounded-[15px] border-4 border-secondary bg-white flex flex-col overflow-hidden">
-          {/* HEADER */}
-          <div className="flex items-center justify-between gap-3 bg-secondary px-5 py-3 shrink-0">
-            <div className="text-header font-bold leading-none text-textwhite">
-              {header}
-            </div>
-            <div className="mr-5 flex items-center">
-              <BackButton isModal />
-            </div>
-          </div>
+    <div className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 md:py-8">
+      <header className="flex items-center gap-3">
+        <BackButton />
+        {typeof header === "string" ? (
+          <h1 className="min-w-0 flex-1 truncate text-headline text-ink">{header}</h1>
+        ) : (
+          <div className="min-w-0 flex-1">{header}</div>
+        )}
+        {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+      </header>
 
-          {/* OPTIONAL TOP (for pet style) */}
-          {top && (
-            <div className="px-5 shrink-0">
-              <div className="flex items-center gap-3">{top}</div>
-            </div>
-          )}
+      {top ? <div className="flex flex-wrap items-center gap-3">{top}</div> : null}
 
-          {/* BODY */}
-          <main className="flex-1 min-h-0 py-2">
-            {isPetLayout ? (
-              // 👇 PET STYLE GRID
-              <div className="grid h-full min-h-0 gap-3 px-3 lg:grid-cols-[60svh_1fr]">
-                {/* SIDE */}
-                <div className="min-h-0 overflow-y-auto scroll-stable">
-                  {side}
-                </div>
-
-                {/* MAIN */}
-                <div
-                  className={`min-h-0 ${
-                    scrollable
-                      ? "overflow-y-auto scroll-stable"
-                      : "overflow-hidden"
-                  }`}
-                >
-                  <div className="">{main}</div>
-                </div>
-              </div>
-            ) : (
-              // 👇 NORMAL LAYOUT (default)
-              <div
-                className={`h-full ${
-                  scrollable
-                    ? "overflow-y-auto scroll-stable"
-                    : "overflow-hidden"
-                }`}
-              >
-                <aside className="px-5 h-full">{main}</aside>
-              </div>
-            )}
-          </main>
+      {side ? (
+        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
+          <section className="min-w-0">{side}</section>
+          <section className={cn("min-w-0", !scrollable && "overflow-hidden")}>{main}</section>
         </div>
-      </div>
+      ) : (
+        <section className={cn("min-h-0 min-w-0 flex-1", !scrollable && "overflow-hidden")}>
+          {main}
+        </section>
+      )}
     </div>
   );
 }

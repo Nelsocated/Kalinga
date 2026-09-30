@@ -27,7 +27,7 @@ export default function Loading() {
     <>
       <WebTemplate
         scrollable={false}
-        header={<div>Notification</div>}
+        header="Notification"
         main={
           <main>
             <div className="border-b-2 pb-4">

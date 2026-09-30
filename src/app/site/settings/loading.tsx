@@ -57,7 +57,7 @@ export default function Loading() {
   return (
     <>
       <WebTemplate
-        header={<div>Settings</div>}
+        header="Settings"
         scrollable={false}
         main={
           <div className="min-h-0 overflow-y-auto scroll-stable">

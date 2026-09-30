@@ -7,7 +7,7 @@ import WebTemplate from "@/src/components/template/WebTemplate";
 import { Gear, UserCheck } from "@phosphor-icons/react";
 
 export default function SettingsPage() {
-  return <WebTemplate header={<div>Settings</div>} main={SettingsTabsView()} />;
+  return <WebTemplate header="Settings" main={SettingsTabsView()} />;
 }
 
 type TabKey = "change-password" | "delete-account";

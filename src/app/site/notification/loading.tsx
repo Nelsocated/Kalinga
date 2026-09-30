@@ -10,7 +10,7 @@ export default function Loading() {
 
   return (
     <WebTemplate
-      header={<div>Notifications</div>}
+      header="Notifications"
       main={
         <div className="flex-1 min-h-0 overflow-hidden scroll-stable py-5">
           {/* top labels */}

@@ -50,7 +50,8 @@ export default function LogoutButton({
       <Button
         type="button"
         onClick={() => setOpen(true)}
-        className={`bg-white border-0 flex items-center gap-3 ${className}`}
+        variant="ghost"
+        className={`justify-start ${className}`}
       >
         {withIcon ? (
           <SignOut size={25} aria-hidden="true" />
