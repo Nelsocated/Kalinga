@@ -53,3 +53,6 @@ next-env.d.ts
 *.tflite
 *.pb
 *.bin
+
+# Local planning docs
+/docs/frontend-spec.md
