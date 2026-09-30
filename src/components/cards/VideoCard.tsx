@@ -2,58 +2,50 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
+import { PlayCircle } from "@phosphor-icons/react";
+import { cn } from "@/src/lib/cn";
 
 export type VideoCardProps = {
-  href: string; // link to the video page
+  href: string;
   thumbnailUrl?: string | null;
   subtitle: string;
   petName: string;
   className?: string;
 };
 
-export default function VideoCard({
-  href,
-  thumbnailUrl,
-  subtitle,
-  petName,
-  className = "",
-}: VideoCardProps) {
-  const src = (thumbnailUrl ?? "").trim() || DEFAULT_AVATAR_URL;
+/** Video tile: 4:5 thumbnail with the pet name over a scrim. */
+export default function VideoCard({ href, thumbnailUrl, subtitle, petName, className }: VideoCardProps) {
+  const src = (thumbnailUrl ?? "").trim();
 
   return (
     <Link
       href={href}
-      className={[
-        "block overflow-hidden rounded-[15px] border-2 border-secondary hover:scale-105 w-48 h-77",
+      aria-label={`Watch ${petName}`}
+      className={cn(
+        "group relative block aspect-[4/5] w-full overflow-hidden rounded-lg bg-ink transition-[box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift",
         className,
-      ].join(" ")}
+      )}
     >
-      <div className="relative h-full w-full">
+      {src ? (
         <Image
           src={src}
-          alt={`${petName} video thumbnail`}
+          alt=""
           fill
-          className="object-cover"
+          sizes="(min-width: 1024px) 240px, (min-width: 640px) 30vw, 45vw"
+          className="object-cover transition-transform duration-300 ease-out-expo group-hover:scale-[1.03]"
         />
+      ) : null}
 
-        {/* Dark Gradient */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-black/60 to-transparent" />
+      <PlayCircle
+        size={28}
+        weight="fill"
+        aria-hidden="true"
+        className="absolute top-2.5 left-2.5 text-card drop-shadow"
+      />
 
-        {/* Text */}
-        <div className="absolute bottom-2 left-2 right-2 flex flex-col">
-          <div className="max-w-[40%] truncate text-base font-semibold text-white drop-shadow">
-            {petName}
-          </div>
-          <div className="max-w-[55%] truncate text-xs font-semibold text-white drop-shadow">
-            {subtitle}
-          </div>
-        </div>
-
-        {/* Video Badge */}
-        <div className="absolute left-3 top-3 rounded-full bg-black/55 px-3 py-1 text-xs font-semibold text-white">
-          ▶ Video
-        </div>
+      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-ink/80 to-transparent px-3 pt-10 pb-3">
+        <p className="truncate font-semibold text-card">{petName}</p>
+        <p className="truncate text-xs text-card/85">{subtitle}</p>
       </div>
     </Link>
   );

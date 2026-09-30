@@ -1,26 +1,30 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Funnel, MagnifyingGlass, WarningCircle } from "@phosphor-icons/react";
 
 import type { Pets, SearchPetCardItem } from "@/src/lib/types/pets";
 import { fetchSearchPets } from "@/src/lib/services/petClient";
 
 import PetCard from "../cards/PetCard";
 import Button from "../ui/Button";
-import FilterControls from "../ui/FilterControls";
 import Modal from "../ui/Modal";
+import EmptyState from "../ui/EmptyState";
+import FilterControls from "../ui/FilterControls";
+import CardGridSkeleton from "../skeletons/CardGridSkeleton";
 import { sidebarItemClass } from "../layout/navItems";
-import { Funnel } from "@phosphor-icons/react";
 
 type ViewKey = "filters" | "results";
 
 function toggleArrayValue<T extends string>(value: T, values: T[]): T[] {
-  return values.includes(value)
-    ? values.filter((v) => v !== value)
-    : [...values, value];
+  return values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
 }
 
-export default function FilterModal() {
+/**
+ * Pet search by species, sex, age and size.
+ * "sidebar" is the nav row; "button" is a page-header action for phones and Explore.
+ */
+export default function FilterModal({ variant = "sidebar" }: { variant?: "sidebar" | "button" }) {
   const [open, setOpen] = useState(false);
   const [activeView, setActiveView] = useState<ViewKey>("filters");
 
@@ -31,57 +35,35 @@ export default function FilterModal() {
 
   const [pets, setPets] = useState<SearchPetCardItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
   const [filterError, setFilterError] = useState<string | null>(null);
 
-  const filters = useMemo(
-    () => ({ species, sex, age, size }),
-    [species, sex, age, size],
-  );
+  const filters = useMemo(() => ({ species, sex, age, size }), [species, sex, age, size]);
+  const hasAnyFilter = species.length + sex.length + age.length + size.length > 0;
 
-  const hasAnyFilter = useMemo(
-    () =>
-      species.length > 0 || sex.length > 0 || age.length > 0 || size.length > 0,
-    [species, sex, age, size],
-  );
-
-  function handleSpeciesToggle(value: Pets["species"]) {
-    setFilterError(null);
-    setSpecies((prev) => toggleArrayValue(value, prev));
-  }
-
-  function handleSexToggle(value: Pets["sex"]) {
-    setFilterError(null);
-    setSex((prev) => toggleArrayValue(value, prev));
-  }
-
-  function handleAgeToggle(value: Pets["age"]) {
-    setFilterError(null);
-    setAge((prev) => toggleArrayValue(value, prev));
-  }
-
-  function handleSizeToggle(value: Pets["size"]) {
-    setFilterError(null);
-    setSize((prev) => toggleArrayValue(value, prev));
+  function toggle<T extends string>(setter: React.Dispatch<React.SetStateAction<T[]>>) {
+    return (value: T) => {
+      setFilterError(null);
+      setter((prev) => toggleArrayValue(value, prev));
+    };
   }
 
   async function runSearch() {
     if (!hasAnyFilter) {
-      setFilterError(
-        "Please select at least one filter before clicking See Pets.",
-      );
+      setFilterError("Pick at least one filter to see matching pets.");
       return;
     }
 
+    setFilterError(null);
+    setSearchFailed(false);
+    setActiveView("results");
+    setLoading(true);
     try {
-      setFilterError(null);
-      setLoading(true);
-      const data = await fetchSearchPets(filters);
-      setPets(data);
-      setActiveView("results");
+      setPets(await fetchSearchPets(filters));
     } catch (error: unknown) {
       console.error("Failed to fetch pets:", error);
       setPets([]);
-      setActiveView("results");
+      setSearchFailed(true);
     } finally {
       setLoading(false);
     }
@@ -97,155 +79,101 @@ export default function FilterModal() {
     setActiveView("filters");
   }
 
-  function closeModal() {
-    setOpen(false);
+  function openModal() {
+    setOpen(true);
+    setActiveView("filters");
+    setFilterError(null);
   }
+
+  const footer =
+    activeView === "filters" ? (
+      <>
+        <Button variant="ghost" onClick={resetFilters} disabled={!hasAnyFilter}>
+          Clear
+        </Button>
+        <Button variant="primary" onClick={runSearch}>
+          See pets
+        </Button>
+      </>
+    ) : (
+      <Button variant="secondary" onClick={() => setActiveView("filters")}>
+        Change filters
+      </Button>
+    );
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => {
-          setOpen(true);
-          setActiveView("filters");
-          setFilterError(null);
-        }}
-        className={sidebarItemClass()}
-      >
-        <Funnel size={24} aria-hidden="true" />
-        <span className="sr-only lg:not-sr-only">Lookup</span>
-      </button>
+      {variant === "sidebar" ? (
+        <button type="button" onClick={openModal} className={sidebarItemClass()}>
+          <Funnel size={24} aria-hidden="true" />
+          <span className="sr-only lg:not-sr-only">Lookup</span>
+        </button>
+      ) : (
+        <Button variant="secondary" onClick={openModal} icon={<MagnifyingGlass aria-hidden="true" />}>
+          Find a pet
+        </Button>
+      )}
 
       <Modal
         open={open}
-        onClose={closeModal}
-        title={activeView === "filters" ? "Find your match" : "Recommendations"}
+        onClose={() => setOpen(false)}
+        title={activeView === "filters" ? "Find your match" : "Matching pets"}
         className="sm:max-w-3xl"
+        footer={footer}
       >
-            <div className="py-1">
-              {activeView === "filters" ? (
-                <div className="space-y-5 flex flex-col">
-                  <FilterControls.SpeciesSection
-                    selected={species}
-                    onToggle={handleSpeciesToggle}
+        {activeView === "filters" ? (
+          <div className="flex flex-col gap-6">
+            <FilterControls.SpeciesSection selected={species} onToggle={toggle(setSpecies)} />
+            <FilterControls.GenderSection selected={sex} onToggle={toggle(setSex)} />
+            <FilterControls.AgeSection selected={age} onToggle={toggle(setAge)} />
+            <FilterControls.SizeSection selected={size} onToggle={toggle(setSize)} />
+            {filterError ? (
+              <p role="alert" className="text-sm font-medium text-reject-text">
+                {filterError}
+              </p>
+            ) : null}
+          </div>
+        ) : loading ? (
+          <CardGridSkeleton count={6} />
+        ) : searchFailed ? (
+          <EmptyState
+            icon={<WarningCircle aria-hidden="true" />}
+            title="Couldn't load pets"
+            description="Check your connection and try again."
+            action={
+              <Button variant="primary" onClick={runSearch}>
+                Retry
+              </Button>
+            }
+          />
+        ) : pets.length === 0 ? (
+          <EmptyState
+            icon={<Funnel aria-hidden="true" />}
+            title="No pets match yet"
+            description="Try fewer filters to see more pets."
+          />
+        ) : (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted" role="status">
+              {pets.length} pet{pets.length === 1 ? "" : "s"} found
+            </p>
+            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {pets.map((pet) => (
+                <li key={pet.id}>
+                  <PetCard
+                    href={`/site/profiles/pets/${pet.id}`}
+                    imageUrl={pet.photo_url}
+                    petName={pet.pet_name}
+                    shelterLogo={pet.shelter?.logo_url ?? undefined}
+                    shelterName={pet.shelter?.shelter_name ?? "Kalinga shelter"}
+                    sex={pet.sex}
                   />
-                  <FilterControls.GenderSection
-                    selected={sex}
-                    onToggle={handleSexToggle}
-                  />
-                  <FilterControls.AgeSection
-                    selected={age}
-                    onToggle={handleAgeToggle}
-                  />
-                  <FilterControls.SizeSection
-                    selected={size}
-                    onToggle={handleSizeToggle}
-                  />
-                  <FilterControls.Actions
-                    onReset={resetFilters}
-                    onSearch={runSearch}
-                    error={filterError}
-                  />
-                </div>
-              ) : (
-                <div className="space-y-4 pt-2 px-2  overflow-y-auto scroll-stable">
-                  {loading ? (
-                    <PetResultsLoading />
-                  ) : pets.length === 0 ? (
-                    <div className="text-center text-sm opacity-60">
-                      No pets found. Try changing your filters.
-                    </div>
-                  ) : (
-                    <>
-                      <div className="text-center text-sm font-medium">
-                        {pets.length} pet{pets.length > 1 ? "s" : ""} found
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        {pets.map((pet) => (
-                          <PetCard
-                            key={pet.id}
-                            href={`/site/profiles/pets/${pet.id}`}
-                            imageUrl={pet.photo_url}
-                            petName={pet.pet_name}
-                            shelterLogo={pet.shelter?.logo_url ?? ""}
-                            shelterName={
-                              pet.shelter?.shelter_name ?? "Unknown Shelter"
-                            }
-                            sex={pet.sex}
-                          />
-                        ))}
-                      </div>
-                    </>
-                  )}
-
-                  <div className="flex justify-center pt-2">
-                    <Button
-                      type="button"
-                      onClick={() => setActiveView("filters")}
-                      variant="secondary"
-                    >
-                      Back to Filters
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Modal>
     </>
-  );
-}
-
-function PetResultsLoading() {
-  return (
-    <>
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <PetCardSkeleton key={i} />
-        ))}
-      </div>
-
-      <style jsx>{`
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-160%);
-          }
-          100% {
-            transform: translateX(220%);
-          }
-        }
-      `}</style>
-    </>
-  );
-}
-
-function PetCardSkeleton() {
-  return (
-    <div className="relative block w-full overflow-visible rounded-[15px] border bg-primary shadow-sm">
-      {/* IMAGE */}
-      <div className="p-1">
-        <div className="relative h-45 overflow-hidden rounded-[15px] bg-yellow-100/70">
-          <div className="absolute inset-0 overflow-hidden">
-            <div
-              className="absolute inset-y-0 -left-1/2 w-1/2 bg-linear-to-r from-transparent via-yellow-300/50 to-transparent"
-              style={{ animation: "shimmer 1.8s linear infinite" }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* TEXT */}
-      <div className="ml-1 p-2 pt-1">
-        <div className="mb-2 flex items-center gap-2">
-          <div className="h-5 w-28 rounded-md bg-yellow-100/90 animate-pulse" />
-          <div className="h-4 w-4 rounded-full bg-yellow-100/80 animate-pulse" />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="h-4.5 w-4.5 rounded-full bg-yellow-100/90 animate-pulse" />
-          <div className="h-3 w-24 rounded-md bg-yellow-100/80 animate-pulse" />
-        </div>
-      </div>
-    </div>
   );
 }

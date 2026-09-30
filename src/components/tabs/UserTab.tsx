@@ -1,262 +1,165 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { House, PawPrint, PlayCircle, type Icon } from "@phosphor-icons/react";
+import { Heart, House, PawPrint, PlayCircle, WarningCircle } from "@phosphor-icons/react";
 
 import type { LikedMiniItem } from "@/src/lib/types/likes";
 
 import VideoCard from "../cards/VideoCard";
 import PetCard from "../cards/PetCard";
 import ShelterCard from "../cards/ShelterCard";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
+import EmptyState from "../ui/EmptyState";
+import Button, { LinkButton } from "../ui/Button";
+import CardGridSkeleton from "../skeletons/CardGridSkeleton";
+import TabBar, { type TabDef } from "./TabBar";
 import { fetchJson } from "@/src/lib/fetchJson";
 
 export type TabsKey = "videos" | "pets" | "shelters";
 type LikedKind = "video" | "pet" | "shelter";
-const TAB_META = {
-  videos: { icon: PlayCircle, label: "Videos" },
-  shelters: { icon: House, label: "Shelters" },
-  pets: { icon: PawPrint, label: "Pets" },
-} satisfies Record<TabsKey, { icon: Icon; label: string }>;
 
-const ITEMS_PER_BATCH = 10;
+const TABS: TabDef<TabsKey>[] = [
+  { key: "videos", label: "Videos", icon: PlayCircle },
+  { key: "pets", label: "Pets", icon: PawPrint },
+  { key: "shelters", label: "Shelters", icon: House },
+];
 
-function buildVideoHref(videoId: string) {
-  return `/site/home/pet/${videoId}`;
-}
+const KIND: Record<TabsKey, LikedKind> = { videos: "video", pets: "pet", shelters: "shelter" };
 
-function toPetGender(value?: string | null): "male" | "female" {
-  return value === "female" ? "female" : "male";
+const ITEMS_PER_BATCH = 12;
+
+function toPetGender(value?: string | null): "male" | "female" | "unknown" {
+  return value === "female" || value === "male" ? value : "unknown";
 }
 
 async function fetchLikedStuff(): Promise<LikedMiniItem[]> {
-  const json = await fetchJson<{ data: LikedMiniItem[] }>("/api/likes/me", {
-    cache: "no-store",
-  });
-
+  const json = await fetchJson<{ data: LikedMiniItem[] }>("/api/likes/me", { cache: "no-store" });
   return json.data;
 }
 
+/** The signed-in person's likes, by kind. */
 export default function UserTab() {
-  const tabs: TabsKey[] = ["videos", "pets", "shelters"];
   const [tab, setTab] = useState<TabsKey>("videos");
   const [likedItems, setLikedItems] = useState<LikedMiniItem[]>([]);
-  const [loading, setLoading] = useState(false);
-
+  const [status, setStatus] = useState<"loading" | "error" | "ready">("loading");
+  const [attempt, setAttempt] = useState(0);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_BATCH);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let alive = true;
-
-    (async () => {
-      setLoading(true);
-
-      try {
-        const res = await fetchLikedStuff();
+    fetchLikedStuff()
+      .then((items) => {
         if (!alive) return;
-        setLikedItems(res ?? []);
-      } catch (error) {
-        console.error(error);
-        if (!alive) return;
-        setLikedItems([]);
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-
+        setLikedItems(items ?? []);
+        setStatus("ready");
+      })
+      .catch(() => alive && setStatus("error"));
     return () => {
       alive = false;
     };
-  }, []);
+  }, [attempt]);
 
-  useEffect(() => {
-    setVisibleCount(ITEMS_PER_BATCH);
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = 0;
-    }
-  }, [tab]);
-
-  const filtered = useMemo(() => {
-    const kind: LikedKind =
-      tab === "videos" ? "video" : tab === "pets" ? "pet" : "shelter";
-
-    return likedItems.filter((item) => item.kind === kind);
-  }, [tab, likedItems]);
-
+  const filtered = useMemo(() => likedItems.filter((item) => item.kind === KIND[tab]), [tab, likedItems]);
   const hasMore = visibleCount < filtered.length;
-
-  const visibleItems = useMemo(
-    () => filtered.slice(0, visibleCount),
-    [filtered, visibleCount],
-  );
+  const visibleItems = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
 
   const loadMore = useCallback(() => {
-    setVisibleCount((count) =>
-      Math.min(count + ITEMS_PER_BATCH, filtered.length),
-    );
+    setVisibleCount((count) => Math.min(count + ITEMS_PER_BATCH, filtered.length));
   }, [filtered.length]);
 
   useEffect(() => {
-    if (!hasMore || !scrollRef.current || !loadMoreRef.current) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          loadMore();
-        }
-      },
-      {
-        root: scrollRef.current,
-        rootMargin: "200px",
-        threshold: 0,
-      },
-    );
-
+    if (!hasMore || !loadMoreRef.current) return;
+    const observer = new IntersectionObserver((entries) => entries[0]?.isIntersecting && loadMore(), {
+      rootMargin: "300px",
+    });
     observer.observe(loadMoreRef.current);
-
     return () => observer.disconnect();
-  }, [hasMore, filtered.length, loadMore]);
+  }, [hasMore, loadMore]);
+
+  function changeTab(next: TabsKey) {
+    setTab(next);
+    setVisibleCount(ITEMS_PER_BATCH);
+  }
 
   return (
-    <div className="min-h-0 pr-7">
-      <div className="flex min-h-0 flex-col rounded-[15px] bg-white">
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-start gap-12 sm:gap-16">
-            {tabs.map((key) => {
-              const active = tab === key;
-              const meta = TAB_META[key];
+    <section aria-label="Your likes" className="flex flex-col gap-5">
+      <h2 className="text-xl font-semibold text-ink">Likes</h2>
+      <TabBar tabs={TABS} active={tab} onChange={changeTab} label="Liked items" idPrefix="likes" />
 
-              return (
-                <TabButton
-                  key={key}
-                  active={active}
-                  onClick={() => setTab(key)}
-                  label={meta.label}
-                >
-                  <meta.icon
-                    size={40}
-                    weight={active ? "fill" : "regular"}
-                    aria-hidden="true"
-                  />
-                </TabButton>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="py-2">
-          <hr className="border" />
-        </div>
-
-        <div ref={scrollRef} className="mt-3 min-h-0 flex-1 px-4 pr-1">
-          {loading ? (
-            <div className="rounded-[15px] border border-black/10 bg-white p-6 text-center text-sm opacity-60">
-              Loading...
-            </div>
-          ) : null}
-
-          {(tab === "videos" || tab === "pets") && visibleItems.length > 0 ? (
-            <div className="grid grid-cols-1 place-items-center gap-6 sm:grid-cols-3 lg:grid-cols-4">
-              {visibleItems.map((item) =>
-                tab === "videos" ? (
-                  <VideoCard
-                    key={`video-${item.id}`}
-                    href={buildVideoHref(item.id)}
-                    thumbnailUrl={item.thumbnailUrl ?? item.imageUrl}
-                    subtitle={
-                      item.subtitle ?? item.caption ?? "Unknown Shelter"
-                    }
-                    petName={item.petName ?? item.title ?? "Unknown Pet"}
-                  />
-                ) : (
-                  <PetCard
-                    key={`pet-${item.id}`}
-                    href={`/site/profiles/pets/${item.id}`}
-                    imageUrl={item.imageUrl}
-                    petName={item.petName ?? item.title ?? "Unknown Pet"}
-                    sex={toPetGender(item.gender)}
-                    shelterName={item.shelterName ?? "Unknown Shelter"}
-                    shelterLogo={item.shelterLogo ?? DEFAULT_AVATAR_URL}
-                  />
-                ),
-              )}
-            </div>
-          ) : null}
-
-          {tab === "shelters" && visibleItems.length > 0 ? (
-            <div className="space-y-3">
-              {visibleItems.map((item) => (
+      <div id="likes-panel" role="tabpanel" aria-labelledby={`likes-tab-${tab}`}>
+        {status === "loading" ? (
+          <CardGridSkeleton count={4} />
+        ) : status === "error" ? (
+          <EmptyState
+            icon={<WarningCircle aria-hidden="true" />}
+            title="Couldn't load your likes"
+            action={
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setStatus("loading");
+                  setAttempt((n) => n + 1);
+                }}
+              >
+                Retry
+              </Button>
+            }
+          />
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={<Heart aria-hidden="true" />}
+            title="Nothing liked yet"
+            description="Tap the heart on a pet, video or shelter to keep it here."
+            action={
+              <LinkButton href="/site/home" variant="primary">
+                Browse pets
+              </LinkButton>
+            }
+          />
+        ) : tab === "shelters" ? (
+          <ul className="grid gap-3 lg:grid-cols-2">
+            {visibleItems.map((item) => (
+              <li key={`shelter-${item.id}`}>
                 <ShelterCard
-                  key={`shelter-${item.id}`}
                   href={item.href ?? `/site/profiles/shelter/${item.id}`}
                   imageUrl={item.imageUrl}
-                  name={item.title ?? "Unknown Shelter"}
-                  location={item.subtitle ?? "Unknown location"}
+                  name={item.title ?? "Shelter"}
+                  location={item.subtitle}
                   id={item.id}
                   petsAvailable={item.petsAvailable}
                   petsAdopted={item.petsAdopted}
                 />
-              ))}
-            </div>
-          ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {visibleItems.map((item) => (
+              <li key={`${tab}-${item.id}`}>
+                {tab === "videos" ? (
+                  <VideoCard
+                    href={`/site/home/pet/${item.id}`}
+                    thumbnailUrl={item.thumbnailUrl ?? item.imageUrl}
+                    subtitle={item.subtitle ?? item.caption ?? ""}
+                    petName={item.petName ?? item.title ?? "Pet video"}
+                  />
+                ) : (
+                  <PetCard
+                    href={`/site/profiles/pets/${item.id}`}
+                    imageUrl={item.imageUrl}
+                    petName={item.petName ?? item.title ?? "Unnamed pet"}
+                    sex={toPetGender(item.gender)}
+                    shelterName={item.shelterName ?? undefined}
+                    shelterLogo={item.shelterLogo ?? undefined}
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
 
-          {hasMore ? (
-            <div
-              ref={loadMoreRef}
-              className="mt-4 rounded-[15px] border border-black/10 bg-white p-4 text-center text-xs opacity-60"
-            >
-              Loading more...
-            </div>
-          ) : null}
-
-          {!loading && filtered.length === 0 ? (
-            <div className="rounded-[15px] border border-black/10 bg-white p-6 text-center text-sm opacity-60">
-              No items yet.
-            </div>
-          ) : null}
-        </div>
+        {hasMore ? <div ref={loadMoreRef} className="h-8" aria-hidden="true" /> : null}
       </div>
-    </div>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  label,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={[
-        "group flex min-w-21 flex-col items-center gap-1 rounded-full px-3",
-        "transition-all duration-200 ease-out",
-      ].join(" ")}
-    >
-      <div className="transition-transform duration-200 ease-out group-hover:scale-105">
-        {children}
-      </div>
-
-      <span
-        className={[
-          "text-sm font-medium transition-colors duration-200 ease-out",
-          active ? "text-primary" : "text-black",
-        ].join(" ")}
-      >
-        {label}
-      </span>
-    </button>
+    </section>
   );
 }

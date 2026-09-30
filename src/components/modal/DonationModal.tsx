@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
-import BackButton from "../ui/BackButton";
 import { HandCoins, QrCode } from "@phosphor-icons/react";
+import Button from "../ui/Button";
+import Modal from "../ui/Modal";
+import { fetchJson } from "@/src/lib/fetchJson";
 
 type Donation = {
   id: string;
   type: "goods" | "monetary";
-  item_name?: string | null;
+  item_name?: string[] | null;
   method?: string | null;
   account_name?: string | null;
   account_number?: string | null;
@@ -21,217 +23,125 @@ type Props = {
   buttonClassName?: string;
 };
 
+/** How to donate goods or money to a shelter. */
 export default function DonationModal({ shelterId, buttonClassName }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [data, setData] = useState<Donation[]>([]);
-  const [showGoodsList, setShowGoodsList] = useState(false);
+  const [data, setData] = useState<Donation[] | null>(null);
   const [openQrId, setOpenQrId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setShowGoodsList(false);
-      setOpenQrId(null);
-      setErrorMsg(null);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    if (!shelterId?.trim()) {
-      setErrorMsg("Missing shelter id.");
+  async function open() {
+    setIsOpen(true);
+    setOpenQrId(null);
+    setErrorMsg(null);
+    setData(null);
+    try {
+      const json = await fetchJson<{ data: Donation[] }>(`/api/shelters/${shelterId}/donation`, { cache: "no-store" });
+      setData(json.data ?? []);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "Couldn't load donation details.");
       setData([]);
-      return;
     }
-
-    const fetchDonations = async () => {
-      try {
-        setErrorMsg(null);
-
-        const res = await fetch(`/api/shelters/${shelterId}/donation`, {
-          cache: "no-store",
-        });
-
-        const json = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(json?.error ?? `Request failed (${res.status})`);
-        }
-
-        setData(Array.isArray(json?.data) ? json.data : []);
-      } catch (err: unknown) {
-        console.error("Donation fetch error:", err);
-
-        const message =
-          err instanceof Error ? err.message : "Unable to fetch donations.";
-
-        setErrorMsg(message);
-        setData([]);
-      }
-    };
-
-    fetchDonations();
-  }, [isOpen, shelterId]);
+  }
 
   const goods = useMemo(
-    () =>
-      data.filter((d) => d.type === "goods").flatMap((d) => d.item_name ?? []),
+    () => (data ?? []).filter((d) => d.type === "goods").flatMap((d) => d.item_name ?? []),
     [data],
   );
-
-  const monetary = useMemo(
-    () => data.filter((d) => d.type === "monetary"),
-    [data],
-  );
-
+  const monetary = useMemo(() => (data ?? []).filter((d) => d.type === "monetary"), [data]);
   const goodsInstruction =
-    data.find((d) => d.type === "goods" && d.instruction_note?.trim())
-      ?.instruction_note ?? null;
+    (data ?? []).find((d) => d.type === "goods" && d.instruction_note?.trim())?.instruction_note ?? null;
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className={[
-          "text-black font-semibold flex flex-col items-center leading-none hover:scale-105",
-          buttonClassName,
-        ].join(" ")}
+      <Button
+        variant="secondary"
+        onClick={open}
+        icon={<HandCoins aria-hidden="true" />}
+        className={buttonClassName}
       >
-        <HandCoins size={42} aria-hidden="true" />
-      </button>
+        Donate
+      </Button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/50 "
-            onClick={() => setIsOpen(false)}
-          />
+      <Modal open={isOpen} onClose={() => setIsOpen(false)} title="Donate">
+        {data === null ? (
+          <p role="status" className="text-sm text-muted">
+            Loading donation details…
+          </p>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {errorMsg ? (
+              <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">
+                {errorMsg}
+              </p>
+            ) : null}
 
-          <div className="relative z-10 w-125 max-w-[90%] rounded-[15px] border-2 bg-white shadow-2xl">
-            <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-4">
-              <div className="pl-4">
-                <BackButton onClick={() => setIsOpen(false)} />
-              </div>
-              <div className="text-center text-subheader font-bold text-white">
-                Donations
-              </div>
-              <div />
-            </div>
-
-            <div className="max-h-[75vh] overflow-y-auto scroll-stable px-5 py-2 text-black space-y-2">
-              {errorMsg ? (
-                <div className="text-sm text-red-600">{errorMsg}</div>
+            <section className="flex flex-col gap-2">
+              <h3 className="font-semibold text-ink">Goods</h3>
+              <p className="text-sm text-ink-soft">
+                {goodsInstruction ?? "This shelter hasn't added drop-off instructions yet."}
+              </p>
+              {goods.length ? (
+                <ul className="flex flex-wrap gap-2">
+                  {goods.map((item, i) => (
+                    <li key={i} className="rounded-full bg-sunshine-soft px-3 py-1 text-xs font-medium text-ink">
+                      {item || "Unnamed item"}
+                    </li>
+                  ))}
+                </ul>
               ) : null}
+            </section>
 
-              {/* GOODS */}
-              <div>
-                <div className="text-lg font-semibold">Goods</div>
-
-                {goodsInstruction ? (
-                  <div className="text-description font-medium leading-relaxed">
-                    {goodsInstruction}
-                  </div>
-                ) : (
-                  <div className="text-description font-medium opacity-60">
-                    No instruction provided.
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setShowGoodsList((prev) => !prev)}
-                  className="font-medium hover:underline text-semibold text-lg hover:scale-105 "
-                >
-                  {showGoodsList ? "Hide donation items" : "What to Donate?"}
-                </button>
-
-                {showGoodsList && (
-                  <div className="px-4">
-                    {goods.length ? (
-                      <ul className="space-y-1 text-description font-medium">
-                        {goods.map((item, i) => (
-                          <li key={i}>- {item || "Unnamed item"}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="text-sm opacity-60">No goods listed.</div>
-                    )}
-                  </div>
-                )}
-              </div>
-              <hr className="text-black/50" />
-
-              {/* MONETARY */}
-              <div>
-                <div className="text-lg font-semibold">Monetary</div>
-
-                {monetary.length ? (
-                  <div>
-                    {monetary.map((item) => {
-                      const isQrOpen = openQrId === item.id;
-
-                      return (
-                        <div key={item.id} className="px-2 py-1">
-                          <div className="flex items-center justify-between">
-                            <div className="font-semibold text-subtitle">
-                              {item.method?.toUpperCase() || "PAYMENT METHOD"}
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setOpenQrId((prev) =>
-                                  prev === item.id ? null : item.id,
-                                )
-                              }
-                              disabled={!item.qr_url}
-                              className="rounded-full bg-primary  p-1 disabled:cursor-not-allowed disabled:opacity-50"
-                              aria-label={
-                                isQrOpen ? "Hide QR code" : "Show QR code"
-                              }
-                            >
-                              <QrCode size={23} aria-hidden="true" />
-                            </button>
-                          </div>
-
-                          {item.account_name ? (
-                            <div className="text-description font-medium">
-                              Account Name: {item.account_name}
-                            </div>
-                          ) : null}
-
-                          {item.account_number ? (
-                            <div className="text-description font-medium">
-                              Account No: {item.account_number}
-                            </div>
-                          ) : null}
-
-                          <div className="flex items-center justify-center  ">
-                            {isQrOpen && item.qr_url ? (
-                              <Image
-                                src={item.qr_url}
-                                alt="QR"
-                                width={500}
-                                height={500}
-                                className="w-50 rounded-[15px] border mt-5"
-                              />
-                            ) : null}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-sm opacity-60">
-                    No payment methods available.
-                  </div>
-                )}
-              </div>
-            </div>
+            <section className="flex flex-col gap-3 border-t border-line pt-5">
+              <h3 className="font-semibold text-ink">Money</h3>
+              {monetary.length ? (
+                monetary.map((item) => {
+                  const qrOpen = openQrId === item.id;
+                  return (
+                    <div key={item.id} className="flex flex-col gap-2 rounded-md border border-line bg-ground p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-semibold text-ink">{item.method || "Payment method"}</p>
+                        {item.qr_url ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setOpenQrId(qrOpen ? null : item.id)}
+                            aria-expanded={qrOpen}
+                            icon={<QrCode aria-hidden="true" />}
+                          >
+                            {qrOpen ? "Hide QR" : "Show QR"}
+                          </Button>
+                        ) : null}
+                      </div>
+                      {item.account_name ? (
+                        <p className="text-sm text-ink-soft">
+                          Account name <span className="font-medium text-ink">{item.account_name}</span>
+                        </p>
+                      ) : null}
+                      {item.account_number ? (
+                        <p className="text-sm text-ink-soft">
+                          Account number <span className="font-medium tabular-nums text-ink">{item.account_number}</span>
+                        </p>
+                      ) : null}
+                      {qrOpen && item.qr_url ? (
+                        <Image
+                          src={item.qr_url}
+                          alt={`QR code for ${item.method || "this payment method"}`}
+                          width={240}
+                          height={240}
+                          className="mx-auto mt-2 rounded-md border border-line"
+                        />
+                      ) : null}
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-muted">No payment methods listed yet.</p>
+              )}
+            </section>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </>
   );
 }

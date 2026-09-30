@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/src/lib/cn";
 
 export const fieldStyles =
-  "block w-full rounded-md border border-line bg-card px-3.5 py-2.5 text-[15px] text-ink " +
+  "block w-full rounded-md border border-line bg-card px-3.5 py-2.5 text-base text-ink " +
   "transition-[border-color,box-shadow] duration-200 outline-none " +
   "placeholder:text-muted hover:border-ink-soft/40 " +
   "focus:border-ink focus:ring-2 focus:ring-ink/15 " +

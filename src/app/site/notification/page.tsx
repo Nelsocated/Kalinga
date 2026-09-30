@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import NotifClient from "./NotifClient";
 import { getUserId } from "@/src/lib/utils/auth";
 import { getUserAdoptionFeed } from "@/src/lib/services/adoptionService";
@@ -15,6 +16,7 @@ export type NotificationItem = {
   id: string;
   shelter: string;
   petName: string;
+  petPhotoUrl: string | null;
   date: string;
   status: NotificationStatus;
   title: string;
@@ -220,7 +222,7 @@ async function getNotifications(): Promise<NotificationItem[]> {
   const userId = await getUserId();
 
   if (!userId) {
-    throw new Error("User not authenticated");
+    redirect("/login?next=/site/notification");
   }
 
   const data = await getUserAdoptionFeed(userId);
@@ -236,6 +238,7 @@ async function getNotifications(): Promise<NotificationItem[]> {
       id: item.id,
       shelter: shelterName,
       petName,
+      petPhotoUrl: item.pet?.photo_url ?? null,
       date: formatDate(item.updated_at ?? item.created_at),
       status,
       title: content.title,

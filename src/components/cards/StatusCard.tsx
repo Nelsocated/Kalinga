@@ -1,30 +1,10 @@
-import type {
-  NotificationItem,
-  NotificationStatus,
-} from "@/src/app/site/notification/page";
-import BackButton from "../ui/BackButton";
+import { Check } from "@phosphor-icons/react/dist/ssr";
+import type { NotificationStatus } from "@/src/app/site/notification/page";
+import { cn } from "@/src/lib/cn";
 
-type Props = {
-  item: NotificationItem;
-  onOpenDetails?: () => void;
-  onClose?: () => void;
-};
+type Step = { key: NotificationStatus; label: string };
 
-type StepKey =
-  | "pending"
-  | "under_review"
-  | "contacting_applicant"
-  | "approved"
-  | "not_approved"
-  | "adopted"
-  | "withdrawn";
-
-type Step = {
-  key: StepKey;
-  label: string;
-};
-
-const statusIndexMap: Record<NotificationStatus, number> = {
+const STATUS_INDEX: Record<NotificationStatus, number> = {
   pending: 0,
   under_review: 1,
   contacting_applicant: 2,
@@ -34,148 +14,65 @@ const statusIndexMap: Record<NotificationStatus, number> = {
   adopted: 4,
 };
 
-function getStatusColor(status: StepKey) {
-  switch (status) {
-    case "adopted":
-      return "bg-adopted border-adopted";
-    case "withdrawn":
-      return "bg-withdrawn border-withdrawn";
-    case "approved":
-      return "bg-approved border-approved";
-    case "not_approved":
-      return "bg-reject border-reject";
-    case "contacting_applicant":
-      return "bg-contacting border-contacting";
-    case "under_review":
-      return "bg-under_review border-under_review";
-    default:
-      return "bg-submitted border-submitted";
-  }
-}
-
-function getStatusTextColor(status: StepKey) {
-  switch (status) {
-    case "adopted":
-      return "text-adopted";
-    case "withdrawn":
-      return "text-withdrawn";
-    case "approved":
-      return "text-approved";
-    case "not_approved":
-      return "text-reject";
-    case "contacting_applicant":
-      return "text-contacting";
-    case "under_review":
-      return "text-under_review";
-    default:
-      return "text-submitted";
-  }
-}
+// Dot color for the step the application has reached
+const DOT: Partial<Record<NotificationStatus, string>> = {
+  under_review: "bg-under_review",
+  contacting_applicant: "bg-contacting",
+  approved: "bg-approved",
+  not_approved: "bg-reject",
+  adopted: "bg-adopted",
+  withdrawn: "bg-withdrawn",
+};
 
 function getSteps(status: NotificationStatus): Step[] {
-  const decisionStep: Step =
-    status === "not_approved"
-      ? { key: "not_approved", label: "Not Approved" }
-      : { key: "approved", label: "Approved" };
-
-  const finalStep: Step =
-    status === "withdrawn"
-      ? { key: "withdrawn", label: "Withdrawn" }
-      : { key: "adopted", label: "Adopted" };
-
   return [
     { key: "pending", label: "Submitted" },
-    { key: "under_review", label: "Under Review" },
-    { key: "contacting_applicant", label: "Contacting Applicant" },
-    decisionStep,
-    finalStep,
+    { key: "under_review", label: "Under review" },
+    { key: "contacting_applicant", label: "Contacting you" },
+    status === "not_approved"
+      ? { key: "not_approved", label: "Not approved" }
+      : { key: "approved", label: "Approved" },
+    status === "withdrawn"
+      ? { key: "withdrawn", label: "Withdrawn" }
+      : { key: "adopted", label: "Adopted" },
   ];
 }
 
-export default function StatusCard({ item, onClose }: Props) {
-  const activeIndex = statusIndexMap[item.status];
-  const steps = getSteps(item.status);
+/** Where an adoption application is, as a vertical list of steps. */
+export default function StatusSteps({ status }: { status: NotificationStatus }) {
+  const active = STATUS_INDEX[status] ?? 0;
 
   return (
-    <div className="h-[50svh] overflow-hidden rounded-[15px] border-2 bg-white shadow-sm">
-      <div className="relative bg-primary px-6 py-3">
-        <div className="absolute left-6 top-1/2 -translate-y-1/2">
-          <BackButton onClick={onClose} />
-        </div>
-
-        <h2 className="text-center text-subtitle font-extrabold text-innerbg">
-          {item.title}
-        </h2>
-      </div>
-
-      <div className="p-6 md:p-10">
-        {/* MOBILE */}
-        <div className="relative flex flex-col gap-8 md:hidden">
-          {/* one vertical line */}
-          <div className="absolute left-5 top-5 bottom-5 w-0.5 bg-primary" />
-
-          {steps.map((step, index) => {
-            const isReached = index <= activeIndex;
-            const isCurrent = index === activeIndex;
-            const stepColor = getStatusColor(step.key);
-            const stepTextColor = getStatusTextColor(step.key);
-
-            return (
-              <div key={step.key} className="relative flex items-center gap-4">
-                <div
-                  className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 ${
-                    isReached ? `${stepColor} text-white` : "border bg-white"
-                  } ${isCurrent ? "ring-4 ring-primary" : ""}`}
-                />
-
-                <p
-                  className={`text-base font-medium ${
-                    isReached ? stepTextColor : "text-primary"
-                  }`}
-                >
-                  {step.label}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* DESKTOP */}
-        <div className="relative hidden md:block pt-15">
-          {/* one horizontal line centered with circles */}
-          <div className="absolute left-[10%] right-[10%] top-20 h-0.5 bg-primary " />
-
-          <div className="grid grid-cols-5">
-            {steps.map((step, index) => {
-              const isReached = index <= activeIndex;
-              const isCurrent = index === activeIndex;
-              const stepColor = getStatusColor(step.key);
-              const stepTextColor = getStatusTextColor(step.key);
-
-              return (
-                <div
-                  key={step.key}
-                  className="relative flex flex-col items-center"
-                >
-                  <div
-                    className={`relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 ${
-                      isReached ? `${stepColor} text-white` : "border bg-white"
-                    } ${isCurrent ? "ring-4 ring-primary" : ""}`}
-                  />
-
-                  <p
-                    className={`mt-4 text-center text-description font-medium ${
-                      isReached ? stepTextColor : "text-primary"
-                    }`}
-                  >
-                    {step.label}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
+    <ol className="flex flex-col" aria-label="Application progress">
+      {getSteps(status).map((step, i) => {
+        const reached = i <= active;
+        const current = i === active;
+        const last = i === 4;
+        return (
+          <li key={step.key} className="relative flex gap-3 pb-5 last:pb-0">
+            {!last ? (
+              <span
+                aria-hidden="true"
+                className={cn("absolute top-6 left-[11px] h-[calc(100%-1rem)] w-0.5", i < active ? "bg-ink/40" : "bg-line")}
+              />
+            ) : null}
+            <span
+              aria-hidden="true"
+              className={cn(
+                "relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full border-2",
+                reached ? cn("border-transparent text-white", DOT[step.key] ?? "bg-ink") : "border-line bg-card",
+                current && "ring-4 ring-sunshine-soft",
+              )}
+            >
+              {reached && !current ? <Check size={12} weight="bold" /> : null}
+            </span>
+            <span className={cn("pt-0.5 text-sm", current ? "font-semibold text-ink" : reached ? "text-ink" : "text-muted")}>
+              {step.label}
+              {current ? <span className="sr-only"> (current step)</span> : null}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

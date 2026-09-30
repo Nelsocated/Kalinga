@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
+import { PawPrint } from "@phosphor-icons/react";
+import { cn } from "@/src/lib/cn";
 
 type Media = {
   id: string;
@@ -16,133 +18,63 @@ type Props = {
   pet_media?: Media[];
 };
 
+/** Main photo with a row of thumbnails to switch between. */
 export default function PhotoView({ name, photo_url, pet_media = [] }: Props) {
-  const [start, setStart] = useState(0);
-  const [selectedUrl, setSelectedUrl] = useState(photo_url);
-
-  const extraPhotos = useMemo(() => {
-    return pet_media
-      .filter(
-        (item) => item.type === "photo" && item.url && item.url !== photo_url,
-      )
-      .slice(0, 5);
+  const photos = useMemo(() => {
+    const extras = pet_media
+      .filter((item) => item.type === "photo" && item.url && item.url !== photo_url)
+      .slice(0, 5)
+      .map((item) => ({ id: item.id, url: item.url }));
+    return photo_url ? [{ id: "main-photo", url: photo_url }, ...extras] : extras;
   }, [pet_media, photo_url]);
 
-  const allPhotos = useMemo(() => {
-    const mainPhoto = photo_url
-      ? [
-          {
-            id: "main-photo",
-            type: "photo" as const,
-            url: photo_url,
-            caption: `${name} main photo`,
-          },
-        ]
-      : [];
-
-    return [...mainPhoto, ...extraPhotos];
-  }, [photo_url, extraPhotos, name]);
-
-  useEffect(() => {
-    setSelectedUrl(photo_url);
-  }, [photo_url]);
-
-  const canSlide = extraPhotos.length > 3;
-
-  const visibleExtras = useMemo(() => {
-    if (extraPhotos.length <= 3) {
-      return extraPhotos;
-    }
-
-    return [0, 1, 2].map(
-      (offset) => extraPhotos[(start + offset) % extraPhotos.length],
-    );
-  }, [extraPhotos, start]);
-
-  const next = () => {
-    if (!canSlide) return;
-    setStart((prev) => (prev + 1) % extraPhotos.length);
-  };
-
-  const prev = () => {
-    if (!canSlide) return;
-    setStart((prev) => (prev - 1 + extraPhotos.length) % extraPhotos.length);
-  };
-
-  const selectedPhoto =
-    allPhotos.find((photo) => photo.url === selectedUrl) ?? allPhotos[0];
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = photos.find((p) => p.id === selectedId) ?? photos[0];
 
   return (
-    <div>
-      <div className="mb-4 relative overflow-hidden rounded-[15px] bg-black/5 h-60">
-        {selectedPhoto?.url ? (
+    <div className="flex flex-col gap-3">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-sunshine-soft">
+        {selected ? (
           <Image
-            src={selectedPhoto.url}
-            alt={selectedPhoto.caption ?? `${name} photo`}
+            key={selected.url}
+            src={selected.url}
+            alt={`${name}`}
             fill
+            priority
+            sizes="(min-width: 1024px) 420px, 100vw"
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, 600px" // ← tune to your layout
           />
         ) : (
-          <div className="flex h-60 items-center justify-center text-description opacity-70">
-            No main photo yet.
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-ink-soft">
+            <PawPrint size={40} aria-hidden="true" />
+            <span className="text-sm">No photos yet</span>
           </div>
         )}
       </div>
 
-      {extraPhotos.length > 0 ? (
-        <div className="relative w-full">
-          <div className="grid grid-cols-3 gap-3">
-            {visibleExtras.map((photo) => {
-              const isActive = selectedUrl === photo.url;
-
-              return (
-                <button
-                  key={photo.id}
-                  type="button"
-                  onClick={() => setSelectedUrl(photo.url)}
-                  className={[
-                    "overflow-hidden rounded-xl transition",
-                    isActive
-                      ? "ring-3 ring-primary"
-                      : "opacity-90 hover:opacity-100",
-                  ].join(" ")}
-                >
-                  <Image
-                    src={photo.url}
-                    alt={photo.caption ?? "Pet photo"}
-                    width={500}
-                    height={500}
-                    className="aspect-3/4 w-full object-cover shadow-sm"
-                  />
-                </button>
-              );
-            })}
-          </div>
-
-          {canSlide && (
-            <button
-              type="button"
-              onClick={prev}
-              className="absolute top-1/2 -left-6 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-black/5 hover:shadow-lg"
-            >
-              ‹
-            </button>
-          )}
-
-          {canSlide && (
-            <button
-              type="button"
-              onClick={next}
-              className="absolute top-1/2 -right-6 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-black/5 hover:shadow-lg"
-            >
-              ›
-            </button>
-          )}
+      {photos.length > 1 ? (
+        <div className="flex snap-x gap-2 overflow-x-auto p-1 [scrollbar-width:none]" role="list" aria-label={`Photos of ${name}`}>
+          {photos.map((photo, i) => {
+            const active = photo.id === selected?.id;
+            return (
+              <button
+                key={photo.id}
+                type="button"
+                role="listitem"
+                onClick={() => setSelectedId(photo.id)}
+                aria-label={`Show photo ${i + 1} of ${photos.length}`}
+                aria-current={active ? "true" : undefined}
+                className={cn(
+                  "relative size-16 shrink-0 snap-start overflow-hidden rounded-md transition-opacity sm:size-20",
+                  active ? "ring-2 ring-ink ring-offset-2 ring-offset-ground" : "opacity-80 hover:opacity-100",
+                )}
+              >
+                <Image src={photo.url} alt="" fill sizes="80px" className="object-cover" />
+              </button>
+            );
+          })}
         </div>
-      ) : (
-        <div className="text-sm opacity-70">No extra photos yet.</div>
-      )}
+      ) : null}
     </div>
   );
 }

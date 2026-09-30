@@ -3,32 +3,31 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "../ui/Button";
+import Input from "../ui/Input";
+import Modal from "../ui/Modal";
 import { deleteAccountAction } from "@/src/app/actions/auth";
 
+/** Delete account, behind a typed confirmation. */
 export default function DeleteAccountView() {
   const router = useRouter();
-
   const [openConfirm, setOpenConfirm] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function handleDeleteAccount() {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-      setError("");
-
       const result = await deleteAccountAction();
-
       if (!result.ok) {
         setError(result.error);
         return;
       }
-
       router.replace("/login");
       router.refresh();
     } catch {
-      setError("Something went wrong while deleting your account.");
+      setError("Couldn't delete your account. Try again.");
     } finally {
       setLoading(false);
     }
@@ -42,92 +41,54 @@ export default function DeleteAccountView() {
 
   return (
     <>
-      <section className="p-5">
-        <div className="mb-5 flex justify-center items-center flex-col">
-          <h2 className="text-subtitle font-bold text-black">
-            Deleting your account will:
-          </h2>
-          <ul className="mt-1 text-lg text-black list-disc list-inside">
-            <li>Remove your profile and personal information </li>
-            <li>Delete all saved data and history </li>
-            <li>Prevent you from accessing the account again</li>
-          </ul>
+      <div className="flex flex-col gap-4">
+        <ul className="list-disc space-y-1 pl-5 text-sm text-ink-soft">
+          <li>Your profile and personal details are removed.</li>
+          <li>Your likes, messages and applications are deleted.</li>
+          <li>You can&apos;t sign in to this account again.</li>
+        </ul>
+        <Button variant="destructive" onClick={() => setOpenConfirm(true)} className="w-fit">
+          Delete my account
+        </Button>
+      </div>
 
-          <div className="font-bold text-lg mt-7 text-reject text-center leading-6">
-            Deleting your account will permanently
-            <br />
-            remove your access to Kalinga.
-          </div>
+      <Modal
+        open={openConfirm}
+        onClose={closeModal}
+        title="Delete your account?"
+        footer={
+          <>
+            <Button variant="ghost" onClick={closeModal} disabled={loading}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              loading={loading}
+              disabled={confirmText !== "DELETE"}
+            >
+              Delete forever
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-ink-soft">
+            This can&apos;t be undone. Type <span className="font-semibold text-ink">DELETE</span> to confirm.
+          </p>
+          <Input
+            label="Confirmation"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            autoComplete="off"
+          />
+          {error ? (
+            <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">
+              {error}
+            </p>
+          ) : null}
         </div>
-
-        <div className="mt-10 flex justify-center items-center">
-          <button
-            type="button"
-            onClick={() => setOpenConfirm(true)}
-            className="rounded-[15px] hover:scale-105 bg-white border-2 border-reject px-4 py-2 text-lg font-bold text-black hover:bg-reject"
-          >
-            Delete My Account
-          </button>
-        </div>
-      </section>
-
-      {openConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
-
-          <div className="relative z-10 w-125 max-w-[90%] overflow-hidden rounded-[15px] border-2 bg-white shadow-2xl">
-            <div className="rounded-t-[15px] bg-primary py-2 text-center text-subtitle font-bold text-reject">
-              Confirm Account Deletion
-            </div>
-
-            <div className="max-h-[75vh] space-y-4 overflow-y-auto scroll-stable p-5">
-              <p className="text-description text-neutral-800">
-                Type <span className="font-semibold">DELETE</span> below to
-                confirm permanent account deletion.
-              </p>
-
-              <div>
-                <label className="mb-2 block text-description font-medium">
-                  Confirmation
-                </label>
-                <input
-                  type="text"
-                  value={confirmText}
-                  onChange={(e) => setConfirmText(e.target.value)}
-                  placeholder="Type DELETE"
-                  className="w-full rounded-[15px] border px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-
-              {error ? (
-                <div className="rounded-[15px] bg-red-50 px-3 py-2 text-description text-red-600">
-                  {error}
-                </div>
-              ) : null}
-
-              <div className="flex justify-end gap-3 pt-2">
-                <Button
-                  type="button"
-                  onClick={closeModal}
-                  disabled={loading}
-                  className="rounded-[15px] border px-4 py-2 text-description font-medium"
-                >
-                  Cancel
-                </Button>
-
-                <button
-                  type="button"
-                  onClick={handleDeleteAccount}
-                  disabled={loading || confirmText !== "DELETE"}
-                  className="rounded-[15px] bg-reject px-4 py-2 text-description font-medium text-white disabled:opacity-60"
-                >
-                  {loading ? "Deleting..." : "Confirm Delete"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   );
 }

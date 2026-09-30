@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClientSupabase } from "@/src/lib/supabase/client";
 
 import PetProfileHeader from "@/src/components/template/pet/PetProfileHeader";
@@ -15,7 +14,8 @@ import AdoptModal from "@/src/components/modal/AdoptModal";
 import AddPetPhotosModal from "@/src/components/modal/AddPetPhotosModal";
 
 import WebTemplate from "@/src/components/template/WebTemplate";
-import { GenderFemale, GenderMale } from "@phosphor-icons/react";
+import SexIcon from "@/src/components/ui/SexIcon";
+import { CheckCircle, MinusCircle } from "@phosphor-icons/react";
 
 export type PetGender = "male" | "female" | "unknown";
 type Media = {
@@ -54,22 +54,6 @@ type PetProfileClientProps = {
   initialPet: PetProfile;
 };
 
-export function getSexIcon(sex: PetGender, className?: number) {
-  if (sex === "male") {
-    return (
-      <GenderMale size={className ?? 40} className="text-male" aria-label="Male" role="img" />
-    );
-  }
-
-  if (sex === "female") {
-    return (
-      <GenderFemale size={className ?? 40} className="text-female" aria-label="Female" role="img" />
-    );
-  }
-
-  return null;
-}
-
 export default function PetProfileClient({
   id,
   initialPet,
@@ -80,11 +64,6 @@ export default function PetProfileClient({
       { label: "Breed", value: initialPet.breed },
       { label: "Age", value: initialPet.age_label },
       { label: "Size", value: initialPet.size },
-      { label: "Vaccinated", value: initialPet.vaccinated },
-      {
-        label: "Spayed/Neutered",
-        value: initialPet.spayed_neutered,
-      },
     ],
     [initialPet],
   );
@@ -107,23 +86,21 @@ export default function PetProfileClient({
     <WebTemplate
       header="Pet Profile"
       side={
-        <div className="p-5">
+        <div className="flex flex-col gap-4 lg:sticky lg:top-8">
           <PhotoView
+            key={initialPet.photo_url ?? ""}
             name={initialPet.name}
             photo_url={initialPet.photo_url ?? ""}
             pet_media={initialPet.pet_media ?? []}
           />
-
-          <div className="mt-4 flex justify-center">
-            <AdoptModal petId={id} />
-          </div>
+          <AdoptModal petId={id} />
         </div>
       }
       main={
         <>
           <PetProfileHeader
             title={initialPet.name}
-            sex={getSexIcon(initialPet.sex)}
+            sex={<SexIcon sex={initialPet.sex} size={28} />}
             subtitle={initialPet.shelter?.shelter_name}
             subtitleHref={
               initialPet.shelter?.id
@@ -141,7 +118,7 @@ export default function PetProfileClient({
             actions={isOwner ? <AddPetPhotosModal petId={id} /> : null}
           />
 
-          <ProfileSection title="Characteristics">
+          <ProfileSection>
             <div className="flex flex-wrap gap-2">
               {characteristics
                 .filter(
@@ -160,10 +137,27 @@ export default function PetProfileClient({
             </div>
           </ProfileSection>
 
-          <ProfileSection title="Information">
-            <div className="text-sm whitespace-pre-line wrap-break-words [word-break:normal] wrap-break-word">
-              {initialPet.description ?? "No description yet."}
-            </div>
+          <ProfileSection title="Health">
+            {[
+              { label: "Vaccinated", done: initialPet.vaccinated },
+              { label: "Spayed or neutered", done: initialPet.spayed_neutered },
+            ].map((row) => (
+              <p key={row.label} className="flex items-center gap-2 text-sm text-ink">
+                {row.done ? (
+                  <CheckCircle size={20} weight="fill" className="text-approved-text" aria-hidden="true" />
+                ) : (
+                  <MinusCircle size={20} className="text-muted" aria-hidden="true" />
+                )}
+                {row.label}
+                <span className="sr-only">{row.done ? ": yes" : ": not yet"}</span>
+              </p>
+            ))}
+          </ProfileSection>
+
+          <ProfileSection title={`About ${initialPet.name}`}>
+            <p className="max-w-[65ch] whitespace-pre-line break-words">
+              {initialPet.description || "The shelter hasn't written about this pet yet."}
+            </p>
           </ProfileSection>
         </>
       }

@@ -13,9 +13,9 @@ export default function ShelterEditProfileModal() {
 
   return (
     <EditProfileModalBase
-      title="Edit Profile"
+      title="Edit shelter profile"
       fields={[
-        { key: "shelter_name", label: "Shelter Name" },
+        { key: "shelter_name", label: "Shelter name" },
         { key: "about", label: "About" },
         { key: "location", label: "Location" },
         { key: "contact_email", label: "Email", type: "email" },

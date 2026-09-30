@@ -1,10 +1,11 @@
 "use client";
 
-import Image from "next/image";
-import React from "react";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import type React from "react";
+import { CaretRight } from "@phosphor-icons/react";
+import Avatar from "@/src/components/ui/Avatar";
 
+/** Pet name with sex, like and owner actions, then a row linking to the shelter. */
 export default function PetProfileHeader({
   title,
   sex,
@@ -15,6 +16,7 @@ export default function PetProfileHeader({
   meta,
   actions,
   likeButton,
+  compact = false,
 }: {
   title: string;
   sex?: React.ReactNode;
@@ -25,58 +27,47 @@ export default function PetProfileHeader({
   likeButton?: React.ReactNode;
   meta?: React.ReactNode;
   actions?: React.ReactNode;
+  /** Smaller name, for when the pet is secondary on the page. */
+  compact?: boolean;
 }) {
-  const src = (imageUrl ?? "").trim() || DEFAULT_AVATAR_URL;
-  const router = useRouter();
+  const shelterRow = subtitle ? (
+    <>
+      <Avatar src={imageUrl} name={subtitle} size={40} />
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-sm font-semibold text-ink">{subtitle}</span>
+        {location ? <span className="truncate text-xs text-muted">{location}</span> : null}
+      </span>
+    </>
+  ) : null;
 
   return (
-    <div className="relative w-full pr-5">
-      <div className="flex w-full flex-col gap-2">
-        {/* TOP ROW: NAME + ACTIONS */}
-        <div className="flex items-center justify-between">
-          {/* LEFT: NAME */}
-          <div className="flex min-w-0 items-center gap-1 font-bold text-name">
-            <span className="truncate">{title}</span>
-            <span className="shrink-0">{sex}</span>
-          </div>
-
-          {/* RIGHT: ACTIONS (CLOSE TO NAME) */}
-          <div className="flex shrink-0 items-center gap-2">
-            {likeButton}
-            {actions}
-          </div>
-        </div>
-
-        {/* SECOND ROW: AVATAR + INFO */}
-        <div className="flex items-center">
-          <div className="h-15 w-15 shrink-0 overflow-hidden rounded-full">
-            <Image
-              src={src}
-              alt={title}
-              width={46}
-              height={46}
-              className="h-full w-full object-cover"
-            />
-          </div>
-
-          <div className="ml-2 min-w-0 leading-tight">
-            {subtitle &&
-              (subtitleHref ? (
-                <button
-                  onClick={() => router.push(subtitleHref)}
-                  className="font-semibold text-description hover:underline"
-                >
-                  {subtitle}
-                </button>
-              ) : (
-                <div className="font-semibold text-description">{subtitle}</div>
-              ))}
-
-            {location ? <div className="text-small">{location}</div> : null}
-            {meta ? <div className="mt-1">{meta}</div> : null}
-          </div>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start justify-between gap-3">
+        <h2 className={`flex min-w-0 items-center gap-2 text-ink ${compact ? "text-xl font-semibold" : "text-display"}`}>
+          <span className="truncate">{title}</span>
+          {sex}
+        </h2>
+        <div className="flex shrink-0 items-center gap-2 pt-1">
+          {actions}
+          {likeButton}
         </div>
       </div>
+
+      {shelterRow ? (
+        subtitleHref ? (
+          <Link
+            href={subtitleHref}
+            className="flex items-center gap-3 rounded-lg border border-line bg-card p-3 transition-colors hover:bg-sunshine-wash"
+          >
+            {shelterRow}
+            <CaretRight size={18} aria-hidden="true" className="shrink-0 text-ink-soft" />
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3 rounded-lg border border-line bg-card p-3">{shelterRow}</div>
+        )
+      ) : null}
+
+      {meta ? <div>{meta}</div> : null}
     </div>
   );
 }

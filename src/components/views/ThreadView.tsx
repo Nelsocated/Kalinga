@@ -1,14 +1,12 @@
-import type {
-  PersonCard,
-  MessageThread,
-  Message,
-} from "@/src/lib/types/messages";
+import { ArrowBendUpLeft, ChatCircle } from "@phosphor-icons/react";
+import type { PersonCard, MessageThread, Message } from "@/src/lib/types/messages";
 import ThreadViewSkeleton from "@/src/components/skeletons/ThreadViewSkeleton";
-import Image from "next/image";
+import Avatar from "@/src/components/ui/Avatar";
+import Button from "@/src/components/ui/Button";
+import EmptyState from "@/src/components/ui/EmptyState";
+import { cn } from "@/src/lib/cn";
 
-type MessageWithSender = Message & {
-  sender: PersonCard;
-};
+type MessageWithSender = Message & { sender: PersonCard };
 
 type Props = {
   selectedThreadId: string | null;
@@ -16,129 +14,93 @@ type Props = {
   messages: MessageWithSender[];
   loadingThread: boolean;
   onOpenReplyModal: () => void;
+  /** Which side the viewer writes as, to tell their own messages apart. */
+  senderSide: "user" | "shelter";
 };
 
+function formatFullDate(value: string) {
+  return new Date(value).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+/** One conversation: subject, then messages oldest first as bubbles, reply at the bottom. */
 export default function ThreadView({
   selectedThreadId,
   selectedThread,
   messages,
   loadingThread,
   onOpenReplyModal,
+  senderSide,
 }: Props) {
   if (!selectedThreadId) {
     return (
-      <div className="flex h-full items-center justify-center text-neutral-500">
-        Select a message thread
-      </div>
-    );
-  }
-
-  if (loadingThread) {
-    return <ThreadViewSkeleton />;
-  }
-
-  if (!selectedThread) {
-    return (
-      <div className="flex h-full items-center justify-center text-neutral-500">
-        Thread not found.
-      </div>
-    );
-  }
-
-  const sortedMessages = [...messages].sort(
-    (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-  );
-
-  return (
-    <div className="flex h-full min-h-0 flex-col border-l bg-white">
-      {/* Header */}
-      <div className="shrink-0 border-b px-6 py-2">
-        <h2 className="text-subtitle font-bold text-black">
-          {selectedThread.subject}
-        </h2>
-        <p className="mt-1 text-description text-neutral-500">
-          {selectedThread.thread_type === "adoption"
-            ? "Adoption-related conversation"
-            : "General conversation"}
-        </p>
-      </div>
-
-      {/* Scrollable body */}
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {sortedMessages.length === 0 ? (
-          <p className="px-6 py-3 text-sm text-neutral-500">No messages yet.</p>
-        ) : (
-          <div className="flex flex-col">
-            {sortedMessages.map((message) => (
-              <article key={message.id} className="border-b px-6 py-2">
-                <div className="flex items-start gap-3">
-                  <Avatar
-                    name={message.sender.name}
-                    image={message.sender.image}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-description font-semibold text-black">
-                      {message.sender.name}
-                    </p>
-                    <p className="mt-0.5 text-small text-neutral-500">
-                      {formatFullDate(message.created_at)}
-                    </p>
-                    <div className="mt-3">
-                      <p className="whitespace-pre-wrap text-description leading-6 text-black">
-                        {message.body}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Reply bar — naturally pinned at bottom via flex */}
-      <div className="shrink-0 border-t bg-white px-5 py-2">
-        <button
-          type="button"
-          onClick={onOpenReplyModal}
-          className="hover:scale-105  rounded-[15px] border bg-white px-5 py-2 text-description font-semibold text-black transition hover:bg-primary"
-        >
-          Reply
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Avatar({ name, image }: { name: string; image: string | null }) {
-  if (image) {
-    return (
-      <Image
-        src={image}
-        alt={name}
-        width={500}
-        height={500}
-        className="h-10 w-10 rounded-full border object-cover"
+      <EmptyState
+        className="h-full"
+        icon={<ChatCircle aria-hidden="true" />}
+        title="Pick a conversation"
+        description="Choose a message on the left to read it here."
       />
     );
   }
 
+  if (loadingThread) return <ThreadViewSkeleton />;
+
+  if (!selectedThread) {
+    return <EmptyState className="h-full" icon={<ChatCircle aria-hidden="true" />} title="This conversation isn't available" />;
+  }
+
+  const ordered = [...messages].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+  );
+
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-neutral-100 text-xs font-semibold text-neutral-600">
-      {name.slice(0, 1).toUpperCase()}
+    <div className="flex h-full min-h-0 flex-col">
+      <header className="shrink-0 border-b border-line px-4 py-4 sm:px-6">
+        <h2 className="text-lg font-semibold text-ink">{selectedThread.subject}</h2>
+        <p className="text-sm text-muted">
+          {selectedThread.thread_type === "adoption" ? "About an adoption application" : "General message"}
+        </p>
+      </header>
+
+      <ol className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-5 sm:px-6">
+        {ordered.length === 0 ? (
+          <li className="text-sm text-muted">No messages yet.</li>
+        ) : (
+          ordered.map((message) => {
+            const mine =
+              senderSide === "user" ? !!message.sender_user_id : !!message.sender_shelter_id;
+            return (
+              <li key={message.id} className={cn("flex items-end gap-2", mine && "flex-row-reverse")}>
+                <Avatar src={message.sender.image} name={message.sender.name} size={32} />
+                <div className={cn("flex max-w-[80%] flex-col gap-1", mine && "items-end")}>
+                  <div
+                    className={cn(
+                      "rounded-lg px-4 py-3 text-base leading-relaxed whitespace-pre-wrap text-ink",
+                      mine ? "bg-sunshine-soft" : "border border-line bg-card",
+                    )}
+                  >
+                    {message.body}
+                  </div>
+                  <p className="text-xs text-muted">
+                    <span className="sr-only">{mine ? "You" : message.sender.name}, </span>
+                    {formatFullDate(message.created_at)}
+                  </p>
+                </div>
+              </li>
+            );
+          })
+        )}
+      </ol>
+
+      <footer className="shrink-0 border-t border-line px-4 py-3 sm:px-6">
+        <Button variant="primary" onClick={onOpenReplyModal} icon={<ArrowBendUpLeft aria-hidden="true" />}>
+          Reply
+        </Button>
+      </footer>
     </div>
   );
-}
-
-function formatFullDate(value: string) {
-  const date = new Date(value);
-
-  return date.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
 }

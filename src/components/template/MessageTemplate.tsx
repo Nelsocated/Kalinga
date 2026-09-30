@@ -1,13 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, NotePencil } from "@phosphor-icons/react";
 import WebTemplate from "./WebTemplate";
-import MessagesTabs from "../tabs/MessagesTabs";
+import MessagesTabs, { type MessagesView } from "../tabs/MessagesTabs";
 import ThreadList from "../lists/ThreadList";
 import ThreadView from "../views/ThreadView";
 import ComposeView from "../views/ComposeView";
 import SentMessagesList from "../lists/SentMessagesList";
-import BackButton from "../ui/BackButton";
+import Button from "../ui/Button";
+import Modal from "../ui/Modal";
+import { cn } from "@/src/lib/cn";
 import type {
   PersonCard,
   SentMessageItem,
@@ -16,8 +19,6 @@ import type {
   ThreadResponse,
   ComposeRecipient,
 } from "@/src/lib/types/messages";
-
-type ViewMode = "inbox" | "compose";
 
 type MessageWithSender = Message & { sender: PersonCard };
 
@@ -33,6 +34,10 @@ type Props = {
   composeRecipients: ComposeRecipient[];
 };
 
+/**
+ * Inbox shared by users and shelters.
+ * Phones: the list, then the open thread as its own screen. From md: side by side.
+ */
 export default function MessagesLayout({
   userId,
   senderSide,
@@ -44,22 +49,18 @@ export default function MessagesLayout({
   buildMessages,
   composeRecipients,
 }: Props) {
-  const [mode, setMode] = useState<ViewMode>("inbox");
-  const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
-  const [threads, setThreads] = useState<ThreadWithMeta[]>(() =>
-    initialThreads.map(enrichThread),
-  );
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(
-    initialThreads[0]?.id ?? null,
-  );
+  const [mode, setMode] = useState<MessagesView>("inbox");
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [replyOpen, setReplyOpen] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
+  const [threads, setThreads] = useState<ThreadWithMeta[]>(() => initialThreads.map(enrichThread));
+  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(initialThreads[0]?.id ?? null);
   const [selectedThread, setSelectedThread] = useState<ThreadWithMeta | null>(
     initialThreads[0] ? enrichThread(initialThreads[0]) : null,
   );
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [sentMessages, setSentMessages] = useState<SentMessageItem[]>([]);
-  const [openedMessage, setOpenedMessage] = useState<SentMessageItem | null>(
-    null,
-  );
+  const [openedMessage, setOpenedMessage] = useState<SentMessageItem | null>(null);
   const [loadingThreads, setLoadingThreads] = useState(false);
   const [loadingThread, setLoadingThread] = useState(false);
   const [loadingSent, setLoadingSent] = useState(false);
@@ -74,12 +75,11 @@ export default function MessagesLayout({
     try {
       setLoadingThreads(true);
       setError(null);
-      const raw = await fetchThreads();
-      const next = raw.map(enrichThread);
+      const next = (await fetchThreads()).map(enrichThread);
       setThreads(next);
       return next;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load threads");
+      setError(err instanceof Error ? err.message : "Couldn't load your messages.");
       return [];
     } finally {
       setLoadingThreads(false);
@@ -92,35 +92,27 @@ export default function MessagesLayout({
         setLoadingThread(true);
         setError(null);
         const data = await fetchThread(threadId);
-
-        const existingThread = threadsRef.current.find(
-          (t) => t.id === threadId,
-        );
-        const mergedThread: ThreadWithMeta = {
+        const existing = threadsRef.current.find((t) => t.id === threadId);
+        const merged: ThreadWithMeta = {
           ...data.thread,
-          other_party:
-            data.thread.other_party ?? existingThread?.other_party ?? null,
+          other_party: data.thread.other_party ?? existing?.other_party ?? null,
         };
-
-        const loadedThread = enrichThread(mergedThread);
-        setSelectedThread(loadedThread);
-        setMessages(buildMessages({ ...data, thread: mergedThread }));
+        const loaded = enrichThread(merged);
+        setSelectedThread(loaded);
+        setMessages(buildMessages({ ...data, thread: merged }));
         setThreads((prev) =>
           prev.map((t) =>
-            t.id !== loadedThread.id
+            t.id !== loaded.id
               ? t
               : enrichThread({
                   ...t,
-                  ...loadedThread,
-                  last_message_preview:
-                    loadedThread.last_message_preview?.trim() ||
-                    t.last_message_preview ||
-                    null,
+                  ...loaded,
+                  last_message_preview: loaded.last_message_preview?.trim() || t.last_message_preview || null,
                 }),
           ),
         );
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load thread");
+        setError(err instanceof Error ? err.message : "Couldn't open this conversation.");
       } finally {
         setLoadingThread(false);
       }
@@ -132,177 +124,154 @@ export default function MessagesLayout({
     try {
       setLoadingSent(true);
       setError(null);
-      const data = await fetchSentMessages();
-      setSentMessages(data);
+      setSentMessages(await fetchSentMessages());
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load sent messages",
-      );
+      setError(err instanceof Error ? err.message : "Couldn't load sent messages.");
     } finally {
       setLoadingSent(false);
     }
   }, [fetchSentMessages]);
-
-  const buildLockedRecipient = (thread: ThreadWithMeta | null) => {
-    if (!thread?.other_party) return null;
-    return {
-      id: thread.other_party.id,
-      name: thread.other_party.name,
-      image: thread.other_party.image ?? null,
-      subtitle: thread.other_party.subtitle ?? null,
-      type: senderSide === "user" ? ("shelter" as const) : ("user" as const),
-    };
-  };
-
-  useEffect(() => {
-    setThreads(initialThreads.map(enrichThread));
-    setSelectedThreadId((prev) => prev ?? initialThreads[0]?.id ?? null);
-    setSelectedThread(
-      (prev) =>
-        prev ?? (initialThreads[0] ? enrichThread(initialThreads[0]) : null),
-    );
-  }, [initialThreads, enrichThread]);
 
   useEffect(() => {
     if (mode === "inbox" && selectedThreadId) void loadThread(selectedThreadId);
   }, [mode, selectedThreadId, loadThread]);
 
   useEffect(() => {
-    if (mode === "compose") void loadSentMessages();
+    if (mode === "sent") void loadSentMessages();
   }, [mode, loadSentMessages]);
 
   async function handleRefreshAfterSend(threadId: string) {
+    setComposeOpen(false);
+    setReplyOpen(false);
     setMode("inbox");
-    setIsReplyModalOpen(false);
     const next = await loadThreads();
-    const nextId =
-      next.find((t) => t.id === threadId)?.id ?? next[0]?.id ?? null;
+    const nextId = next.find((t) => t.id === threadId)?.id ?? next[0]?.id ?? null;
     setSelectedThreadId(nextId);
-    if (nextId) await loadThread(nextId);
-    else {
+    if (nextId) {
+      await loadThread(nextId);
+      setShowDetail(true);
+    } else {
       setSelectedThread(null);
       setMessages([]);
     }
   }
 
-  const lockedRecipient = buildLockedRecipient(selectedThread);
+  const lockedRecipient = selectedThread?.other_party
+    ? {
+        id: selectedThread.other_party.id,
+        name: selectedThread.other_party.name,
+        image: selectedThread.other_party.image ?? null,
+        subtitle: selectedThread.other_party.subtitle ?? null,
+        type: senderSide === "user" ? ("shelter" as const) : ("user" as const),
+      }
+    : null;
 
   return (
     <>
       <WebTemplate
         header="Messages"
-        scrollable={false}
+        actions={
+          <Button variant="primary" onClick={() => setComposeOpen(true)} icon={<NotePencil aria-hidden="true" />}>
+            <span className="hidden sm:inline">New message</span>
+            <span className="sm:hidden">New</span>
+          </Button>
+        }
         main={
-          <div className="grid h-full min-h-0 grid-cols-[320px_1fr]">
-            <div className="flex min-h-0 flex-col border-r bg-white">
-              <MessagesTabs mode={mode} setMode={setMode} />
-              <div className="min-h-0 w-full flex-1 ">
-                {mode === "inbox" ? (
-                  <ThreadList
-                    threads={threads}
-                    selectedThreadId={selectedThreadId}
-                    loading={loadingThreads}
-                    onSelectThread={setSelectedThreadId}
-                    withStatus={senderSide === "shelter"}
-                  />
-                ) : (
-                  <SentMessagesList
-                    items={sentMessages}
-                    loading={loadingSent}
-                    onOpenMessage={(item: SentMessageItem) =>
-                      setOpenedMessage(item)
-                    }
-                  />
-                )}
-              </div>
-            </div>
+          <div className="flex flex-col gap-4">
+            {error ? (
+              <p role="alert" className="rounded-md bg-reject/10 px-4 py-3 text-sm text-reject-text">
+                {error}
+              </p>
+            ) : null}
 
-            <div className="min-h-0 overflow-hidden">
-              {mode === "inbox" ? (
+            <div className="grid gap-4 md:h-[calc(100dvh-11rem)] md:grid-cols-[320px_minmax(0,1fr)]">
+              <div className={cn("flex min-h-0 flex-col gap-3", showDetail && "hidden md:flex")}>
+                <MessagesTabs mode={mode} setMode={setMode} />
+                <div className="min-h-0 flex-1 md:overflow-y-auto">
+                  {mode === "inbox" ? (
+                    <ThreadList
+                      threads={threads}
+                      selectedThreadId={selectedThreadId}
+                      loading={loadingThreads}
+                      onSelectThread={(id) => {
+                        setSelectedThreadId(id);
+                        setShowDetail(true);
+                      }}
+                      withStatus={senderSide === "shelter"}
+                      emptyHint={senderSide === "user" ? "Message a shelter you've liked." : undefined}
+                    />
+                  ) : (
+                    <SentMessagesList items={sentMessages} loading={loadingSent} onOpenMessage={setOpenedMessage} />
+                  )}
+                </div>
+              </div>
+
+              <div
+                className={cn(
+                  "min-h-[60dvh] overflow-hidden rounded-lg border border-line bg-card md:min-h-0",
+                  mode === "sent" && "hidden md:block",
+                  !showDetail && "hidden md:block",
+                )}
+              >
+                <div className="border-b border-line px-2 py-2 md:hidden">
+                  <Button variant="ghost" size="sm" onClick={() => setShowDetail(false)} icon={<ArrowLeft aria-hidden="true" />}>
+                    All messages
+                  </Button>
+                </div>
                 <ThreadView
-                  selectedThreadId={selectedThreadId}
+                  selectedThreadId={mode === "inbox" ? selectedThreadId : null}
                   selectedThread={selectedThread}
                   messages={messages}
                   loadingThread={loadingThread}
-                  onOpenReplyModal={() => setIsReplyModalOpen(true)}
-                />
-              ) : (
-                <ComposeView
-                  userId={userId}
+                  onOpenReplyModal={() => setReplyOpen(true)}
                   senderSide={senderSide}
-                  mode="new"
-                  recipients={composeRecipients}
-                  onCreated={handleRefreshAfterSend}
-                  adoptionRequestId={
-                    senderSide === "shelter"
-                      ? (selectedThread?.adoption_request_id ?? undefined)
-                      : undefined
-                  }
                 />
-              )}
+              </div>
             </div>
           </div>
         }
       />
 
-      {error ? (
-        <div className="fixed right-6 bottom-6 z-40 rounded-[15px] border bg-white px-4 py-2 text-description text-red-500 shadow">
-          {error}
-        </div>
-      ) : null}
-
-      {openedMessage ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
-          <div className="w-full max-w-xl rounded-[15px] border bg-white shadow-lg">
-            <div className="border-b px-5 py-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-subtitle font-bold text-black">
-                  {openedMessage.subject || "(No subject)"}
-                </h2>
-                <BackButton
-                  className="h-7 w-7"
-                  onClick={() => setOpenedMessage(null)}
-                />
-              </div>
-            </div>
-            <div className="scroll-stable overflow-y-auto px-5 py-4">
-              <div className="flex justify-between">
-                <p className="text-description">
-                  To:{" "}
-                  <span className="font-semibold">
-                    {openedMessage.receiver.name}
-                  </span>
-                </p>
-                <p className="text-xs text-neutral-400">
-                  {new Date(openedMessage.created_at).toLocaleString()}
-                </p>
-              </div>
-              <p className="mt-7 whitespace-pre-wrap text-lg leading-6 text-black">
-                {openedMessage.body}
-              </p>
-            </div>
+      <Modal
+        open={!!openedMessage}
+        onClose={() => setOpenedMessage(null)}
+        title={openedMessage?.subject || "No subject"}
+      >
+        {openedMessage ? (
+          <div className="flex flex-col gap-4">
+            <p className="flex flex-wrap justify-between gap-2 text-sm text-muted">
+              <span>
+                To <span className="font-semibold text-ink">{openedMessage.receiver.name}</span>
+              </span>
+              <span>{new Date(openedMessage.created_at).toLocaleString()}</span>
+            </p>
+            <p className="whitespace-pre-wrap text-ink">{openedMessage.body}</p>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </Modal>
 
       <ComposeView
-        isModal
-        isOpen={isReplyModalOpen}
+        isOpen={composeOpen}
         userId={userId}
         senderSide={senderSide}
-        senderShelterId={senderSide === "shelter" ? userId : undefined}
+        mode="new"
+        recipients={composeRecipients}
+        onClose={() => setComposeOpen(false)}
+        onCreated={handleRefreshAfterSend}
+      />
+
+      <ComposeView
+        key={selectedThreadId ?? "none"}
+        isOpen={replyOpen}
+        userId={userId}
+        senderSide={senderSide}
         mode="reply"
         recipients={lockedRecipient ? [lockedRecipient] : []}
         lockedRecipient={lockedRecipient}
         lockedSubject={selectedThread?.subject ?? ""}
         lockedThreadId={selectedThreadId ?? undefined}
-        onClose={() => setIsReplyModalOpen(false)}
+        onClose={() => setReplyOpen(false)}
         onCreated={handleRefreshAfterSend}
-        adoptionRequestId={
-          senderSide === "shelter"
-            ? (selectedThread?.adoption_request_id ?? undefined)
-            : undefined
-        }
       />
     </>
   );

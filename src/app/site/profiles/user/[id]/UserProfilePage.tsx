@@ -1,9 +1,12 @@
 "use client";
 
+import Link from "next/link";
+import { Bell, Gear } from "@phosphor-icons/react";
 import UserEditProfileModal from "@/src/components/modal/EditProfile/UserEditProfile";
 import TopCard from "@/src/components/template/user/TopCard";
 import ProfileSection from "@/src/components/template/ProfileSection";
 import WebTemplate from "@/src/components/template/WebTemplate";
+import { buttonStyles } from "@/src/components/ui/Button";
 
 type UserUI = {
   id: string;
@@ -16,32 +19,40 @@ type UserUI = {
   created_at?: string | null;
 };
 
-export default function UserProfilePage({
-  user,
-  tabs,
-}: {
-  user: UserUI;
-  tabs: React.ReactNode;
-}) {
+const iconLink = buttonStyles({ variant: "ghost", size: "icon", className: "md:hidden" });
+
+export default function UserProfilePage({ user, tabs }: { user: UserUI; tabs: React.ReactNode }) {
   return (
     <WebTemplate
       header={
-        <>
-          <TopCard
-            title={user.full_name}
-            subtitle={`@${user.username}`}
-            location={user.location ?? ""}
-            imageUrl={user.avatar_url}
-            rightSlot={<UserEditProfileModal />}
-          />
-        </>
+        <TopCard
+          title={user.full_name}
+          subtitle={`@${user.username}`}
+          imageUrl={user.avatar_url}
+          rightSlot={
+            <div className="flex items-center gap-1">
+              <UserEditProfileModal />
+              {/* The sidebar holds these from md; phones reach them here */}
+              <Link href="/site/notification" aria-label="Notifications" className={iconLink}>
+                <Bell aria-hidden="true" />
+              </Link>
+              <Link href="/site/settings" aria-label="Settings" className={iconLink}>
+                <Gear aria-hidden="true" />
+              </Link>
+            </div>
+          }
+        />
       }
       main={
-        <>
-          <ProfileSection title="Bio">{user.bio ?? "—"}</ProfileSection>
-          <ProfileSection title="Contact">{user.contact ?? "—"}</ProfileSection>
-          {tabs}
-        </>
+        <div className="flex flex-col">
+          <div className="grid gap-x-10 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <ProfileSection title="Bio">
+              <p className="max-w-[65ch] whitespace-pre-line">{user.bio || "No bio yet."}</p>
+            </ProfileSection>
+            <ProfileSection title="Contact">{user.contact}</ProfileSection>
+          </div>
+          <div className="pt-8">{tabs}</div>
+        </div>
       }
     />
   );

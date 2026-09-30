@@ -1,11 +1,12 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import BackButton from "../../ui/BackButton";
+import { useCallback, useEffect, useId, useState } from "react";
+import { Camera, PencilSimple } from "@phosphor-icons/react";
+import Avatar from "../../ui/Avatar";
+import Button from "../../ui/Button";
 import Input from "../../ui/Input";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
-import { PencilSimple } from "@phosphor-icons/react";
+import Textarea from "../../ui/Textarea";
+import Modal from "../../ui/Modal";
 
 type Field = {
   key: string;
@@ -30,64 +31,48 @@ type Props = {
   onSaved?: () => void;
 };
 
+// Long-form fields get a textarea
+const MULTILINE = new Set(["bio", "about"]);
+
+/** Edit profile details and photo in a dialog. */
 export default function EditProfileModal({
   title,
-  triggerLabel = "Edit Profile",
+  triggerLabel = "Edit profile",
   fields,
   loadProfile,
   saveProfile,
   uploadAvatar,
   onSaved,
 }: Props) {
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-
+  const formId = useId();
+  const fileId = useId();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  const [avatarUrl, setAvatarUrl] = useState(DEFAULT_AVATAR_URL);
+  const [uploading, setUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [values, setValues] = useState<ProfileValues>({});
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-
-  const canSave = useMemo(() => !loading && !saving, [loading, saving]);
-
-  const resetMessages = useCallback(() => {
-    setErrorMsg(null);
-    setSuccessMsg(null);
-  }, []);
 
   const closeModal = useCallback(() => {
     setOpen(false);
-    resetMessages();
-  }, [resetMessages]);
+    setErrorMsg(null);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
-
     let cancelled = false;
 
     async function run() {
       try {
         setLoading(true);
-        resetMessages();
-
+        setErrorMsg(null);
         const profile = await loadProfile();
         if (cancelled) return;
-
-        setAvatarUrl(profile.avatarUrl?.trim() || DEFAULT_AVATAR_URL);
-
-        const nextValues: ProfileValues = {};
-        for (const field of fields) {
-          nextValues[field.key] = profile[field.key] ?? "";
-        }
-        setValues(nextValues);
+        setAvatarUrl(profile.avatarUrl?.trim() ?? "");
+        setValues(Object.fromEntries(fields.map((f) => [f.key, profile[f.key] ?? ""])));
       } catch (error) {
-        if (!cancelled) {
-          setErrorMsg(
-            error instanceof Error ? error.message : "Failed to load profile.",
-          );
-        }
+        if (!cancelled) setErrorMsg(error instanceof Error ? error.message : "Couldn't load your profile.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -97,185 +82,118 @@ export default function EditProfileModal({
     return () => {
       cancelled = true;
     };
-  }, [open, fields, loadProfile, resetMessages]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") closeModal();
-    }
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, closeModal]);
+  }, [open, fields, loadProfile]);
 
   async function handleAvatarPick(file: File) {
     if (!uploadAvatar) return;
-
+    setErrorMsg(null);
+    setUploading(true);
     try {
-      resetMessages();
-      setSaving(true);
-
-      const publicUrl = await uploadAvatar(file);
-      setAvatarUrl(publicUrl);
-      setSuccessMsg("Picture updated.");
+      setAvatarUrl(await uploadAvatar(file));
     } catch (error) {
-      setErrorMsg(
-        error instanceof Error ? error.message : "Failed to upload picture.",
-      );
+      setErrorMsg(error instanceof Error ? error.message : "Couldn't upload that photo.");
     } finally {
-      setSaving(false);
+      setUploading(false);
     }
   }
 
-  async function handleSave() {
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setErrorMsg(null);
+    setSaving(true);
     try {
-      resetMessages();
-      setSaving(true);
-
-      const payload: SaveProfileValues = {
-        values,
-        avatarUrl:
-          avatarUrl && avatarUrl !== DEFAULT_AVATAR_URL ? avatarUrl : undefined,
-      };
-
-      await saveProfile(payload);
-
-      setSuccessMsg("Profile saved!");
+      await saveProfile({ values, avatarUrl: avatarUrl || undefined });
       onSaved?.();
+      setOpen(false);
     } catch (error) {
-      setErrorMsg(
-        error instanceof Error ? error.message : "Failed to save profile.",
-      );
+      setErrorMsg(error instanceof Error ? error.message : "Couldn't save your profile.");
     } finally {
       setSaving(false);
     }
   }
+
+  const displayName = values.full_name || values.shelter_name || "Profile";
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="flex w-fit items-center gap-2 rounded-[15px] border border-black/50 bg-primary px-7 py-1 text-description text-secondary font-semibold hover:scale-105"
-      >
+      <Button variant="secondary" onClick={() => setOpen(true)} icon={<PencilSimple aria-hidden="true" />}>
         {triggerLabel}
-        <PencilSimple size={16} aria-hidden="true" />
-      </button>
+      </Button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
-
-          {/* Modal */}
-          <div
-            ref={dialogRef}
-            className="relative z-10 w-125 max-w-[90%] rounded-[15px] border-2 bg-white shadow-2xl"
-            aria-modal="true"
-            role="dialog"
-          >
-            {/* Header — matches DonationModal exactly */}
-            <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-3 ">
-              <div className="pl-4">
-                <BackButton onClick={closeModal} />
-              </div>
-              <div className="text-center text-title font-bold text-innerbg">
-                {title}
-              </div>
-              <div />
-            </div>
-
-            {/* Body */}
-            <div className="max-h-[75vh] overflow-y-auto scroll-stable py-2 px-5">
-              {/* Avatar */}
-              <div className="flex flex-col items-center gap-2 ">
-                <div className="relative h-16 w-16 overflow-hidden rounded-full bg-black/10">
-                  <Image
-                    src={avatarUrl}
-                    alt="Profile picture"
-                    fill
-                    className="object-cover"
+      <Modal
+        open={open}
+        onClose={closeModal}
+        title={title}
+        footer={
+          <>
+            <Button variant="ghost" onClick={closeModal}>
+              Cancel
+            </Button>
+            <Button type="submit" form={formId} variant="primary" loading={saving} disabled={loading || uploading}>
+              Save changes
+            </Button>
+          </>
+        }
+      >
+        {loading ? (
+          <p role="status" className="text-sm text-muted">
+            Loading your profile…
+          </p>
+        ) : (
+          <form id={formId} onSubmit={handleSave} className="flex flex-col gap-4">
+            {uploadAvatar ? (
+              <div className="flex items-center gap-4">
+                <Avatar src={avatarUrl} name={displayName} size={72} />
+                <label
+                  htmlFor={fileId}
+                  className="flex h-11 cursor-pointer items-center gap-2 rounded-full border border-line bg-card px-4 text-sm font-medium text-ink transition-colors focus-within:ring-2 focus-within:ring-ink hover:bg-sunshine-wash"
+                >
+                  <Camera size={18} aria-hidden="true" />
+                  {uploading ? "Uploading…" : "Change photo"}
+                  <input
+                    id={fileId}
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    disabled={uploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleAvatarPick(file);
+                      e.target.value = "";
+                    }}
                   />
-                </div>
-
-                {uploadAvatar && (
-                  <label className="cursor-pointer text-description font-semibold text-black/70 hover:underline">
-                    Edit Picture
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) void handleAvatarPick(file);
-                      }}
-                    />
-                  </label>
-                )}
+                </label>
               </div>
+            ) : null}
 
-              {/* Fields */}
-              <div className="space-y-3">
-                {fields.map((field) => (
-                  <div key={field.key}>
-                    <Input
-                      type={field.type ?? "text"}
-                      label={field.label}
-                      placeholder={field.label}
-                      labelClassName="text-description text-secondary font-medium"
-                      value={values[field.key] ?? ""}
-                      onChange={(e) =>
-                        setValues((prev) => ({
-                          ...prev,
-                          [field.key]: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
+            {fields.map((field) =>
+              MULTILINE.has(field.key) ? (
+                <Textarea
+                  key={field.key}
+                  label={field.label}
+                  rows={4}
+                  value={values[field.key] ?? ""}
+                  onChange={(e) => setValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                />
+              ) : (
+                <Input
+                  key={field.key}
+                  label={field.label}
+                  type={field.type ?? "text"}
+                  value={values[field.key] ?? ""}
+                  onChange={(e) => setValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                />
+              ),
+            )}
 
-              {/* Messages */}
-              {(errorMsg || successMsg) && (
-                <div className="text-xs">
-                  {errorMsg && <div className="text-red-600">{errorMsg}</div>}
-                  {successMsg && (
-                    <div className="text-green-700">{successMsg}</div>
-                  )}
-                </div>
-              )}
-
-              {loading && (
-                <div className="text-center text-xs text-black/60">
-                  Loading profile...
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex gap-2 mt-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 rounded-[15px] hover:scale-105  border border-black/10 bg-innerbg text-black px-3 py-2 text-sm font-semibold"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={!canSave}
-                  className="flex-1 rounded-[15px] hover:scale-105 bg-primary px-3 py-2 text-sm text-secondary font-semibold"
-                >
-                  {saving ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+            {errorMsg ? (
+              <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">
+                {errorMsg}
+              </p>
+            ) : null}
+          </form>
+        )}
+      </Modal>
     </>
   );
 }

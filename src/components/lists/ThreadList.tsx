@@ -1,9 +1,12 @@
 "use client";
 
-import Image from "next/image";
+import { ChatCircle } from "@phosphor-icons/react";
 import type { ThreadWithMeta } from "@/src/lib/types/messages";
 import ListRowsSkeleton from "@/src/components/skeletons/ListRowsSkeleton";
-import type { PetStatusFull } from "@/src/lib/types/adoptionRequests";
+import Avatar from "@/src/components/ui/Avatar";
+import EmptyState from "@/src/components/ui/EmptyState";
+import StatusChip, { type ChipStatus } from "@/src/components/ui/StatusChip";
+import { cn } from "@/src/lib/cn";
 
 type Props = {
   threads: ThreadWithMeta[];
@@ -11,7 +14,12 @@ type Props = {
   loading: boolean;
   onSelectThread: (threadId: string) => void;
   withStatus?: boolean;
+  emptyHint?: string;
 };
+
+export function formatShortDate(value: string) {
+  return new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
 
 export default function ThreadList({
   threads,
@@ -19,131 +27,54 @@ export default function ThreadList({
   loading,
   onSelectThread,
   withStatus = false,
+  emptyHint,
 }: Props) {
-  return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="w-full border-b-2 px-5 text-center text-title font-semibold text-black">
-        Messages Received
-      </div>
+  if (loading) return <ListRowsSkeleton count={7} />;
 
-      <div className="min-h-0 flex-1 overflow-y-auto scroll-stable">
-        {loading ? (
-          <ListRowsSkeleton count={7} />
-        ) : threads.length === 0 ? (
-          <div className="p-4 text-description text-neutral-500">
-            No messages yet.
-          </div>
-        ) : (
-          <div className="space-y-2 px-1 py-3">
-            {threads.map((thread) => {
-              const isActive = selectedThreadId === thread.id;
-              const otherPartyName = thread.other_party?.name || "Shelter";
-              const otherPartyImage = thread.other_party?.image || null;
-              const status = withStatus
-                ? (thread.adoption_status as PetStatusFull | null)
-                : null;
-
-              return (
-                <button
-                  key={thread.id}
-                  type="button"
-                  onClick={() => onSelectThread(thread.id)}
-                  className={`relative w-full rounded-[15px] border py-2 pl-5 pr-4 hover:scale-105  text-left transition ${
-                    isActive
-                      ? "border bg-background"
-                      : "border-neutral-200 bg-white hover:bg-neutral-50"
-                  }`}
-                >
-                  {withStatus && (
-                    <div
-                      className={`absolute left-0 top-0 h-full w-2 rounded-l-[15px] ${getStatusColor(
-                        status,
-                      )}`}
-                    />
-                  )}
-
-                  <div className="flex items-start gap-2">
-                    <Avatar name={otherPartyName} image={otherPartyImage} />
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between">
-                        <div className="min-w-0">
-                          <p className="truncate text-description font-bold text-black">
-                            {otherPartyName}
-                          </p>
-                          <p className="truncate text-small text-neutral-500">
-                            {thread.subject}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-col items-end gap-1">
-                          <span className="text-small text-neutral-500">
-                            {formatShortDate(thread.last_message_at)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <p className="mt-2 line-clamp-2 text-small text-neutral-600">
-                        {thread.last_message_preview || "No preview available"}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Avatar({ name, image }: { name: string; image: string | null }) {
-  if (image) {
+  if (threads.length === 0) {
     return (
-      <Image
-        src={image}
-        alt={name}
-        width={30}
-        height={30}
-        className="h-10 w-10 rounded-full border object-cover"
+      <EmptyState
+        icon={<ChatCircle aria-hidden="true" />}
+        title="No messages yet"
+        description={emptyHint}
       />
     );
   }
 
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-neutral-100 text-small font-semibold text-neutral-600">
-      {name.slice(0, 1).toUpperCase()}
-    </div>
+    <ul className="flex flex-col gap-1.5" aria-label="Conversations">
+      {threads.map((thread) => {
+        const active = selectedThreadId === thread.id;
+        const name = thread.other_party?.name || "Conversation";
+        const status = withStatus ? (thread.adoption_status as ChipStatus | null) : null;
+
+        return (
+          <li key={thread.id}>
+            <button
+              type="button"
+              onClick={() => onSelectThread(thread.id)}
+              aria-current={active ? "true" : undefined}
+              className={cn(
+                "flex w-full items-start gap-3 rounded-lg px-3 py-3 text-left transition-colors",
+                active ? "bg-sunshine-wash" : "hover:bg-sunshine-wash/60",
+              )}
+            >
+              <Avatar src={thread.other_party?.image} name={name} size={44} />
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="flex items-baseline justify-between gap-2">
+                  <span className="truncate font-semibold text-ink">{name}</span>
+                  <span className="shrink-0 text-xs text-muted">{formatShortDate(thread.last_message_at)}</span>
+                </span>
+                <span className="truncate text-sm text-ink">{thread.subject}</span>
+                <span className="line-clamp-1 text-sm text-muted">
+                  {thread.last_message_preview || "No messages yet"}
+                </span>
+                {status ? <StatusChip status={status} className="mt-1 w-fit" /> : null}
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
-}
-
-function getStatusColor(status: PetStatusFull | null) {
-  switch (status) {
-    case "pending":
-      return "submitted";
-    case "under_review":
-      return "bg-under_review";
-    case "contacting_applicant":
-      return "bg-contacting";
-    case "approved":
-      return "bg-approved";
-    case "not_approved":
-      return "bg-reject";
-    case "adopted":
-      return "bg-adopted";
-    case "withdrawn":
-      return "bg-withdrawn";
-    default:
-      return "bg-transparent";
-  }
-}
-
-export function formatShortDate(value: string) {
-  const date = new Date(value);
-
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
 }

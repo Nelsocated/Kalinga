@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
+import { MapPin } from "@phosphor-icons/react";
+import Avatar from "../ui/Avatar";
 import LikeButton from "../ui/LikeButton";
+import { cn } from "@/src/lib/cn";
 
 export type ShelterCardProps = {
   id: string;
@@ -16,21 +17,14 @@ export type ShelterCardProps = {
   className?: string;
 };
 
-function Stat({
-  label,
-  value,
-}: {
-  label: string;
-  value: number | null | undefined;
-}) {
-  return (
-    <div className="rounded-[15px] bg-primary px-7 py-1 flex justify-center items-center gap-6">
-      <div className="text-2xl font-semibold">{value ?? "-"}</div>
-      <div className="text-lg">{label}</div>
-    </div>
-  );
+function countLabel(available?: number | null, adopted?: number | null) {
+  const parts: string[] = [];
+  if (typeof available === "number") parts.push(`${available} available`);
+  if (typeof adopted === "number") parts.push(`${adopted} adopted`);
+  return parts.join(" · ");
 }
 
+/** Shelter row: logo, name, location and pet counts, with a like button. */
 export default function ShelterCard({
   id,
   href,
@@ -39,51 +33,37 @@ export default function ShelterCard({
   location,
   petsAvailable,
   petsAdopted,
-  className = "",
+  className,
 }: ShelterCardProps) {
-  const src = (imageUrl ?? "").trim() || DEFAULT_AVATAR_URL;
+  const counts = countLabel(petsAvailable, petsAdopted);
 
   return (
-    <Link
-      href={href}
-      className={[
-        "block w-full rounded-[15px] border bg-outerbg p-3 hover:scale-105  shadow-sm transition  hover:bg-black/5",
+    <div
+      className={cn(
+        "relative flex items-center gap-4 rounded-lg border border-line bg-card p-3 transition-[box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift sm:p-4",
         className,
-      ].join(" ")}
+      )}
     >
-      <div className="flex items-center gap-5">
-        <div className="pl-5 h-25 w-30 shrink-0 overflow-hidden rounded-md">
-          <Image
-            src={src}
-            alt={`${name} image`}
-            width={64}
-            height={64}
-            className="h-full w-full object-cover"
-          />
-        </div>
+      <Avatar src={imageUrl} name={name} size={64} className="size-14 sm:size-16" />
 
-        <div className="min-w-0 flex-1 flex flex-col justify-center">
-          <div className="text-4xl font-bold">{name}</div>
-
-          {location ? (
-            <div className="text-2xl truncate">{location}</div>
-          ) : (
-            <div className="opacity-60">Unknown location</div>
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-5">
-          <Stat label="Pets Available" value={petsAvailable} />
-          <Stat label="Pets Adopted" value={petsAdopted} />
-        </div>
-
-        <div className="pr-5 flex items-center">
-          <LikeButton
-            targetType="shelter"
-            targetId={id}
-          />
-        </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        {/* The stretched link makes the whole row clickable; the like button sits above it */}
+        <Link
+          href={href}
+          className="truncate text-lg font-semibold text-ink after:absolute after:inset-0 after:rounded-lg"
+        >
+          {name}
+        </Link>
+        <p className="flex min-w-0 items-center gap-1 text-sm text-muted">
+          <MapPin size={14} aria-hidden="true" className="shrink-0" />
+          <span className="truncate">{location || "Location not listed"}</span>
+        </p>
+        {counts ? <p className="text-sm text-ink-soft">{counts}</p> : null}
       </div>
-    </Link>
+
+      <div className="relative z-10">
+        <LikeButton targetType="shelter" targetId={id} />
+      </div>
+    </div>
   );
 }

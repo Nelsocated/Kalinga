@@ -1,12 +1,12 @@
 "use client";
 
+import type React from "react";
 import TopCard from "@/src/components/template/user/TopCard";
 import ProfileSection from "@/src/components/template/ProfileSection";
 import WebTemplate from "@/src/components/template/WebTemplate";
 import LikeButton from "@/src/components/ui/LikeButton";
 import DonationModal from "@/src/components/modal/DonationModal";
 import ShareButton from "@/src/components/ui/ShareButton";
-import React from "react";
 
 type ShelterPetUI = {
   id: string;
@@ -31,10 +31,7 @@ type ShelterProfileClientProps = {
   tabs: React.ReactNode;
 };
 
-export default function ShelterProfileClient({
-  shelter,
-  tabs,
-}: ShelterProfileClientProps) {
+export default function ShelterProfileClient({ shelter, tabs }: ShelterProfileClientProps) {
   return (
     <WebTemplate
       header={
@@ -43,29 +40,26 @@ export default function ShelterProfileClient({
           subtitle={shelter.location ?? ""}
           imageUrl={shelter.logo_url}
           actions={
-            <div className="flex gap-3">
+            <div className="flex items-center gap-1">
               <DonationModal shelterId={shelter.id} />
-              <ShareButton id={shelter.id} type="shelter" />
-              <LikeButton
-                targetId={shelter.id}
-                targetType="shelter"
-              />
+              <ShareButton id={shelter.id} type="shelter" className="size-12 hover:bg-sunshine-wash" />
+              <LikeButton targetId={shelter.id} targetType="shelter" />
             </div>
           }
         />
       }
       main={
-        <>
-          <ProfileSection title="Information">
-            {shelter.about ?? "—"}
-          </ProfileSection>
-
-          <ProfileSection title="Contact">
-            {shelter.contact ?? "—"}
-          </ProfileSection>
-
-          {tabs}
-        </>
+        <div className="flex flex-col">
+          <div className="grid gap-x-10 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <ProfileSection title="About">
+              <p className="max-w-[65ch] whitespace-pre-line">
+                {shelter.about || "This shelter hasn't written an introduction yet."}
+              </p>
+            </ProfileSection>
+            <ProfileSection title="Contact">{shelter.contact}</ProfileSection>
+          </div>
+          <div className="pt-8">{tabs}</div>
+        </div>
       }
     />
   );

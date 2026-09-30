@@ -1,13 +1,13 @@
 "use client";
 
+import type React from "react";
+import { SquaresFour } from "@phosphor-icons/react";
 import TopCard from "@/src/components/template/user/TopCard";
 import ProfileSection from "@/src/components/template/ProfileSection";
 import WebTemplate from "@/src/components/template/WebTemplate";
-
-import RightSlot from "@/src/components/template/user/RightSlot";
+import ContactRows from "@/src/components/template/ContactRows";
 import ShelterEditProfileModal from "@/src/components/modal/EditProfile/ShelterEditProfile";
-import DashboardButton from "@/src/components/ui/DashboardButton";
-import React from "react";
+import { LinkButton } from "@/src/components/ui/Button";
 
 export type ShelterPetUI = {
   id: string;
@@ -33,10 +33,8 @@ type ShelterProfileClientProps = {
   tabs: React.ReactNode;
 };
 
-export default function ShelterProfileClient({
-  shelter,
-  tabs,
-}: ShelterProfileClientProps) {
+/** The shelter's own profile: same layout as the public one, with edit and dashboard. */
+export default function ShelterProfileClient({ shelter, tabs }: ShelterProfileClientProps) {
   return (
     <WebTemplate
       header={
@@ -45,28 +43,33 @@ export default function ShelterProfileClient({
           subtitle={shelter.location ?? ""}
           imageUrl={shelter.logo_url}
           actions={
-            <RightSlot>
-              <div className="flex gap-3">
-                <ShelterEditProfileModal />
-                <DashboardButton />
-              </div>
-            </RightSlot>
+            <div className="flex items-center gap-2">
+              <ShelterEditProfileModal />
+              <LinkButton href="/shelter/dashboard" variant="secondary" icon={<SquaresFour aria-hidden="true" />}>
+                Dashboard
+              </LinkButton>
+            </div>
           }
         />
       }
       main={
-        <>
-          <ProfileSection title="Information">
-            {shelter.about ?? "—"}
-          </ProfileSection>
-
-          <ProfileSection title="Contact" className="leading-5">
-            <div>{shelter.contact_email}</div>
-            <div>{shelter.contact_phone}</div>
-          </ProfileSection>
-
-          {tabs}
-        </>
+        <div className="flex flex-col">
+          <div className="grid gap-x-10 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <ProfileSection title="About">
+              <p className="max-w-[65ch] whitespace-pre-line">
+                {shelter.about || "Add an introduction so adopters know who you are."}
+              </p>
+            </ProfileSection>
+            <ProfileSection title="Contact">
+              <ContactRows
+                email={shelter.contact_email}
+                phone={shelter.contact_phone}
+                emptyText="Add an email or phone number so adopters can reach you."
+              />
+            </ProfileSection>
+          </div>
+          <div className="pt-8">{tabs}</div>
+        </div>
       }
     />
   );

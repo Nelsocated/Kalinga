@@ -1,7 +1,9 @@
 "use client";
 
+import { PawPrint } from "@phosphor-icons/react";
 import PetCard from "../cards/PetCard";
-import BackButton from "../ui/BackButton";
+import Modal from "../ui/Modal";
+import EmptyState from "../ui/EmptyState";
 import type { PetGender } from "@/src/lib/types/shelters";
 
 type ShelterPetMini = {
@@ -20,49 +22,36 @@ type Props = {
   onSelect: (pet: ShelterPetMini) => void;
 };
 
+/** Pick which of the shelter's pets a post is about. */
 export default function LinkPetModal({ open, pets, onClose, onSelect }: Props) {
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
-      <div className="w-full max-w-2xl overflow-hidden rounded-[15px] border bg-white shadow-2xl">
-        <div className="grid grid-cols-3 items-center rounded-t-[15px] bg-primary py-2">
-          <div className="pl-4">
-            <BackButton onClick={onClose} />
-          </div>
-          <div className="text-center text-title font-bold text-white">
-            Link Pet Profile
-          </div>
-          <div />
-        </div>
-
-        <div className="md:p-2">
-          {pets.length > 0 ? (
-            <div className="h-full max-h-3xl py-3 px-2 overflow-y-auto scroll-stable">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {pets.map((pet) => (
-                  <button
-                    key={pet.id}
-                    type="button"
-                    onClick={() => onSelect(pet)}
-                    className="transition-transform hover:scale-[1.02]"
-                  >
-                    <PetCard
-                      imageUrl={pet.imageUrl}
-                      petName={pet.petName || "Unknown pet"}
-                      sex={pet.gender}
-                      shelterName={pet.shelterName || "Unknown shelter"}
-                      shelterLogo={pet.shelterLogo || ""}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <p className="py-6 text-sm text-black/70">No pets found.</p>
-          )}
-        </div>
-      </div>
-    </div>
+    <Modal open={open} onClose={onClose} title="Choose a pet" className="sm:max-w-2xl">
+      {pets.length === 0 ? (
+        <EmptyState
+          icon={<PawPrint aria-hidden="true" />}
+          title="No pets yet"
+          description="Add a pet first, then you can link posts to it."
+        />
+      ) : (
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {pets.map((pet) => (
+            <li key={pet.id}>
+              <button
+                type="button"
+                onClick={() => onSelect(pet)}
+                className="w-full rounded-lg text-left transition-transform duration-200 ease-out-expo hover:-translate-y-0.5"
+              >
+                <PetCard
+                  imageUrl={pet.imageUrl}
+                  petName={pet.petName || "Unnamed pet"}
+                  sex={pet.gender}
+                  resize
+                />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Modal>
   );
 }

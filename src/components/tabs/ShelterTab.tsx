@@ -1,25 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PawPrint, PlayCircle, type Icon } from "@phosphor-icons/react";
+import { PawPrint, PlayCircle } from "@phosphor-icons/react";
 
 import VideoCard from "../cards/VideoCard";
 import PetCard from "../cards/PetCard";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
+import EmptyState from "../ui/EmptyState";
+import TabBar, { type TabDef } from "./TabBar";
 
-import type {
-  ShelterVideoMini,
-  ShelterPetMini,
-} from "@/src/lib/types/shelters";
+import type { ShelterVideoMini, ShelterPetMini } from "@/src/lib/types/shelters";
 
 export type TabsKey = "videos" | "pets";
 
-const TAB_META = {
-  videos: { icon: PlayCircle, label: "Videos" },
-  pets: { icon: PawPrint, label: "Pets" },
-} satisfies Record<TabsKey, { icon: Icon; label: string }>;
+const TABS: TabDef<TabsKey>[] = [
+  { key: "videos", label: "Videos", icon: PlayCircle },
+  { key: "pets", label: "Pets", icon: PawPrint },
+];
 
-const ITEMS_PER_BATCH = 10;
+const ITEMS_PER_BATCH = 12;
 
 type Props = {
   shelterId: string;
@@ -27,179 +25,74 @@ type Props = {
   initialPets: ShelterPetMini[];
 };
 
-export default function ShelterTopCard({ initialVideos, initialPets }: Props) {
-  const tabs: TabsKey[] = ["videos", "pets"];
+/** A shelter's posted videos and pets. */
+export default function ShelterTab({ initialVideos, initialPets }: Props) {
   const [tab, setTab] = useState<TabsKey>("videos");
-
-  const [videos] = useState<ShelterVideoMini[]>(initialVideos);
-  const [pets] = useState<ShelterPetMini[]>(initialPets);
-  const [loading] = useState(false);
-
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_BATCH);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  function handleTabChange(nextTab: TabsKey) {
-    setTab(nextTab);
-    setVisibleCount(ITEMS_PER_BATCH);
-
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = 0;
-    }
-  }
-
-  const list = useMemo(
-    () => (tab === "videos" ? videos : pets),
-    [tab, videos, pets],
-  );
-
+  const list = tab === "videos" ? initialVideos : initialPets;
   const hasMore = visibleCount < list.length;
-
-  const visibleItems = useMemo(
-    () => list.slice(0, visibleCount),
-    [list, visibleCount],
-  );
+  const visibleItems = useMemo(() => list.slice(0, visibleCount), [list, visibleCount]);
 
   const loadMore = useCallback(() => {
     setVisibleCount((c) => Math.min(c + ITEMS_PER_BATCH, list.length));
   }, [list.length]);
 
   useEffect(() => {
-    if (!hasMore) return;
-    if (!scrollRef.current || !loadMoreRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          loadMore();
-        }
-      },
-      { root: scrollRef.current, rootMargin: "200px", threshold: 0 },
-    );
-
+    if (!hasMore || !loadMoreRef.current) return;
+    const observer = new IntersectionObserver((entries) => entries[0]?.isIntersecting && loadMore(), {
+      rootMargin: "300px",
+    });
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
   }, [hasMore, loadMore]);
 
-  const base = window.location.origin;
+  function changeTab(next: TabsKey) {
+    setTab(next);
+    setVisibleCount(ITEMS_PER_BATCH);
+  }
 
   return (
-    <div className="min-h-0 pr-7">
-      <div className="flex min-h-0 flex-col rounded-[15px] bg-white">
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-start gap-12 sm:gap-16">
-            {tabs.map((key) => {
-              const active = tab === key;
-              const meta = TAB_META[key];
+    <section aria-label="Posts" className="flex flex-col gap-5">
+      <TabBar tabs={TABS} active={tab} onChange={changeTab} label="Shelter posts" idPrefix="shelter-posts" />
 
-              return (
-                <TabButton
-                  key={key}
-                  active={active}
-                  onClick={() => handleTabChange(key)}
-                  label={meta.label}
-                >
-                  <meta.icon
-                    size={40}
-                    weight={active ? "fill" : "regular"}
-                    aria-hidden="true"
-                  />
-                </TabButton>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="py-2">
-          <hr className="border-primary" />
-        </div>
-
-        <div ref={scrollRef} className="mt-3 min-h-0 flex-1 px-4 pr-1">
-          {loading ? (
-            <div className="rounded-[15px] border border-black/10 bg-white p-6 text-center text-sm opacity-60">
-              Loading...
-            </div>
-          ) : null}
-
-          {visibleItems.length > 0 ? (
-            <div className="grid grid-cols-1 place-items-center gap-6 sm:grid-cols-3 lg:grid-cols-4">
-              {tab === "videos"
-                ? (visibleItems as ShelterVideoMini[]).map((x) => (
+      <div id="shelter-posts-panel" role="tabpanel" aria-labelledby={`shelter-posts-tab-${tab}`}>
+        {list.length === 0 ? (
+          <EmptyState
+            icon={tab === "videos" ? <PlayCircle aria-hidden="true" /> : <PawPrint aria-hidden="true" />}
+            title={tab === "videos" ? "No videos yet" : "No pets yet"}
+          />
+        ) : (
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {tab === "videos"
+              ? (visibleItems as ShelterVideoMini[]).map((x) => (
+                  <li key={`video-${x.id}`}>
                     <VideoCard
-                      key={`posted-video-${x.id}`}
-                      href={`${base}/site/home/pet/${x.id}`}
+                      href={`/site/home/pet/${x.id}`}
                       thumbnailUrl={x.thumbnailUrl ?? x.imageUrl}
-                      subtitle={x.subtitle ?? x.caption ?? "Your shelter"}
-                      petName={x.petName ?? x.title ?? "Untitled"}
+                      subtitle={x.subtitle ?? x.caption ?? ""}
+                      petName={x.petName ?? x.title ?? "Pet video"}
                     />
-                  ))
-                : (visibleItems as ShelterPetMini[]).map((x) => (
+                  </li>
+                ))
+              : (visibleItems as ShelterPetMini[]).map((x) => (
+                  <li key={`pet-${x.id}`}>
                     <PetCard
-                      key={`posted-pet-${x.id}`}
-                      href={`${base}/site/profiles/pets/${x.id}`}
+                      href={`/site/profiles/pets/${x.id}`}
                       imageUrl={x.imageUrl}
-                      petName={x.petName ?? "Unnamed Pet"}
+                      petName={x.petName ?? "Unnamed pet"}
                       sex={x.gender ?? "unknown"}
-                      shelterName={x.shelterName ?? "Your shelter"}
-                      shelterLogo={x.shelterLogo ?? DEFAULT_AVATAR_URL}
+                      shelterName={x.shelterName ?? undefined}
+                      shelterLogo={x.shelterLogo ?? undefined}
                     />
-                  ))}
-            </div>
-          ) : null}
+                  </li>
+                ))}
+          </ul>
+        )}
 
-          {hasMore ? (
-            <div
-              ref={loadMoreRef}
-              className="mt-4 rounded-[15px] border border-black/10 bg-white p-4 text-center text-xs opacity-60"
-            >
-              Loading more...
-            </div>
-          ) : null}
-
-          {!loading && list.length === 0 ? (
-            <div className="rounded-[15px] border border-black/10 bg-white p-6 text-center text-sm opacity-60">
-              No items yet.
-            </div>
-          ) : null}
-        </div>
+        {hasMore ? <div ref={loadMoreRef} className="h-8" aria-hidden="true" /> : null}
       </div>
-    </div>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  label,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={[
-        "group flex min-w-21 flex-col items-center gap-1 rounded-full px-3 hover:scale-105",
-        "transition-all duration-200 ease-out",
-      ].join(" ")}
-    >
-      <div className="transition-transform duration-200 ease-out ">
-        {children}
-      </div>
-
-      <span
-        className={[
-          "text-sm font-medium transition-colors duration-200 ease-out",
-          active ? "text-primary" : "text-black",
-        ].join(" ")}
-      >
-        {label}
-      </span>
-    </button>
+    </section>
   );
 }

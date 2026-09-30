@@ -1,109 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
-import LogoutButton from "../ui/LogoutButton";
-import {
-  changePasswordAction,
-  logoutAction,
-} from "@/src/app/actions/auth";
+import Modal from "../ui/Modal";
+import { changePasswordAction, logoutAction } from "@/src/app/actions/auth";
 
+/** Change password; the server checks the email and current password against the session. */
 export default function ChangePasswordView() {
   const [email, setEmail] = useState("");
-  const [accountEmail, setAccountEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
-  const [checkingEmail, setCheckingEmail] = useState(true);
   const [error, setError] = useState("");
   const [successOpen, setSuccessOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  useEffect(() => {
-    async function loadCurrentUser() {
-      try {
-        setCheckingEmail(true);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
 
-        const res = await fetch("/api/users", {
-          method: "GET",
-          cache: "no-store",
-        });
-
-        if (res.status === 401) {
-          setAccountEmail("");
-          return;
-        }
-
-        const data = await res.json().catch(() => null);
-
-        const fetchedEmail =
-          data?.data?.email ||
-          data?.data?.contact_email ||
-          data?.email ||
-          data?.user?.email ||
-          "";
-
-        setAccountEmail(fetchedEmail);
-      } catch {
-        setAccountEmail("");
-      } finally {
-        setCheckingEmail(false);
-      }
+    if (newPassword !== confirmNewPassword) {
+      setError("The new passwords don't match.");
+      return;
     }
 
-    loadCurrentUser();
-  }, []);
-
-  async function handleChangePassword() {
+    setLoading(true);
     try {
-      setError("");
-
-      const trimmedEmail = email.trim();
-
-      if (!trimmedEmail) {
-        setError("Please enter your email.");
-        return;
-      }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (!emailRegex.test(trimmedEmail)) {
-        setError("Please enter a valid email address.");
-        return;
-      }
-
-      if (!accountEmail) {
-        setError("Unable to verify your account email right now.");
-        return;
-      }
-
-      if (trimmedEmail.toLowerCase() !== accountEmail.trim().toLowerCase()) {
-        setError("Email does not match your account.");
-        return;
-      }
-
-      if (!currentPassword) {
-        setError("Please enter your current password.");
-        return;
-      }
-
-      if (!newPassword) {
-        setError("Please enter a new password.");
-        return;
-      }
-
-      if (!confirmNewPassword) {
-        setError("Please confirm your new password.");
-        return;
-      }
-
-      setLoading(true);
-
       const result = await changePasswordAction({
-        email: trimmedEmail,
+        email: email.trim(),
         currentPassword,
         newPassword,
         confirmNewPassword,
@@ -120,148 +46,73 @@ export default function ChangePasswordView() {
       setConfirmNewPassword("");
       setSuccessOpen(true);
     } catch {
-      setError("Something went wrong while changing your password.");
+      setError("Couldn't reach Kalinga. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
   }
 
-  async function closeSuccessModal() {
+  async function logInAgain() {
+    setLoggingOut(true);
     try {
-      setLoggingOut(true);
-
       await logoutAction();
-    } catch {
     } finally {
-      setSuccessOpen(false);
-      setLoggingOut(false);
       window.location.href = "/login";
     }
   }
 
-  const border = "border-1 ";
-  const labelClass = "w-56 shrink-0 text-right text-lg font-medium";
-  const rowClass = "mx-auto flex w-full max-w-2xl items-center gap-5";
-  const inputWrapClass = "flex-1";
-
   return (
     <>
-      <section>
-        <div className="w-full space-y-3 pt-3">
-          <div className={rowClass}>
-            <label className={labelClass}>Email:</label>
-            <div className={inputWrapClass}>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={checkingEmail}
-                placeholder="Enter Email"
-              />
-            </div>
-          </div>
+      <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-4">
+        <Input label="Account email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
+        <Input
+          label="Current password"
+          type="password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          autoComplete="current-password"
+          required
+        />
+        <Input
+          label="New password"
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          autoComplete="new-password"
+          required
+        />
+        <Input
+          label="Confirm new password"
+          type="password"
+          value={confirmNewPassword}
+          onChange={(e) => setConfirmNewPassword(e.target.value)}
+          autoComplete="new-password"
+          required
+        />
 
-          <div className={rowClass}>
-            <label className={labelClass}>Current Password:</label>
-            <div className={inputWrapClass}>
-              <Input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter Current Password"
-              />
-            </div>
-          </div>
+        {error ? (
+          <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">
+            {error}
+          </p>
+        ) : null}
 
-          <div className={rowClass}>
-            <label className={labelClass}>New Password:</label>
-            <div className={inputWrapClass}>
-              <Input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter New Password"
-              />
-            </div>
-          </div>
+        <Button type="submit" variant="primary" loading={loading} className="w-fit">
+          Change password
+        </Button>
+      </form>
 
-          <div className={rowClass}>
-            <label className={labelClass}>Confirm New Password:</label>
-            <div className={inputWrapClass}>
-              <Input
-                type="password"
-                value={confirmNewPassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
-                placeholder="Confirm New Password"
-              />
-            </div>
-          </div>
-
-          {error ? (
-            <p className="mx-auto max-w-2xl rounded-[15px] bg-red-50 px-3 py-2 text-sm text-red-600">
-              {error}
-            </p>
-          ) : null}
-
-          <div className="mt-8 space-y-4">
-            <div className="flex justify-center gap-3">
-              <Button
-                type="button"
-                onClick={() => {
-                  setEmail("");
-                  setCurrentPassword("");
-                  setNewPassword("");
-                  setConfirmNewPassword("");
-                  setError("");
-                }}
-                className="hover:scale-105"
-                disabled={loading || checkingEmail}
-              >
-                Clear
-              </Button>
-
-              <Button
-                type="button"
-                onClick={handleChangePassword}
-                disabled={loading || checkingEmail}
-                className="bg-primary hover:scale-105"
-              >
-                {loading ? "Updating..." : "Change Password"}
-              </Button>
-            </div>
-
-            <div className="flex justify-center mt-7">
-              <LogoutButton className={border} withIcon={false} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {successOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4">
-          <div className="w-full max-w-53 overflow-hidden rounded-[15px] border bg-white shadow-md">
-            <div className="bg-primary px-4 py-2 text-center text-subtitle font-semibold text-white">
-              Password Status
-            </div>
-
-            <div className="px-4 py-5 text-center text-description leading-tight text-black">
-              Your password has
-              <br />
-              been changed!
-            </div>
-
-            <div className="flex justify-center pb-4">
-              <Button
-                type="button"
-                onClick={closeSuccessModal}
-                disabled={loggingOut}
-              >
-                {loggingOut ? "Redirecting..." : "OK"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <Modal
+        open={successOpen}
+        onClose={logInAgain}
+        title="Password changed"
+        footer={
+          <Button variant="primary" onClick={logInAgain} loading={loggingOut}>
+            Log in again
+          </Button>
+        }
+      >
+        <p className="text-sm text-ink-soft">Your password is updated. Log in again with the new one.</p>
+      </Modal>
     </>
   );
 }

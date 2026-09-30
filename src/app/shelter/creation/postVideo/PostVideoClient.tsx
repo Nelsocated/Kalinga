@@ -5,7 +5,7 @@ import { ChangeEvent, FormEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
 
-import { getSexIcon } from "@/src/app/site/profiles/pets/[id]/PetProfileClient";
+import SexIcon from "@/src/components/ui/SexIcon";
 import WebTemplate from "@/src/components/template/WebTemplate";
 import Button from "@/src/components/ui/Button";
 import CharacteristicChip from "@/src/components/template/pet/CharacteristicChip";
@@ -226,7 +226,7 @@ export default function PostVideoClient({ pets, initialError }: Props) {
                             <div className="text-subtitle leading-none font-bold">
                               {selectedPet.petName}
                             </div>
-                            {getSexIcon(selectedPet.gender, 20)}
+                            <SexIcon sex={selectedPet.gender} size={20} />
                           </div>
 
                           <div className="flex items-center text-description leading-none">

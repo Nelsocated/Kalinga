@@ -2,6 +2,8 @@
 
 import type { NotificationItem } from "@/src/app/site/notification/page";
 import Button from "../ui/Button";
+import Modal from "../ui/Modal";
+import StatusSteps from "../cards/StatusCard";
 
 type Props = {
   open: boolean;
@@ -9,30 +11,25 @@ type Props = {
   onClose: () => void;
 };
 
+/** An application update in full, with where it sits in the process. */
 export default function StatusModal({ open, item, onClose }: Props) {
-  if (!open || !item) return null;
-
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
-      <div className="w-full max-w-lg overflow-hidden rounded-[15px] border bg-outerbg shadow-2xl">
-        <div className="flex items-center justify-center bg-primary px-6 py-2">
-          <h2 className="text-subtitle font-extrabold text-innerbg">
-            {item.title}
-          </h2>
+    <Modal
+      open={open && !!item}
+      onClose={onClose}
+      title={item?.title ?? "Application update"}
+      footer={
+        <Button variant="primary" onClick={onClose}>
+          Close
+        </Button>
+      }
+    >
+      {item ? (
+        <div className="flex flex-col gap-6">
+          <p className="whitespace-pre-line text-ink-soft">{item.fullMessage}</p>
+          <StatusSteps status={item.status} />
         </div>
-
-        <div className="space-y-2 p-4 md:p-4 ">
-          <p className="leading-5 text-lg text-black whitespace-pre-line text-justify">
-            {item.fullMessage}
-          </p>
-
-          <div className="flex justify-end">
-            <Button type="button" onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+      ) : null}
+    </Modal>
   );
 }

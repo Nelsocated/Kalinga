@@ -93,7 +93,7 @@ export async function createAdoptionRequest(
 }
 
 export type UserAdoptionFeedItem = Adoption_Requests & {
-  pet: { name: string | null } | null;
+  pet: { name: string | null; photo_url: string | null } | null;
   shelter: { shelter_name: string | null } | null;
 };
 
@@ -119,7 +119,7 @@ export async function getUserAdoptionFeed(
 
   const { data, error } = await supabase
     .from("adoption_requests")
-    .select("*, pet:pets(name), shelter:shelter(shelter_name)")
+    .select("*, pet:pets(name, photo_url), shelter:shelter(shelter_name)")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 

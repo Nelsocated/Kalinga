@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import BackButton from "../ui/BackButton";
-import { Plus } from "@phosphor-icons/react";
+import { Images, Plus } from "@phosphor-icons/react";
+import Button from "../ui/Button";
+import Modal from "../ui/Modal";
+import { fetchJson } from "@/src/lib/fetchJson";
 
 type Props = {
   petId: string;
@@ -15,175 +17,99 @@ type Photo = {
   url: string;
 };
 
+const MAX_PHOTOS = 5;
+
+/** Shelter owners add up to five extra photos to a pet. */
 export default function AddPetPhotosModal({ petId, buttonClassName }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [photos, setPhotos] = useState<Photo[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // reset on close
-  useEffect(() => {
-    if (!isOpen) {
-      setError(null);
+  async function loadPhotos() {
+    const json = await fetchJson<{ data: Photo[] }>(`/api/pets/photos?petId=${petId}`, { cache: "no-store" });
+    setPhotos((json.data ?? []).filter((p) => p.url?.trim()));
+  }
+
+  async function open() {
+    setIsOpen(true);
+    setError(null);
+    setFetching(true);
+    try {
+      await loadPhotos();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't load photos.");
+    } finally {
+      setFetching(false);
     }
-  }, [isOpen]);
-
-  // fetch photos on open
-  useEffect(() => {
-    if (!isOpen) return;
-
-    async function loadPhotos() {
-      setFetching(true);
-
-      try {
-        const res = await fetch(`/api/pets/photos?petId=${petId}`);
-        const json = await res.json();
-
-        if (!res.ok) throw new Error(json?.error || "Failed to load photos");
-
-        setPhotos(json.data ?? []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error loading photos");
-      } finally {
-        setFetching(false);
-      }
-    }
-
-    loadPhotos();
-  }, [isOpen, petId]);
-
-  // upload (Promise style like your request)
-  function uploadPhoto(file: File): Promise<string> {
-    return fetch("/api/pets/photos", {
-      method: "POST",
-      body: (() => {
-        const form = new FormData();
-        form.append("file", file);
-        form.append("petId", petId);
-        return form;
-      })(),
-    }).then(async (res) => {
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
-      return data.data.url;
-    });
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
 
-    if (photos.length >= 5) {
-      alert("Max 5 photos allowed");
+    if (photos.length >= MAX_PHOTOS) {
+      setError(`A pet can have up to ${MAX_PHOTOS} extra photos.`);
       return;
     }
 
-    setLoading(true);
-
+    setError(null);
+    setUploading(true);
     try {
-      await uploadPhoto(file);
-
-      setLoading(true);
-      const res = await fetch(`/api/pets/photos?petId=${petId}`);
-      const json = await res.json();
-
-      setPhotos(json.data ?? []);
-      setLoading(false);
+      const form = new FormData();
+      form.append("file", file);
+      form.append("petId", petId);
+      await fetchJson("/api/pets/photos", { method: "POST", body: form });
+      await loadPhotos();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Upload failed");
+      setError(err instanceof Error ? err.message : "Couldn't upload that photo.");
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   }
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className={[
-          "flex flex-col items-center bg-primary rounded-full font-semibold hover:scale-105",
-          buttonClassName,
-        ].join(" ")}
-      >
-        <Plus size={40} aria-hidden="true" />
-      </button>
+      <Button variant="secondary" size="sm" onClick={open} icon={<Images aria-hidden="true" />} className={buttonClassName}>
+        Photos
+      </Button>
 
-      {/* MODAL */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* BACKDROP */}
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setIsOpen(false)}
-          />
-
-          {/* MODAL BOX */}
-          <div className="relative z-10 w-125 rounded-[15px] bg-innerbg shadow-2xl">
-            {/* HEADER (same pattern as DonationModal) */}
-            <div className="grid grid-cols-3 items-center bg-primary py-3 rounded-t-[15px]">
-              <div className="pl-4">
-                <BackButton onClick={() => setIsOpen(false)} />
-              </div>
-
-              <div className="text-center text-title font-bold text-innerbg">
-                Pet Photos
-              </div>
-
-              <div />
-            </div>
-
-            {/* BODY */}
-            <div className="max-h-[75vh] overflow-y-auto px-10 py-4 space-y-3">
-              {error && <div className="text-sm text-red-600">{error}</div>}
-
-              {fetching ? (
-                <div className="text-sm opacity-60">Loading...</div>
-              ) : (
-                <>
-                  {/* GRID */}
-                  <div className="grid grid-cols-3 gap-2">
-                    {photos
-                      .filter(
-                        (p) => typeof p.url === "string" && p.url.trim() !== "",
-                      )
-                      .map((p) => (
-                        <Image
-                          key={p.id}
-                          src={p.url}
-                          alt="pet photo"
-                          width={200}
-                          height={200}
-                          className="h-24 w-24 rounded-lg object-cover"
-                        />
-                      ))}
-
-                    {/* ADD BUTTON */}
-                    {photos.length < 5 && (
-                      <label className="flex h-24 w-24 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed text-sm hover:bg-gray-100">
-                        {loading ? "..." : "+ Add"}
-
-                        <input
-                          type="file"
-                          accept="image/*"
-                          hidden
-                          onChange={handleFileChange}
-                        />
-                      </label>
-                    )}
-                  </div>
-
-                  {/* FOOTER */}
-                  <div className="text-sm text-gray-500">
-                    {photos.length}/5 photos uploaded
-                  </div>
-                </>
-              )}
-            </div>
+      <Modal open={isOpen} onClose={() => setIsOpen(false)} title="Pet photos">
+        {fetching ? (
+          <p role="status" className="text-sm text-muted">
+            Loading photos…
+          </p>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <ul className="grid grid-cols-3 gap-2">
+              {photos.map((p) => (
+                <li key={p.id} className="relative aspect-square overflow-hidden rounded-md bg-sunshine-soft">
+                  <Image src={p.url} alt="" fill sizes="160px" className="object-cover" />
+                </li>
+              ))}
+              {photos.length < MAX_PHOTOS ? (
+                <li>
+                  <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-line text-sm font-medium text-ink transition-colors focus-within:ring-2 focus-within:ring-ink hover:bg-sunshine-wash">
+                    <Plus size={22} aria-hidden="true" />
+                    {uploading ? "Uploading…" : "Add photo"}
+                    <input type="file" accept="image/*" className="sr-only" disabled={uploading} onChange={handleFileChange} />
+                  </label>
+                </li>
+              ) : null}
+            </ul>
+            <p className="text-sm text-muted">
+              {photos.length} of {MAX_PHOTOS} photos
+            </p>
+            {error ? (
+              <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">
+                {error}
+              </p>
+            ) : null}
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </>
   );
 }

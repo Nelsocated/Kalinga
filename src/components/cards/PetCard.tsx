@@ -2,11 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
-import {
-  getSexIcon,
-  type PetGender,
-} from "@/src/app/site/profiles/pets/[id]/PetProfileClient";
+import { cn } from "@/src/lib/cn";
+import Avatar from "../ui/Avatar";
+import SexIcon from "../ui/SexIcon";
+import type { PetGender } from "@/src/lib/types/shelters";
 
 export type PetCardProps = {
   href?: string;
@@ -17,10 +16,13 @@ export type PetCardProps = {
   shelterLogo?: string;
   className?: string;
   year_inShelter?: number;
+  /** A short label over the photo, e.g. a foster story title. */
   title?: string | null;
+  /** Compact variant for pickers: no shelter row. */
   resize?: boolean;
 };
 
+/** Photo-led pet tile: 4:5 photo, name with sex, shelter below. */
 export default function PetCard({
   href,
   imageUrl,
@@ -31,104 +33,64 @@ export default function PetCard({
   year_inShelter,
   title,
   resize = false,
-  className = "",
+  className,
 }: PetCardProps) {
-  const src = (imageUrl ?? "").trim() || DEFAULT_AVATAR_URL;
+  const src = (imageUrl ?? "").trim();
+  const hasYear = typeof year_inShelter === "number" && Number.isFinite(year_inShelter);
+  const label =
+    title?.trim() ||
+    (hasYear ? `${year_inShelter} year${year_inShelter === 1 ? "" : "s"} in shelter` : null);
 
-  const hasYear =
-    typeof year_inShelter === "number" && Number.isFinite(year_inShelter);
-
-  const yearLabel = hasYear
-    ? `${year_inShelter} year${year_inShelter === 1 ? "" : "s"} in shelter`
-    : null;
-
-  const topLabel = title?.trim() || yearLabel;
-
-  const cardContent = resize ? (
+  const content = (
     <>
-      {topLabel ? (
-        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full border-2 bg-chip px-4 py-1 text-small leading-none font-bold shadow-sm">
-          {topLabel}
-        </div>
-      ) : null}
-
-      <div>
-        <div className="relative h-30 overflow-hidden rounded-[15px]">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-sunshine-soft">
+        {src ? (
           <Image
             src={src}
-            alt={`${petName} photo`}
+            alt=""
             fill
-            className="object-cover"
+            sizes="(min-width: 1024px) 240px, (min-width: 640px) 30vw, 45vw"
+            className="object-cover transition-transform duration-300 ease-out-expo group-hover:scale-[1.03]"
           />
-        </div>
+        ) : (
+          <span className="absolute inset-0 flex items-center justify-center text-3xl font-bold text-ink/40">
+            {petName.slice(0, 1).toUpperCase()}
+          </span>
+        )}
+        {label ? (
+          <span className="absolute top-2 left-2 max-w-[calc(100%-1rem)] truncate rounded-full bg-card/95 px-2.5 py-1 text-xs font-medium text-ink">
+            {label}
+          </span>
+        ) : null}
       </div>
 
-      <div className="ml-1 px-2 py-2">
-        <div className="flex items-center">
-          <div className="text-lg leading-none font-bold">{petName}</div>
-          {getSexIcon(sex, 15)}
+      <div className="flex flex-col gap-1 px-1 pt-2.5 pb-1">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate font-semibold text-ink">{petName}</span>
+          <SexIcon sex={sex} size={16} />
         </div>
-      </div>
-    </>
-  ) : (
-    <>
-      {topLabel ? (
-        <div className="absolute left-1/2 top-0 z-20 max-w-45 -translate-x-1/2 -translate-y-1/2 truncate whitespace-nowrap rounded-full px-4 py-1 border-2 bg-chip text-small leading-none font-bold shadow-sm">
-          {topLabel}
-        </div>
-      ) : null}
-
-      <div>
-        <div className="relative h-35 overflow-hidden rounded-[15px]">
-          <Image
-            src={src}
-            alt={`${petName} photo`}
-            fill
-            className="object-cover"
-          />
-        </div>
-      </div>
-
-      <div className="ml-1 flex justify-between items-center px-1 py-1">
-        <div>
-          <div className="flex items-center">
-            <div className="text-lg leading-none font-bold ">{petName}</div>
-            {getSexIcon(sex, 20)}
-          </div>
-
-          <div className="flex items-center gap-1 text-small leading-none">
-            <Image
-              src={shelterLogo || DEFAULT_AVATAR_URL}
-              alt={shelterName ?? "Shelter logo"}
-              width={18}
-              height={18}
-              className="rounded-full"
-            />
+        {!resize && shelterName ? (
+          <div className="flex min-w-0 items-center gap-1.5 text-sm text-muted">
+            <Avatar src={shelterLogo} name={shelterName} size={20} />
             <span className="truncate">{shelterName}</span>
           </div>
-        </div>
-
-        <div className="border border-black rounded-full px-3 py-1 text-small">
-          More Info
-        </div>
+        ) : null}
       </div>
     </>
   );
 
-  const sharedClassName = [
-    "relative block overflow-visible rounded-[15px] border-2 bg-primary hover:scale-105",
-    href ? "cursor-pointer" : "",
-    resize ? "w-40" : "w-50",
+  const classes = cn(
+    "group block w-full rounded-lg border border-line bg-card p-2 text-left",
+    href &&
+      "transition-[box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift",
     className,
-  ].join(" ");
+  );
 
-  if (!href) {
-    return <div className={sharedClassName}>{cardContent}</div>;
-  }
-
-  return (
-    <Link href={href} className={sharedClassName}>
-      {cardContent}
+  return href ? (
+    <Link href={href} className={classes} aria-label={`${petName}${shelterName ? `, ${shelterName}` : ""}`}>
+      {content}
     </Link>
+  ) : (
+    <div className={classes}>{content}</div>
   );
 }

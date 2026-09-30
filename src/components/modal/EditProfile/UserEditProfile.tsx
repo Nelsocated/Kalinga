@@ -13,9 +13,9 @@ export default function UserEditProfileModal() {
 
   return (
     <EditProfileModal
-      title="Edit Profile"
+      title="Edit profile"
       fields={[
-        { key: "full_name", label: "Full Name" },
+        { key: "full_name", label: "Full name" },
         { key: "username", label: "Username" },
         { key: "bio", label: "Bio" },
         { key: "contact_email", label: "Email", type: "email" },

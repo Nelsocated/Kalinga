@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import UserProfilePage from "./UserProfilePage";
+import ContactRows from "@/src/components/template/ContactRows";
 import ProfileTabs from "@/src/components/tabs/ProfileTab";
 import { getUserById } from "@/src/lib/services/usersService";
 
@@ -22,13 +23,9 @@ export default async function Page({
     username: data.username,
     avatar_url: data.photo_url ?? null,
     bio: data.bio ?? null,
-    contact:
-      data.contact_email || data.contact_phone ? (
-        <div className="flex flex-col">
-          {data.contact_email && <span>{data.contact_email}</span>}
-          {data.contact_phone && <span>{data.contact_phone}</span>}
-        </div>
-      ) : null,
+    contact: (
+      <ContactRows email={data.contact_email} phone={data.contact_phone} />
+    ),
     location: null,
     created_at: data.created_at,
   };

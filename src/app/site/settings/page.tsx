@@ -1,61 +1,57 @@
-"use client";
-
-import { useState } from "react";
+import Link from "next/link";
 import ChangePasswordView from "@/src/components/views/ChangePasswordView";
 import DeleteAccountView from "@/src/components/views/DeleteAccountView";
 import WebTemplate from "@/src/components/template/WebTemplate";
-import { Gear, UserCheck } from "@phosphor-icons/react";
+import LogoutButton from "@/src/components/ui/LogoutButton";
+import Card from "@/src/components/ui/Card";
 
-export default function SettingsPage() {
-  return <WebTemplate header="Settings" main={SettingsTabsView()} />;
+function SettingsCard({
+  title,
+  description,
+  children,
+  danger = false,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  danger?: boolean;
+}) {
+  return (
+    <Card className={danger ? "border-reject/30 p-5 sm:p-6" : "p-5 sm:p-6"}>
+      <h2 className={danger ? "text-lg font-semibold text-reject-text" : "text-lg font-semibold text-ink"}>{title}</h2>
+      {description ? <p className="mt-1 text-sm text-muted">{description}</p> : null}
+      <div className="mt-5">{children}</div>
+    </Card>
+  );
 }
 
-type TabKey = "change-password" | "delete-account";
+const linkClass = "text-sm font-medium text-ink underline-offset-4 hover:underline";
 
-function SettingsTabsView() {
-  const [activeTab, setActiveTab] = useState<TabKey>("change-password");
-
-  const buttonStyle = `text-lg font-semibold hover:bg-primary  flex items-center rounded-[15px] pl-6 ml-7 border px-2 py-1 border-l-0`;
-
+export default function SettingsPage() {
   return (
-    <div className="overflow-y-auto scroll-stable">
-      <div className="mb-5 flex gap-3 border-b py-5 justify-center relative">
-        <button
-          type="button"
-          onClick={() => setActiveTab("change-password")}
-          className={`flex items-center hover:scale-105`}
-        >
-          <div className="bg-primary rounded-full w-12 h-12 flex items-center justify-center absolute">
-            <Gear size={25} aria-hidden="true" />
-          </div>
-          <span
-            className={`${buttonStyle} ${activeTab === "change-password" ? "bg-primary" : "bg-white"}`}
-          >
-            Account Settings
-          </span>
-        </button>
+    <WebTemplate
+      header="Settings"
+      main={
+        <div className="flex max-w-2xl flex-col gap-5">
+          <SettingsCard title="Password" description="Confirm your account email and current password to set a new one.">
+            <ChangePasswordView />
+          </SettingsCard>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("delete-account")}
-          className={`flex items-center hover:scale-105`}
-        >
-          <div className="bg-primary rounded-full w-12 h-12 flex items-center justify-center absolute">
-            <UserCheck size={25} aria-hidden="true" />
-          </div>
-          <span
-            className={`${buttonStyle} ${activeTab === "delete-account" ? "bg-primary" : "bg-white"}`}
-          >
-            Account Deletion
-          </span>
-        </button>
-      </div>
+          <SettingsCard title="Session">
+            <LogoutButton className="w-fit" />
+          </SettingsCard>
 
-      {activeTab === "change-password" ? (
-        <ChangePasswordView />
-      ) : (
-        <DeleteAccountView />
-      )}
-    </div>
+          <SettingsCard title="About Kalinga">
+            <nav aria-label="Kalinga pages" className="flex flex-wrap gap-x-5 gap-y-2">
+              <Link href="/about" className={linkClass}>About</Link>
+            </nav>
+          </SettingsCard>
+
+          <SettingsCard title="Danger zone" description="Permanently delete your Kalinga account." danger>
+            <DeleteAccountView />
+          </SettingsCard>
+        </div>
+      }
+    />
   );
 }

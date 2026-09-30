@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Button from "./Button";
-import { logoutAction } from "@/src/app/actions/auth";
 import { SignOut } from "@phosphor-icons/react";
+import Button from "./Button";
+import Modal from "./Modal";
+import { logoutAction } from "@/src/app/actions/auth";
 
 type LogoutButtonProps = {
   redirectTo?: string;
@@ -12,92 +13,78 @@ type LogoutButtonProps = {
   withIcon?: boolean;
 };
 
+/** Log out, after a quick confirmation. */
 export default function LogoutButton({
   redirectTo = "/login",
   className = "",
   withIcon = true,
 }: LogoutButtonProps) {
   const router = useRouter();
-
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function handleLogout() {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-      setError("");
-
       const result = await logoutAction();
-
       if (!result.ok) {
         setError(result.error);
         return;
       }
-
       setOpen(false);
       router.replace(redirectTo);
       router.refresh();
     } catch {
-      setError("Something went wrong while logging out.");
+      setError("Couldn't log you out. Try again.");
     } finally {
       setLoading(false);
     }
+  }
+
+  function close() {
+    if (loading) return;
+    setOpen(false);
+    setError("");
   }
 
   return (
     <>
       <Button
         type="button"
-        onClick={() => setOpen(true)}
         variant="ghost"
+        onClick={() => setOpen(true)}
+        icon={withIcon ? <SignOut size={22} aria-hidden="true" /> : undefined}
         className={`justify-start ${className}`}
       >
-        {withIcon ? (
-          <SignOut size={25} aria-hidden="true" />
-        ) : null}
-        <span>Log Out</span>
+        Log out
       </Button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-[15px] border-2 bg-white p-5 shadow-lg">
-            <p className="text-neutral-800 flex justify-center">
-              Log out of your account?
-            </p>
-
-            {error ? (
-              <p className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
-                {error}
-              </p>
-            ) : null}
-
-            <div className="mt-4 flex justify-center gap-3">
-              <Button
-                type="button"
-                onClick={() => {
-                  if (loading) return;
-                  setOpen(false);
-                  setError("");
-                }}
-                disabled={loading}
-                className="text-sm text-neutral-700 bg-primary hover:scale-105"
-              >
-                Cancel
-              </Button>
-
-              <Button
-                type="button"
-                onClick={handleLogout}
-                disabled={loading}
-                className="text-sm text-neutral-700 hover:scale-105"
-              >
-                {loading ? "Logging out..." : "Yes, log out"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        open={open}
+        onClose={close}
+        title="Log out of Kalinga?"
+        className="sm:max-w-sm"
+        footer={
+          <>
+            <Button variant="ghost" onClick={close} disabled={loading}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleLogout} loading={loading}>
+              Log out
+            </Button>
+          </>
+        }
+      >
+        {error ? (
+          <p role="alert" className="text-sm text-reject-text">
+            {error}
+          </p>
+        ) : (
+          <p className="text-sm text-ink-soft">You can log back in any time.</p>
+        )}
+      </Modal>
     </>
   );
 }

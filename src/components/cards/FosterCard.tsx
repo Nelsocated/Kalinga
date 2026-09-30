@@ -1,46 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ArrowRight } from "@phosphor-icons/react";
 
 type FosterCardProps = {
   href: string;
   title: string;
   description: string;
+  /** The pet tile shown beside the story. */
   children: ReactNode;
 };
 
-export default function FosterCard({
-  href,
-  title,
-  description,
-  children,
-}: FosterCardProps) {
+/** A foster story: the pet on one side, the story excerpt on the other. */
+export default function FosterCard({ href, title, description, children }: FosterCardProps) {
   return (
-    <div className="relative flex w-full rounded-[15px] border-2 transition hover:shadow-lg">
-      <div className="flex w-full rounded-[15px] bg-chip">
-        <div>{children}</div>
+    <article className="relative flex flex-col gap-3 rounded-lg border border-line bg-card p-3 transition-[box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift sm:flex-row">
+      <div className="w-full shrink-0 sm:w-40">{children}</div>
 
-        <div className="flex flex-1 flex-col justify-between px-5 py-2">
-          <div>
-            <h3
-              className="text-justify text-lg text-primary
-[text-shadow:-1px_-1px_0_black,1px_-1px_0_black,-1px_1px_0_black,1px_1px_0_black] leading-7 font-extrabold wrap-break-words line-clamp-2"
-            >
-              “{title}”
-            </h3>
-            <p className="ml-4 text-justify leading-6 wrap-break-words line-clamp-4">
-              {description}
-            </p>
-          </div>
-        </div>
-        <div className="flex justify-end items-center mr-5">
-          <Link href={href}>
-            <ArrowRight size={16} aria-hidden="true" />
-          </Link>
-        </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-2 py-1">
+        <h3 className="line-clamp-2 text-lg font-semibold text-ink">{title}</h3>
+        <p className="line-clamp-4 text-sm text-ink-soft">{description}</p>
+        <Link
+          href={href}
+          className="mt-auto flex w-fit items-center gap-1 text-sm font-semibold text-ink underline-offset-4 hover:underline"
+        >
+          Read the story
+          <ArrowRight size={16} aria-hidden="true" />
+        </Link>
       </div>
-    </div>
+    </article>
   );
 }
