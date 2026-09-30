@@ -1,29 +1,74 @@
 @import "tailwindcss";
 
-body {
-  background: var(--color-background);
-  margin: 0;
-}
-
+/*
+ * Kalinga design tokens. DESIGN.md is the source of truth for what each one means.
+ * Sunshine yellow is the identity, navy is the ink, cream is the ground.
+ */
 @theme {
+  /* Brand */
+  --color-sunshine: #f3be0f;
+  --color-sunshine-deep: #d8a90d;
+  --color-sunshine-soft: #fef3b3;
+  --color-sunshine-wash: #fff6d6;
+  --color-ink: #042666;
+  --color-ink-soft: #3a4f7a;
+
+  /* Neutrals */
+  --color-ground: #fff9ed;
+  --color-card: #fffdf7;
+  --color-line: #efe3c2;
+  --color-muted: #5b6478;
+
+  /* Pet sex */
+  --color-male: #6495ed;
+  --color-female: #f8c8dc;
+
+  /* Adoption status: base hue for fills, *-text shades pass AA on the 14% tint */
+  --color-under_review: #1b48a1;
+  --color-contacting: #6b1086;
+  --color-approved: #0f971c;
+  --color-approved-text: #0b6e15;
+  --color-reject: #c01717;
+  --color-reject-text: #a31212;
+  --color-adopted: #ec2e57;
+  --color-adopted-text: #b81d40;
+  --color-withdrawn: #f07800;
+  --color-withdrawn-text: #a65200;
+  --color-submitted: #042666;
+
+  /* Type: Rubik is loaded with next/font in the root layout */
+  --font-sans: var(--font-rubik), system-ui, sans-serif;
+  --text-display: clamp(2rem, 4vw + 1rem, 3.5rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 800;
+  --text-headline: clamp(1.5rem, 1.5vw + 1rem, 2rem);
+  --text-headline--line-height: 1.15;
+  --text-headline--letter-spacing: -0.01em;
+  --text-headline--font-weight: 700;
+
+  /* Shape: pills for controls, 12px inputs, 16px cards, 24px panels */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Depth: flat at rest, lift on interaction */
+  --shadow-lift: 0 6px 18px -8px rgb(4 38 102 / 0.18);
+  --shadow-float: 0 18px 40px -16px rgb(4 38 102 / 0.28);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /*
+   * Legacy aliases, kept while screens move to the tokens above.
+   * Remove each one once nothing uses it.
+   */
   --color-primary: #f3be0f;
   --color-secondary: #042666;
   --color-outerbg: #fff9ed;
   --color-innerbg: #fffdf7;
   --color-chip: #fef3b3;
-  --color-male: #6495ed;
-  --color-female: #f8c8dc;
-  --color-border: #f3be0f;
-
-  --font-sans: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
-
-  --color-submitted: black;
-  --color-under_review: #1b48a1;
-  --color-contacting: #6b1086;
-  --color-reject: #c01717;
-  --color-approved: #0f971c;
-  --color-adopted: #ec2e57;
-  --color-withdrawn: #f07800;
+  --color-border: #efe3c2;
   --color-textwhite: #fffaeb;
 
   --text-header: 60px;
@@ -37,13 +82,64 @@ body {
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scrollbar-color: var(--color-sunshine-deep) transparent;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    scrollbar-gutter: stable;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    text-underline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--color-sunshine-soft);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  input,
+  textarea {
+    caret-color: var(--color-ink);
+  }
+
+  ::placeholder {
+    color: var(--color-muted);
+    opacity: 1;
   }
 }
 
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -51,17 +147,25 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #f3be0f;
+  background: var(--color-sunshine);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d8a90d;
+  background: var(--color-sunshine-deep);
 }
 
-body {
-  scrollbar-gutter: stable;
-}
 .scroll-stable {
   scrollbar-gutter: stable;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

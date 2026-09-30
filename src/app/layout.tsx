@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import { Rubik } from "next/font/google";
 import "./globals.css";
+
+const rubik = Rubik({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-rubik",
+  display: "swap",
+});
 
 const description =
   "Kalinga helps rescued dogs and cats find a home. Watch short videos from " +
@@ -19,7 +26,6 @@ export const metadata: Metadata = {
     "adopt a cat",
     "animal shelter",
     "rescue pets",
-    "Philippines",
   ],
   openGraph: {
     type: "website",
@@ -44,8 +50,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-outerbg min-h-screen">{children}</body>
+    <html lang="en" className={rubik.variable}>
+      <body className="min-h-dvh">{children}</body>
     </html>
   );
 }
