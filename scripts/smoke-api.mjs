@@ -41,6 +41,12 @@ const CHECKS = [
   { method: "POST", path: "/api/foster", body: {}, status: 404 },
   { method: "PATCH", path: "/api/users", body: {}, status: 405 },
   { method: "PATCH", path: "/api/shelters/me", body: {}, status: 405 },
+  // Removed in Task 7
+  { method: "POST", path: "/api/likes", body: {}, status: 405 },
+  { method: "POST", path: "/api/messages/compose", body: {}, status: 404 },
+  { method: "POST", path: `/api/messages/threads/${Z}`, body: {}, status: 405 },
+  { method: "POST", path: `/api/pets/${Z}/adoption`, body: {}, status: 405 },
+  { method: "GET", path: "/api/admin/applications", status: 404 },
 ];
 
 let failed = 0;

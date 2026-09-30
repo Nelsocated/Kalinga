@@ -4,6 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
 import Button from "../ui/Button";
+import { unwrap } from "@/src/lib/actionResult";
+import {
+  composeMessageAction,
+  replyToThreadAction,
+} from "@/src/app/actions/social";
 
 type RecipientOption = {
   id: string;
@@ -118,17 +123,7 @@ export default function ComposeView({
           throw new Error("Missing thread to reply to.");
         }
 
-        const res = await fetch(`/api/messages/threads/${lockedThreadId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ body }),
-        });
-
-        const data = await res.json().catch(() => null);
-
-        if (!res.ok) {
-          throw new Error(data?.error || "Failed to reply");
-        }
+        unwrap(await replyToThreadAction(lockedThreadId, body));
 
         onCreated?.(lockedThreadId);
       } else {
@@ -182,19 +177,9 @@ export default function ComposeView({
           throw new Error("Invalid recipient for this sender side.");
         }
 
-        const res = await fetch("/api/messages/compose", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const { threadId } = unwrap(await composeMessageAction(payload));
 
-        const data = await res.json().catch(() => null);
-
-        if (!res.ok) {
-          throw new Error(data?.error || "Failed to send message");
-        }
-
-        onCreated?.(data?.data?.thread?.id);
+        onCreated?.(threadId);
       }
 
       setBody("");

@@ -1,4 +1,6 @@
 import { fetchJson } from "@/src/lib/fetchJson";
+import { unwrap } from "@/src/lib/actionResult";
+import { createAdoptionRequestAction } from "@/src/app/actions/social";
 import type { PetStatus, answer } from "@/src/lib/types/adoptionRequests";
 
 export type AdoptionFormPayload = {
@@ -32,11 +34,7 @@ export async function createPetAdoptionRequest(
   petId: string,
   payload: AdoptionFormPayload,
 ): Promise<void> {
-  await fetchJson(`/api/pets/${encodeURIComponent(petId)}/adoption`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  unwrap(await createAdoptionRequestAction(petId, payload));
 }
 
 /** `answerId` is the adoption request id. */

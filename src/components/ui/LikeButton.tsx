@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { fetchJson } from "@/src/lib/fetchJson";
+import { unwrap } from "@/src/lib/actionResult";
+import { setLikeAction } from "@/src/app/actions/social";
 
 export type LikeTargetType = "pet" | "shelter" | "video";
 
@@ -46,16 +48,7 @@ async function updateLiked(
   targetId: string,
   nextLiked: boolean,
 ) {
-  await fetchJson("/api/likes", {
-    method: nextLiked ? "POST" : "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      targetType,
-      targetId,
-    }),
-  });
+  unwrap(await setLikeAction({ targetType, targetId }, nextLiked));
 }
 
 function LikeSvg({ className = "" }: { className?: string }) {

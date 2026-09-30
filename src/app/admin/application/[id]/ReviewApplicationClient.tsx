@@ -9,6 +9,8 @@ import type {
 import DocumentModal from "../../../../components/modal/DocumentModal";
 import WebTemplate from "@/src/components/template/WebTemplate";
 import Button from "@/src/components/ui/Button";
+import { unwrap } from "@/src/lib/actionResult";
+import { reviewApplicationAction } from "@/src/app/actions/admin";
 
 type Props = {
   initialData: ShelterApplicationItem;
@@ -105,30 +107,11 @@ export default function ReviewApplicationClient({ initialData }: Props) {
       setErrorMsg(null);
       setSuccessMsg(null);
 
-      const res = await fetch(`/api/admin/applications/${application.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          status,
-        }),
-      });
+      const updated = unwrap(
+        await reviewApplicationAction(application.id, status),
+      );
 
-      const json = (await res.json().catch(() => null)) as {
-        ok?: boolean;
-        data?: ShelterApplicationItem | null;
-        error?: string | null;
-      } | null;
-
-      if (!res.ok || !json?.ok || !json?.data) {
-        throw new Error(json?.error ?? `Request failed (${res.status})`);
-      }
-
-      setApplication((prev) => ({
-        ...prev,
-        ...json.data,
-      }));
+      setApplication((prev) => ({ ...prev, ...updated }));
 
       setSuccessMsg(
         status === "approved"
