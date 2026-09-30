@@ -8,6 +8,8 @@ import Input from "@/src/components/ui/Input";
 import WebTemplate from "@/src/components/template/WebTemplate";
 import Button from "@/src/components/ui/Button";
 import FilterControls from "@/src/components/ui/FilterControls";
+import Textarea from "@/src/components/ui/Textarea";
+import { Camera } from "@phosphor-icons/react";
 import { createClientSupabase } from "@/src/lib/supabase/client";
 import { createPetAction } from "@/src/app/actions/content";
 
@@ -123,19 +125,19 @@ export default function Page() {
     setError(null);
 
     if (!form.name.trim()) {
-      setError("Pet name is required.");
+      setError("Add the pet's name.");
       return;
     }
     if (!form.year_inShelter.trim()) {
-      setError("Year/s in Shelter is required.");
+      setError("Add the year the pet arrived.");
       return;
     }
     if (!form.description.trim()) {
-      setError("Information is required.");
+      setError("Write a little about this pet.");
       return;
     }
     if (!form.breed.trim()) {
-      setError("Breed is required.");
+      setError("Add the breed.");
       return;
     }
 
@@ -171,186 +173,94 @@ export default function Page() {
 
   return (
     <WebTemplate
-      header={"Add a Pet"}
+      header="Add a pet"
       main={
-        <div className="px-4 py-6">
-          <form onSubmit={handleSubmit}>
-            <div className="flex flex-col gap-4">
-              <div className="flex justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="relative flex h-50 w-80 overflow-hidden flex-col items-center justify-center rounded-[15px] border bg-white px-3 py-4 text-center transition hover:bg-primary/10"
-                >
-                  {previewUrl ? (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <Image
-                        src={previewUrl}
-                        alt="Pet preview"
-                        width={140}
-                        height={140}
-                        className="object-contain"
-                        unoptimized
-                      />
-                    </div>
-                  ) : (
-                    <>
-                      <span className="text-subtitle leading-none">+</span>
-                      <span className="text-sm font-semibold">
-                        Upload Pictures
-                      </span>
-                    </>
-                  )}
-                </button>
+        <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-ink">Main photo</span>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="relative flex aspect-[4/5] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border-2 border-dashed border-line bg-card text-center transition-colors hover:bg-sunshine-wash"
+            >
+              {previewUrl ? (
+                <Image src={previewUrl} alt="Preview of the pet photo" fill className="object-cover" unoptimized />
+              ) : (
+                <>
+                  <Camera size={28} className="text-ink" aria-hidden="true" />
+                  <span className="text-sm font-medium text-ink">Choose a photo</span>
+                  <span className="text-xs text-muted">JPG or PNG, up to 5 MB</span>
+                </>
+              )}
+            </button>
+            {previewUrl ? (
+              <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="w-fit">
+                Change photo
+              </Button>
+            ) : null}
+            <input ref={fileInputRef} type="file" accept="image/*" className="sr-only" tabIndex={-1} onChange={handleFileChange} />
+          </div>
 
-                <div className="relative h-50 w-80 overflow-hidden rounded-[15px] bg-primary">
-                  {previewUrl ? (
-                    <Image
-                      src={previewUrl}
-                      alt="Uploaded pet image"
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  ) : null}
-                </div>
+          <div className="flex flex-col gap-5">
+            <Input label="Name" value={form.name} onChange={(e) => updateField("name", e.target.value)} required />
+            <Input label="Breed" value={form.breed} onChange={(e) => updateField("breed", e.target.value)} required />
+            <Input
+              label="Year the pet arrived"
+              hint="For example 2021. We show how long they've waited."
+              inputMode="numeric"
+              value={form.year_inShelter}
+              onChange={(e) => updateField("year_inShelter", e.target.value)}
+              required
+            />
+            <Textarea
+              label="About this pet"
+              value={form.description}
+              onChange={(e) => updateField("description", e.target.value)}
+              rows={5}
+              required
+            />
 
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </div>
+            <FilterControls.SpeciesSection selected={[form.species]} onToggle={(value) => updateField("species", value)} />
+            <FilterControls.GenderSection selected={[form.sex]} onToggle={(value) => updateField("sex", value)} />
+            <FilterControls.AgeSection selected={[form.age]} onToggle={(value) => updateField("age", value)} />
+            <FilterControls.SizeSection selected={[form.size]} onToggle={(value) => updateField("size", value)} />
 
-              <div className="flex flex-col gap-1">
-                <Input
-                  label="Pet Name"
-                  value={form.name}
-                  onChange={(e) => updateField("name", e.target.value)}
-                  placeholder="Pet Name"
-                  labelClassName="text-subtitle font-semibold"
-                  required
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <Input
-                  label="Breed"
-                  value={form.breed}
-                  onChange={(e) => updateField("breed", e.target.value)}
-                  placeholder="Breed"
-                  labelClassName="text-subtitle font-semibold"
-                  required
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <Input
-                  label="Year in Shelter"
-                  value={form.year_inShelter}
-                  onChange={(e) =>
-                    updateField("year_inShelter", e.target.value)
-                  }
-                  placeholder="Year in Shelter"
-                  labelClassName="text-subtitle font-semibold"
-                  required
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="description"
-                  className="leading-7 text-subtitle font-semibold"
-                >
-                  Information
-                </label>
-                <textarea
-                  id="description"
-                  value={form.description}
-                  onChange={(e) => updateField("description", e.target.value)}
-                  placeholder="Information"
-                  rows={5}
-                  className="resize-none rounded-[15px] border border-primary bg-white px-3 py-2 outline-none"
-                  required
-                />
-              </div>
-              <div className="text-subtitle font-semibold">
-                Characteristics:
-              </div>
-
-              <FilterControls.SpeciesSection
-                selected={[form.species]}
-                onToggle={(value) => updateField("species", value)}
-              />
-
-              <FilterControls.GenderSection
-                selected={[form.sex]}
-                onToggle={(value) => updateField("sex", value)}
-              />
-
-              <FilterControls.AgeSection
-                selected={[form.age]}
-                onToggle={(value) => updateField("age", value)}
-              />
-
-              <FilterControls.SizeSection
-                selected={[form.size]}
-                onToggle={(value) => updateField("size", value)}
-              />
-
-              <div>
-                <div className="mb-2 text-subtitle font-semibold">Medical</div>
-                <div className="flex flex-wrap gap-2">
+            <fieldset className="flex flex-col gap-2.5">
+              <legend className="mb-2.5 text-sm font-semibold text-ink">Health</legend>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    ["vaccinated", "Vaccinated"],
+                    ["spayed_neutered", "Spayed or neutered"],
+                  ] as const
+                ).map(([key, label]) => (
                   <button
+                    key={key}
                     type="button"
-                    onClick={() => updateField("vaccinated", !form.vaccinated)}
+                    aria-pressed={form[key]}
+                    onClick={() => updateField(key, !form[key])}
                     className={[
-                      "rounded-[15px] border px-3 py-2 text-sm font-medium transition",
-                      form.vaccinated
-                        ? "bg-primary text-black"
-                        : "border-black/50 bg-white text-black hover:bg-primary/10",
+                      "flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors",
+                      form[key] ? "border-sunshine bg-sunshine text-ink" : "border-line bg-card text-ink hover:bg-sunshine-wash",
                     ].join(" ")}
                   >
-                    Vaccinated
+                    {label}
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updateField("spayed_neutered", !form.spayed_neutered)
-                    }
-                    className={[
-                      "rounded-[15px] border px-3 py-2 text-sm font-medium transition",
-                      form.spayed_neutered
-                        ? "bg-primary text-black"
-                        : "border-black/50 bg-white text-black hover:bg-primary/10",
-                    ].join(" ")}
-                  >
-                    Spayed / Neutered
-                  </button>
-                </div>
+                ))}
               </div>
+            </fieldset>
 
-              {error ? (
-                <div className="rounded-[10px] bg-red-100 px-3 py-2 text-sm text-red-700">
-                  {error}
-                </div>
-              ) : null}
+            {error ? (
+              <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">
+                {error}
+              </p>
+            ) : null}
 
-              <div className="flex justify-center">
-                <Button
-                  type="submit"
-                  disabled={submitting || uploadingImage}
-                  className="w-full max-w-40 flex justify-center hover:scale-105 "
-                >
-                  {submitting || uploadingImage ? "Posting..." : "Post"}
-                </Button>
-              </div>
-            </div>
-          </form>
-        </div>
+            <Button type="submit" variant="primary" size="lg" loading={submitting || uploadingImage} className="w-full sm:w-fit">
+              Add pet
+            </Button>
+          </div>
+        </form>
       }
     />
   );

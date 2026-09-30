@@ -1,14 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { ChangeEvent, FormEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
 
-import SexIcon from "@/src/components/ui/SexIcon";
 import WebTemplate from "@/src/components/template/WebTemplate";
 import Button from "@/src/components/ui/Button";
-import CharacteristicChip from "@/src/components/template/pet/CharacteristicChip";
+import Textarea from "@/src/components/ui/Textarea";
+import LinkedPetField from "@/src/components/forms/LinkedPetField";
+import AvailabilityField from "@/src/components/forms/AvailabilityField";
+import { VideoCamera } from "@phosphor-icons/react";
 import LinkPetModal from "@/src/components/modal/LinkPetModal";
 import type { PetCardProps } from "@/src/lib/types/shelters";
 
@@ -93,9 +93,9 @@ export default function PostVideoClient({ pets, initialError }: Props) {
     e.preventDefault();
     setError(null);
 
-    if (!selectedFile) return setError("Video file is required.");
-    if (!form.caption.trim()) return setError("Caption is required.");
-    if (!form.petId.trim()) return setError("Please link a pet profile.");
+    if (!selectedFile) return setError("Choose a video to post.");
+    if (!form.caption.trim()) return setError("Add a caption.");
+    if (!form.petId.trim()) return setError("Choose which pet this video is about.");
 
     setSubmitting(true);
 
@@ -123,223 +123,62 @@ export default function PostVideoClient({ pets, initialError }: Props) {
   return (
     <>
       <WebTemplate
-        header="Add Video"
+        header="Post a video"
         main={
-          <div className="px-4 py-6">
-            <form onSubmit={handleSubmit}>
-              <div className="flex flex-col gap-4">
-                <div className="flex justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="relative flex h-100 aspect-9/16 overflow-hidden flex-col items-center justify-center rounded-[15px] border bg-white px-3 py-4 text-center transition hover:bg-primary/10"
-                  >
-                    {previewUrl ? (
-                      <video
-                        src={previewUrl}
-                        className="h-full w-full object-cover"
-                        muted
-                        playsInline
-                      />
-                    ) : (
-                      <>
-                        <span className="text-2xl leading-none">+</span>
-                        <span className="text-sm font-semibold">
-                          Upload Video
-                        </span>
-                      </>
-                    )}
-                  </button>
-
-                  <div className="relative h-100 aspect-9/16 overflow-hidden rounded-[15px] bg-primary">
-                    {previewUrl ? (
-                      <video
-                        src={previewUrl}
-                        className="h-full w-full object-cover"
-                        autoPlay
-                        loop
-                        playsInline
-                        controls
-                      />
-                    ) : null}
-                  </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="video/*"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-subtitle font-semibold">Caption</label>
-                  <textarea
-                    value={form.caption}
-                    onChange={(e) => updateField("caption", e.target.value)}
-                    placeholder="Description"
-                    rows={3}
-                    className="resize-none rounded-[15px] border bg-white px-3 py-2 outline-none"
-                    required
-                  />
-                </div>
-
-                {/* Link pet */}
-                <Button
+          <form onSubmit={handleSubmit} className="grid gap-8 md:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-ink">Video</span>
+              {previewUrl ? (
+                <video
+                  src={previewUrl}
+                  className="aspect-9/16 w-full rounded-lg bg-ink object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  controls
+                />
+              ) : (
+                <button
                   type="button"
-                  onClick={() => setShowPetPicker(true)}
-                  className="bg-primary px-3 py-2 text-lg"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex aspect-9/16 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-line bg-card text-center transition-colors hover:bg-sunshine-wash"
                 >
-                  Link Pet Profile
+                  <VideoCamera size={28} className="text-ink" aria-hidden="true" />
+                  <span className="text-sm font-medium text-ink">Choose a video</span>
+                  <span className="px-4 text-xs text-muted">Vertical works best, up to 100 MB</span>
+                </button>
+              )}
+              {previewUrl ? (
+                <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="w-fit">
+                  Change video
                 </Button>
+              ) : null}
+              <input ref={fileInputRef} type="file" accept="video/*" className="sr-only" tabIndex={-1} onChange={handleFileChange} />
+            </div>
 
-                {/* Selected pet preview */}
-                <div className="min-h-28 rounded-[15px] border bg-white p-2">
-                  {selectedPet ? (
-                    <div className="flex gap-3">
-                      <div className="relative h-50 w-50 overflow-hidden rounded-[15px] bg-primary">
-                        {selectedPet.imageUrl ? (
-                          <Image
-                            src={selectedPet.imageUrl}
-                            alt={selectedPet.petName || "Unknown pet"}
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
-                        ) : null}
-                      </div>
+            <div className="flex flex-col gap-5">
+              <Textarea
+                label="Caption"
+                value={form.caption}
+                onChange={(e) => updateField("caption", e.target.value)}
+                rows={3}
+                required
+              />
+              <LinkedPetField pet={selectedPet} onChoose={() => setShowPetPicker(true)} />
+              <AvailabilityField value={form.adoptionStatus} onChange={(v) => updateField("adoptionStatus", v)} />
 
-                      <div className="flex-1">
-                        <div className="p-1">
-                          <div className="relative h-overflow-hidden rounded-[15px]">
-                            <Image
-                              src={selectedPet.imageUrl || ""}
-                              alt={`${selectedPet.petName} photo`}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
-                        <div className="p-2">
-                          <div className="flex items-center">
-                            <div className="text-subtitle leading-none font-bold">
-                              {selectedPet.petName}
-                            </div>
-                            <SexIcon sex={selectedPet.gender} size={20} />
-                          </div>
+              {error ? (
+                <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">
+                  {error}
+                </p>
+              ) : null}
 
-                          <div className="flex items-center text-description leading-none">
-                            <Image
-                              src={
-                                selectedPet.shelterLogo || DEFAULT_AVATAR_URL
-                              }
-                              alt={selectedPet.shelterName ?? ""}
-                              width={30}
-                              height={30}
-                              className="rounded-full"
-                            />
-                            <span>{selectedPet.shelterName}</span>
-                          </div>
-
-                          <div className="mt-1 text-lg font-semibold">
-                            Characteristics:
-                          </div>
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {selectedPet.sex && (
-                              <CharacteristicChip
-                                label="Sex"
-                                value={selectedPet.sex}
-                              />
-                            )}
-                            {selectedPet.age && (
-                              <CharacteristicChip
-                                label="Age"
-                                value={selectedPet.age}
-                              />
-                            )}
-                            {selectedPet.size && (
-                              <CharacteristicChip
-                                label="Size"
-                                value={selectedPet.size}
-                              />
-                            )}
-                            {selectedPet.species && (
-                              <CharacteristicChip
-                                label="Species"
-                                value={selectedPet.species}
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-sm text-black/40">
-                      No pet linked yet.
-                    </div>
-                  )}
-                </div>
-
-                {/* Adoption status */}
-                <div>
-                  <div className="text-lg font-semibold">
-                    Availability for Adoption:
-                  </div>
-                  <div className="mt-1 flex flex-col gap-1 text-lg">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={form.adoptionStatus === "available"}
-                        onChange={() =>
-                          updateField(
-                            "adoptionStatus",
-                            form.adoptionStatus === "available"
-                              ? ""
-                              : "available",
-                          )
-                        }
-                        className="mt-1 accent-primary"
-                      />
-                      Available
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={form.adoptionStatus === "not_available"}
-                        onChange={() =>
-                          updateField(
-                            "adoptionStatus",
-                            form.adoptionStatus === "not_available"
-                              ? ""
-                              : "not_available",
-                          )
-                        }
-                        className="mt-1 accent-primary"
-                      />
-                      Not Available
-                    </label>
-                  </div>
-                </div>
-
-                {error ? (
-                  <div className="rounded-[10px] bg-red-100 px-3 py-2 text-sm text-red-700">
-                    {error}
-                  </div>
-                ) : null}
-
-                <div className="flex justify-center pt-2">
-                  <Button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full max-w-40 flex justify-center hover:scale-105 "
-                  >
-                    {submitting ? "Posting..." : "Post"}
-                  </Button>
-                </div>
-              </div>
-            </form>
-          </div>
+              <Button type="submit" variant="primary" size="lg" loading={submitting} className="w-full sm:w-fit">
+                Post video
+              </Button>
+            </div>
+          </form>
         }
       />
       <LinkPetModal

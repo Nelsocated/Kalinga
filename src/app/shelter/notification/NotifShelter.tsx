@@ -1,15 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ClipboardText } from "@phosphor-icons/react";
 import WebTemplate from "@/src/components/template/WebTemplate";
-import FilterView, {
-  type SpeciesFilter,
-  getIcon,
-} from "@/src/components/views/FilterView";
-import type { PetGender } from "@/src/lib/types/shelters";
 import NotifShelterCard from "@/src/components/cards/NotifShelterCard";
-import Button from "@/src/components/ui/Button";
-import { Funnel } from "@phosphor-icons/react";
+import EmptyState from "@/src/components/ui/EmptyState";
+import { cn } from "@/src/lib/cn";
+import type { PetGender } from "@/src/lib/types/shelters";
 
 export type ShelterAdoptionStatus =
   | "pending"
@@ -43,118 +40,97 @@ export type Props = {
   shelterName?: string | null;
 };
 
-const statusLabelMap: Record<ShelterAdoptionStatus, string> = {
-  pending: "Submitted",
-  under_review: "Under Review",
-  contacting_applicant: "Contacting Applicant",
-  not_approved: "Not Approved",
-  approved: "Approved",
-  withdrawn: "Withdrawn",
-  adopted: "Adopted",
-};
+type StatusFilter = ShelterAdoptionStatus | "all";
+type SpeciesFilter = "all" | "dog" | "cat";
 
-const statusActiveClassMap: Record<ShelterAdoptionStatus, string> = {
-  pending: "text-white border-submitted bg-submitted",
-  under_review: "text-white border-under_review bg-under_review",
-  contacting_applicant: "text-white border-contacting bg-contacting",
-  not_approved: "text-white border-reject bg-reject",
-  approved: "text-black border-approved bg-approved",
-  withdrawn: "text-black border-withdrawn bg-withdrawn",
-  adopted: "text-black border-adopted bg-adopted",
-};
+const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "pending", label: "New" },
+  { value: "under_review", label: "Under review" },
+  { value: "contacting_applicant", label: "Contacting" },
+  { value: "approved", label: "Approved" },
+  { value: "not_approved", label: "Not approved" },
+  { value: "adopted", label: "Adopted" },
+  { value: "withdrawn", label: "Withdrawn" },
+];
 
+const SPECIES_FILTERS: { value: SpeciesFilter; label: string }[] = [
+  { value: "all", label: "All pets" },
+  { value: "dog", label: "Dogs" },
+  { value: "cat", label: "Cats" },
+];
+
+function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn(
+        "flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors",
+        active ? "border-sunshine bg-sunshine text-ink" : "border-line bg-card text-ink hover:bg-sunshine-wash",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Incoming adoption applications, filtered by species and status. */
 export default function NotifShelter({ items = [] }: Props) {
-  const [species, setSpecies] = useState<SpeciesFilter>("dog");
-  const [status, setStatus] = useState<ShelterAdoptionStatus>("pending");
-  const [isReviewing, setIsReviewing] = useState(false);
+  const [species, setSpecies] = useState<SpeciesFilter>("all");
+  const [status, setStatus] = useState<StatusFilter>("all");
 
-  const filteredItems = useMemo(() => {
-    return items.filter(
-      (item) => item.species === species && item.status === status,
-    );
-  }, [items, species, status]);
-
-  const activeStatusClass = statusActiveClassMap[status];
+  const bySpecies = useMemo(
+    () => (species === "all" ? items : items.filter((item) => item.species === species)),
+    [items, species],
+  );
+  const filteredItems = useMemo(
+    () => (status === "all" ? bySpecies : bySpecies.filter((item) => item.status === status)),
+    [bySpecies, status],
+  );
+  const countFor = (value: StatusFilter) =>
+    value === "all" ? bySpecies.length : bySpecies.filter((item) => item.status === value).length;
 
   return (
     <WebTemplate
-      header={"Notification"}
+      header="Applications"
       main={
-        <main className="flex h-full min-h-0 flex-col ">
-          {!isReviewing ? (
-            <FilterView
-              species={species}
-              status={status}
-              onSpeciesChange={setSpecies}
-              onStatusChange={setStatus}
-              onEnter={() => setIsReviewing(true)}
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap gap-2" aria-label="Species">
+              {SPECIES_FILTERS.map((f) => (
+                <Pill key={f.value} active={species === f.value} onClick={() => setSpecies(f.value)}>
+                  {f.label}
+                </Pill>
+              ))}
+            </div>
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0" aria-label="Status">
+              {STATUS_FILTERS.map((f) => (
+                <Pill key={f.value} active={status === f.value} onClick={() => setStatus(f.value)}>
+                  {f.label}
+                  <span className="tabular-nums text-ink-soft">{countFor(f.value)}</span>
+                </Pill>
+              ))}
+            </div>
+          </div>
+
+          {filteredItems.length === 0 ? (
+            <EmptyState
+              icon={<ClipboardText aria-hidden="true" />}
+              title={items.length === 0 ? "No applications yet" : "No applications match"}
+              description={items.length === 0 ? "When someone applies to adopt one of your pets, it shows up here." : undefined}
             />
           ) : (
-            <>
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b-2 px-5 py-2">
-                <div className="flex flex-wrap items-center gap-5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold text-black">
-                      Species:
-                    </span>
-
-                    <span className="flex items-center gap-2 rounded-[15px] border border-primary bg-primary px-3 py-1 text-lg font-semibold text-black">
-                      {getIcon(species)}
-                      {species === "dog" ? "Dog" : "Cat"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold text-black">
-                      Status:
-                    </span>
-
-                    <span
-                      className={`flex items-center rounded-[15px] border px-3 py-1 text-lg font-semibold ${activeStatusClass}`}
-                    >
-                      {statusLabelMap[status]}
-                    </span>
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  onClick={() => setIsReviewing(false)}
-                  className="rounded-[15px] border bg-transparent px-3 py-1 text-sm font-semibold text-black"
-                >
-                  <Funnel size={30} aria-hidden="true" />
-                </Button>
-              </div>
-
-              <div className="px-5 py-3">
-                <p className="text-base font-semibold text-black">
-                  {statusLabelMap[status]} Application(s) for{" "}
-                  {species === "dog" ? "Dogs" : "Cats"}
-                </p>
-              </div>
-
-              <section className="min-h-0 flex-1 overflow-y-auto px-4">
-                {filteredItems.length === 0 ? (
-                  <div className="flex min-h-60 items-center justify-center rounded-[15px] border border-dashed">
-                    <p className="text-sm text-black/70">
-                      No applications found.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 pt-2">
-                    {filteredItems.map((item) => (
-                      <NotifShelterCard
-                        key={item.id}
-                        item={item}
-                        status={item.status}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-            </>
+            <ul className="grid gap-4 lg:grid-cols-2">
+              {filteredItems.map((item) => (
+                <li key={item.id}>
+                  <NotifShelterCard item={item} />
+                </li>
+              ))}
+            </ul>
           )}
-        </main>
+        </div>
       }
     />
   );

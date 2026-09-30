@@ -1,130 +1,72 @@
 "use client";
 
-import Button from "../ui/Button";
-import PetCard from "./PetCard";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Link from "next/link";
+import { ChatCircle, ClipboardText } from "@phosphor-icons/react";
 import type { ShelterNotifItem } from "../../app/shelter/notification/NotifShelter";
-import React, { useState } from "react";
 import AnswerModal from "../modal/AnswerModal";
 import ComposeView from "../views/ComposeView";
+import Avatar from "../ui/Avatar";
+import Button from "../ui/Button";
+import SexIcon from "../ui/SexIcon";
+import StatusChip from "../ui/StatusChip";
 
 type Props = {
   item: ShelterNotifItem;
-  status: string;
 };
 
-function statusText(name: string, status: string) {
-  function switchCase(status: string): React.ReactNode {
-    switch (status) {
-      case "under review":
-        return "wants to adopt";
-      case "contacting applicant":
-        return "wants to adopt";
-      case "not approved":
-        return "- Application Declined";
-      case "approved":
-        return "- Approved Adopter";
-      case "withdrawn":
-        return "- Withdrew Adoption";
-      case "adopted":
-        return "Adopted";
-      default:
-        return "wants to adopt";
-    }
-  }
-
-  return (
-    <div className="line-clamp-1 h-15 rounded-[15px] bg-primary w-60 px-3 py-1 text-sm font-semibold text-black">
-      <span className="truncate">{name}</span> {switchCase(status)}
-    </div>
-  );
-}
-
-export default function NotifShelterCard({ item, status }: Props) {
+/** One incoming adoption application with review and message actions. */
+export default function NotifShelterCard({ item }: Props) {
   const [openAnswer, setOpenAnswer] = useState(false);
   const [openMessage, setOpenMessage] = useState(false);
-  const router = useRouter();
 
   return (
     <>
-      <div className="relative flex flex-col">
-        <div className="z-0 flex items-center justify-between">
-          {statusText(item.applicantName, status)}
-          <button
-            type="button"
-            onClick={() => {
-              if (!item.applicantId) return;
-              router.push(`/site/profiles/user/${item.applicantId}`);
-            }}
-            className="flex h-15 items-start rounded-[15px] bg-primary px-4 py-1 text-sm font-semibold text-black hover:underline"
-          >
-            View User Profile
-          </button>
-        </div>
-
-        <div className="mt-6 h-30" />
-
-        <article className="absolute z-10 mt-6 w-107.5 rounded-[15px] border-3 bg-innerbg p-2">
-          <div className="grid grid-cols-[155px_1fr] items-center gap-3">
-            <PetCard
-              petName={item.petName}
-              sex={item.sex}
-              imageUrl={item.petPhotoUrl}
-              resize={true}
-            />
-
-            <div className="flex flex-col items-center gap-3 p-1">
-              <Button
-                type="button"
-                className="flex w-full justify-center rounded-[15px] hover:scale-105 border bg-white px-3 text-description font-medium text-black"
-                onClick={() => setOpenAnswer(true)}
-              >
-                Review Application Form
-              </Button>
-
-              <Button
-                type="button"
-                className="flex w-full justify-center rounded-[15px] hover:scale-105 border bg-white px-3 text-description font-medium text-black"
-                onClick={() => setOpenMessage(true)}
-              >
-                Message User
-              </Button>
-
-              <Button
-                type="button"
-                className="flex w-full justify-center rounded-[15px] hover:scale-105 border bg-white px-3 text-description font-medium text-black"
-              >
-                Update Adoption Status
-              </Button>
+      <article className="flex flex-col gap-4 rounded-lg border border-line bg-card p-4">
+        <div className="flex items-start gap-3">
+          <Avatar src={item.petPhotoUrl} name={item.petName} size={56} className="rounded-md" />
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <p className="flex items-center gap-1.5 font-semibold text-ink">
+              <span className="truncate">{item.petName}</span>
+              <SexIcon sex={item.sex} size={16} />
+            </p>
+            <p className="flex min-w-0 items-center gap-1.5 text-sm text-ink-soft">
+              <Avatar src={item.applicantPhotoUrl} name={item.applicantName} size={20} />
+              {item.applicantId ? (
+                <Link href={`/site/profiles/user/${item.applicantId}`} className="truncate underline-offset-4 hover:underline">
+                  {item.applicantName}
+                </Link>
+              ) : (
+                <span className="truncate">{item.applicantName}</span>
+              )}
+            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <StatusChip status={item.status} />
+              {item.date ? <span className="text-xs text-muted">{item.date}</span> : null}
             </div>
           </div>
-        </article>
-      </div>
+        </div>
 
-      <AnswerModal
-        isOpen={openAnswer}
-        onClose={() => setOpenAnswer(false)}
-        answerId={item.id}
-      />
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" size="sm" onClick={() => setOpenAnswer(true)} icon={<ClipboardText aria-hidden="true" />}>
+            Review application
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setOpenMessage(true)} icon={<ChatCircle aria-hidden="true" />}>
+            Message
+          </Button>
+        </div>
+      </article>
 
-      {openMessage && (
+      <AnswerModal isOpen={openAnswer} onClose={() => setOpenAnswer(false)} answerId={item.id} />
+
+      {openMessage ? (
         <ComposeView
-          isModal
           isOpen={openMessage}
           onClose={() => setOpenMessage(false)}
+          onCreated={() => setOpenMessage(false)}
           mode="new"
-          userId={item.applicantId}
           senderSide="shelter"
-          senderShelterId={item.shelterId}
-          recipients={[
-            {
-              id: item.applicantId,
-              name: item.applicantName,
-              image: item.applicantPhotoUrl ?? null,
-              subtitle: "Applicant",
-              type: "shelter",
-            },
-          ]}
+          recipients={[]}
           lockedRecipient={{
             id: item.applicantId,
             name: item.applicantName,
@@ -132,9 +74,10 @@ export default function NotifShelterCard({ item, status }: Props) {
             subtitle: "Applicant",
             type: "user",
           }}
-          lockedSubject={`${item.petName} - Adoption Process`}
+          lockedSubject={`${item.petName}: your adoption application`}
+          adoptionRequestId={item.id}
         />
-      )}
+      ) : null}
     </>
   );
 }

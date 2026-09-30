@@ -3,6 +3,8 @@
 import DashboardHeader from "@/src/components/template/DashboardHeader";
 import ContentCard from "../../../components/cards/ContentCard";
 import WebTemplate from "@/src/components/template/WebTemplate";
+import { LinkButton } from "@/src/components/ui/Button";
+import { Plus } from "@phosphor-icons/react";
 
 export type DashboardStats = {
   totalViews: number;
@@ -29,18 +31,16 @@ export default function DashboardPage({ stats, items }: Props) {
   return (
     <WebTemplate
       header="Dashboard"
+      actions={
+        <LinkButton href="/shelter/creation" variant="primary" icon={<Plus weight="bold" aria-hidden="true" />}>
+          Create
+        </LinkButton>
+      }
       main={
-        <main className="flex h-full min-h-0 flex-col">
+        <div className="flex flex-col gap-8">
           <DashboardHeader stats={stats} />
-
-          <section className="flex min-h-0 flex-1 flex-col px-4 py-3">
-            <h2 className="mb-3 text-3xl font-extrabold text-black">Content</h2>
-
-            <div className="min-h-0 flex-1">
-              <ContentCard items={items} />
-            </div>
-          </section>
-        </main>
+          <ContentCard items={items} />
+        </div>
       }
     />
   );
