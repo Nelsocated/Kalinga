@@ -7,10 +7,11 @@ const Z = "00000000-0000-0000-0000-000000000000";
 /** @type {{method:string,path:string,body?:unknown,status:number,shape?:"data"|"error"}[]} */
 const CHECKS = [
   // Public reads
-  { method: "GET", path: "/api/feed", status: 200 },
-  { method: "GET", path: `/api/likes?targetType=pet&targetId=${Z}`, status: 200 },
+  { method: "GET", path: "/api/feed", status: 200, shape: "data" },
+  { method: "GET", path: `/api/likes?targetType=pet&targetId=${Z}`, status: 200, shape: "data" },
   { method: "POST", path: "/api/pets/search", body: {}, status: 200, shape: "data" },
-  { method: "GET", path: `/api/pets/photos?petId=${Z}`, status: 200 },
+  { method: "GET", path: `/api/pets/photos?petId=${Z}`, status: 200, shape: "data" },
+  { method: "GET", path: `/api/views?media_id=${Z}`, status: 200, shape: "data" },
   { method: "GET", path: `/api/shelters/${Z}/donation`, status: 200, shape: "data" },
   // Signed-out access to private reads and uploads
   { method: "GET", path: "/api/likes/me", status: 401, shape: "error" },

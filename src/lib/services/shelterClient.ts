@@ -25,7 +25,7 @@ export async function uploadMyShelterAvatar(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const json = await fetchJson<{ publicUrl: string }>(
+  const json = await fetchJson<{ data: { publicUrl: string } }>(
     "/api/shelters/me/avatar",
     {
       method: "POST",
@@ -34,5 +34,5 @@ export async function uploadMyShelterAvatar(file: File): Promise<string> {
     },
   );
 
-  return json.publicUrl;
+  return json.data.publicUrl;
 }

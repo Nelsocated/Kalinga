@@ -35,12 +35,12 @@ async function fetchInitialLiked(
     targetId,
   });
 
-  const body = await fetchJson<{ liked?: boolean }>(
+  const body = await fetchJson<{ data: { liked: boolean } }>(
     `/api/likes?${params.toString()}`,
     { cache: "no-store" },
   );
 
-  return !!body.liked;
+  return body.data.liked;
 }
 
 async function updateLiked(

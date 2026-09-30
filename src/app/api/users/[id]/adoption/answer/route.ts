@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
 import { getAdoptionAnswerForViewer } from "@/src/lib/services/adoptionService";
 import { requireAuth } from "@/src/lib/utils/auth";
-import { errorResponse } from "@/src/lib/api";
+import { handle, ok } from "@/src/lib/api";
 
 type RouteContext = {
   // The adoption request id
@@ -10,15 +9,9 @@ type RouteContext = {
   }>;
 };
 
-export async function GET(_: Request, { params }: RouteContext) {
-  try {
-    const { id } = await params;
-    const caller = await requireAuth();
+export const GET = handle(async (_req: Request, { params }: RouteContext) => {
+  const { id } = await params;
+  const caller = await requireAuth();
 
-    const data = await getAdoptionAnswerForViewer(id, caller.id);
-
-    return NextResponse.json({ data }, { status: 200 });
-  } catch (error) {
-    return errorResponse(error);
-  }
-}
+  return ok(await getAdoptionAnswerForViewer(id, caller.id));
+});

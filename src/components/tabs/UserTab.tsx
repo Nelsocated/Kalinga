@@ -57,7 +57,11 @@ function toPetGender(value?: string | null): "male" | "female" {
 }
 
 async function fetchLikedStuff(): Promise<LikedMiniItem[]> {
-  return fetchJson<LikedMiniItem[]>("/api/likes/me", { cache: "no-store" });
+  const json = await fetchJson<{ data: LikedMiniItem[] }>("/api/likes/me", {
+    cache: "no-store",
+  });
+
+  return json.data;
 }
 
 export default function UserTab() {

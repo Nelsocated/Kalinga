@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
 import { getShelterDonations } from "@/src/lib/services/donationService";
-import { errorResponse } from "@/src/lib/api";
+import { handle, ok } from "@/src/lib/api";
 
 type RouteContext = {
   params: Promise<{
@@ -8,14 +7,8 @@ type RouteContext = {
   }>;
 };
 
-export async function GET(_req: Request, { params }: RouteContext) {
-  try {
-    const { id: shelterId } = await params;
+export const GET = handle(async (_req: Request, { params }: RouteContext) => {
+  const { id: shelterId } = await params;
 
-    const data = await getShelterDonations(shelterId);
-
-    return NextResponse.json({ data }, { status: 200 });
-  } catch (error) {
-    return errorResponse(error);
-  }
-}
+  return ok(await getShelterDonations(shelterId));
+});

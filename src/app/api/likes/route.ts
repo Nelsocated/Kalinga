@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getInitialLikedByUser } from "@/src/lib/services/likeService";
 import { getUserId } from "@/src/lib/utils/auth";
-import { errorResponse } from "@/src/lib/api";
+import { handle, ok } from "@/src/lib/api";
 
 const LikeTargetSchema = z.object({
   targetType: z.enum(["pet", "shelter", "video"], {
@@ -11,23 +10,17 @@ const LikeTargetSchema = z.object({
   targetId: z.string().min(1, "Invalid targetType or targetId"),
 });
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
+export const GET = handle(async (request: Request) => {
+  const { searchParams } = new URL(request.url);
 
-    const target = LikeTargetSchema.parse({
-      targetType: searchParams.get("targetType"),
-      targetId: searchParams.get("targetId"),
-    });
+  const target = LikeTargetSchema.parse({
+    targetType: searchParams.get("targetType"),
+    targetId: searchParams.get("targetId"),
+  });
 
-    const userId = await getUserId();
+  const userId = await getUserId();
 
-    if (!userId) return NextResponse.json({ liked: false }, { status: 200 });
+  if (!userId) return ok({ liked: false });
 
-    const liked = await getInitialLikedByUser({ userId, ...target });
-
-    return NextResponse.json({ liked }, { status: 200 });
-  } catch (error) {
-    return errorResponse(error);
-  }
-}
+  return ok({ liked: await getInitialLikedByUser({ userId, ...target }) });
+});

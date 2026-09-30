@@ -56,7 +56,7 @@ export default function Feed({
         const res = await fetch(`/api/feed?${params}`);
         const result = await res.json();
 
-        setItems(result.items ?? []);
+        setItems(result.data ?? []);
         setCurrentIndex(0);
       } catch {
         setError("Failed to fetch feed");

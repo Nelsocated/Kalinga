@@ -53,7 +53,7 @@ export default function ScrollBar({
             hasPrev ? "" : "pointer-events-none opacity-50"
           }`}
         >
-          <Image src={"/buttons/Up.svg"} alt="up-button" />
+          <Image src="/buttons/Up.svg" alt="Previous video" width={80} height={80} />
         </button>
 
         <button
@@ -63,7 +63,7 @@ export default function ScrollBar({
             hasNext ? "" : "pointer-events-none opacity-50"
           }`}
         >
-          <Image src={"/buttons/Down.svg"} alt="down-button" />
+          <Image src="/buttons/Down.svg" alt="Next video" width={80} height={80} />
         </button>
       </div>
 

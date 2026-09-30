@@ -1,11 +1,8 @@
 import { getFeed } from "@/src/lib/services/feedService";
+import { handle, ok } from "@/src/lib/api";
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
+export const GET = handle(async (req: Request) => {
+  const mediaId = new URL(req.url).searchParams.get("media");
 
-  const mediaId = searchParams.get("media");
-
-  const items = await getFeed(mediaId);
-
-  return Response.json({ items });
-}
+  return ok(await getFeed(mediaId));
+});

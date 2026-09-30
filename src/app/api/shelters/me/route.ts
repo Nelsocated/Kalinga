@@ -1,16 +1,9 @@
-import { NextResponse } from "next/server";
 import { getMyShelterProfile } from "@/src/lib/services/shelterService";
 import { requireOwnedShelterId } from "@/src/lib/utils/auth";
-import { errorResponse } from "@/src/lib/api";
+import { handle, ok } from "@/src/lib/api";
 
-export async function GET() {
-  try {
-    const shelterId = await requireOwnedShelterId();
-    const data = await getMyShelterProfile(shelterId);
+export const GET = handle(async () => {
+  const shelterId = await requireOwnedShelterId();
 
-    return NextResponse.json({ data }, { status: 200 });
-  } catch (error) {
-    return errorResponse(error);
-  }
-}
-
+  return ok(await getMyShelterProfile(shelterId));
+});

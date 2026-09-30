@@ -41,7 +41,7 @@ export default function AddPetPhotosModal({ petId, buttonClassName }: Props) {
 
         if (!res.ok) throw new Error(json?.error || "Failed to load photos");
 
-        setPhotos(json.photos ?? []);
+        setPhotos(json.data ?? []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error loading photos");
       } finally {
@@ -65,7 +65,7 @@ export default function AddPetPhotosModal({ petId, buttonClassName }: Props) {
     }).then(async (res) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload failed");
-      return data.url;
+      return data.data.url;
     });
   }
 
@@ -87,7 +87,7 @@ export default function AddPetPhotosModal({ petId, buttonClassName }: Props) {
       const res = await fetch(`/api/pets/photos?petId=${petId}`);
       const json = await res.json();
 
-      setPhotos(json.photos ?? []);
+      setPhotos(json.data ?? []);
       setLoading(false);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Upload failed");
