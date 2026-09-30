@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CaretDown, CaretUp, ClipboardText, FileText, Plus } from "@phosphor-icons/react";
 import Feed, { type ActiveItem, type FeedNav } from "@/src/components/feed/Feed";
 import RightBar from "@/src/components/layout/RightBar";
 import { buttonStyles } from "@/src/components/ui/Button";
+import type { LikeHandle } from "@/src/components/ui/LikeButton";
 import { cn } from "@/src/lib/cn";
 
 type Props = {
@@ -47,6 +48,7 @@ function StaffShortcuts({ isShelter, isAdmin }: { isShelter: boolean; isAdmin: b
 export default function HomeClient({ isShelter, isAdmin, initialMediaId }: Props) {
   const [nav, setNav] = useState<FeedNav | null>(null);
   const [active, setActive] = useState<ActiveItem | null>(null);
+  const likeRef = useRef<LikeHandle>(null);
 
   // The feed is the page: no document scroll behind it
   useEffect(() => {
@@ -59,12 +61,18 @@ export default function HomeClient({ isShelter, isAdmin, initialMediaId }: Props
 
   return (
     <div className="relative flex h-dvh items-center justify-center md:gap-5 md:px-6">
-      <Feed onActiveChange={setActive} onNavChange={setNav} initialMediaId={initialMediaId} />
+      <Feed
+        onActiveChange={setActive}
+        onNavChange={setNav}
+        onDoubleTap={() => likeRef.current?.like()}
+        initialMediaId={initialMediaId}
+      />
 
       {active ? (
         <RightBar
           media_id={active.media_id ?? ""}
           shelter={active.shelter}
+          likeRef={likeRef}
           className="absolute right-3 bottom-28 z-10 md:static"
         />
       ) : null}

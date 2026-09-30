@@ -136,7 +136,6 @@ export default function PetProfileClient({
               <LikeButton
                 targetType="pet"
                 targetId={initialPet.id}
-                className="h-10"
               />
             }
             actions={isOwner ? <AddPetPhotosModal petId={id} /> : null}

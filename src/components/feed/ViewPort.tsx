@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Play } from "@phosphor-icons/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Heart, Play } from "@phosphor-icons/react";
 import Caption from "./Caption";
 import type { FeedItem } from "@/src/lib/services/feedService";
 import { getViewSessionId } from "@/src/lib/session/getViewSessionId";
@@ -21,6 +22,8 @@ export default function ViewPort({ item, isActive, preload, onDoubleTap }: Props
   const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const viewRecorded = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [hearts, setHearts] = useState(0);
+  const reduce = useReducedMotion();
 
   // Only the active video plays
   useEffect(() => {
@@ -76,6 +79,7 @@ export default function ViewPort({ item, isActive, preload, onDoubleTap }: Props
       clearTimeout(tapTimer.current);
       tapTimer.current = null;
       onDoubleTap?.();
+      setHearts((n) => n + 1);
       return;
     }
 
@@ -109,6 +113,29 @@ export default function ViewPort({ item, isActive, preload, onDoubleTap }: Props
           <Play size={72} weight="fill" className="text-card/90 drop-shadow-lg" aria-hidden="true" />
         </div>
       ) : null}
+
+      <AnimatePresence>
+        {hearts > 0 && !reduce ? (
+          <motion.div
+            key={hearts}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            transition={{ duration: 0.7, ease: "easeIn", delay: 0.35 }}
+            onAnimationComplete={() => setHearts(0)}
+          >
+            <motion.span
+              initial={{ scale: 0.6 }}
+              animate={{ scale: [0.6, 1.1, 1] }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="flex text-sunshine drop-shadow-lg"
+            >
+              <Heart size={96} weight="fill" />
+            </motion.span>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       <Caption
         id={item.pet_id}

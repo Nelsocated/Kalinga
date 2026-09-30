@@ -49,7 +49,6 @@ export default function ShelterProfileClient({
               <LikeButton
                 targetId={shelter.id}
                 targetType="shelter"
-                className="text-primary h-10"
               />
             </div>
           }

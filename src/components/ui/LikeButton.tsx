@@ -1,184 +1,153 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Heart } from "@phosphor-icons/react";
+import { cn } from "@/src/lib/cn";
 import { fetchJson } from "@/src/lib/fetchJson";
 import { unwrap } from "@/src/lib/actionResult";
 import { setLikeAction } from "@/src/app/actions/social";
 
 export type LikeTargetType = "pet" | "shelter" | "video";
-
-function isExpectedAuthError(error: unknown) {
-  if (!error || typeof error !== "object") {
-    return false;
-  }
-
-  const maybeError = error as { message?: string };
-
-  return maybeError.message?.includes("You must be logged in to like") || false;
-}
+export type LikeHandle = { like: () => void };
 
 type Props = {
   targetType: LikeTargetType;
   targetId: string;
+  size?: "md" | "lg";
   className?: string;
-  size?: number;
-  theme?: "default" | "foster";
 };
 
-async function fetchInitialLiked(
-  targetType: LikeTargetType,
-  targetId: string,
-): Promise<boolean> {
-  const params = new URLSearchParams({
-    targetType,
-    targetId,
-  });
+const BURST = [0, 60, 120, 180, 240, 300];
 
-  const body = await fetchJson<{ data: { liked: boolean } }>(
-    `/api/likes?${params.toString()}`,
-    { cache: "no-store" },
-  );
-
-  return body.data.liked;
-}
-
-async function updateLiked(
-  targetType: LikeTargetType,
-  targetId: string,
-  nextLiked: boolean,
+/**
+ * Heart toggle with a spring and a small burst when liked.
+ * The ref's like() only ever likes, for double-tap on the feed.
+ */
+const LikeButton = forwardRef<LikeHandle, Props>(function LikeButton(
+  { targetType, targetId, size = "md", className },
+  ref,
 ) {
-  unwrap(await setLikeAction({ targetType, targetId }, nextLiked));
-}
-
-function LikeSvg({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="40 0 62 72"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={`text-primary ${className}`}
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M94.7439 13.4458C93.3287 11.9554 91.6484 10.7731 89.799 9.96645C87.9495 9.15981 85.9673 8.74463 83.9654 8.74463C81.9635 8.74463 79.9812 9.15981 78.1318 9.96645C76.2824 10.7731 74.6021 11.9554 73.1868 13.4458L70.2498 16.5375L67.3127 13.4458C64.454 10.4367 60.5769 8.74619 56.5342 8.74619C52.4914 8.74619 48.6143 10.4367 45.7556 13.4458C42.897 16.4549 41.291 20.5361 41.291 24.7916C41.291 29.0471 42.897 33.1284 45.7556 36.1375L70.2498 61.9208L94.7439 36.1375C96.1598 34.6477 97.283 32.879 98.0493 30.9322C98.8156 28.9855 99.21 26.8989 99.21 24.7916C99.21 22.6844 98.8156 20.5978 98.0493 18.651C97.283 16.7042 96.1598 14.9355 94.7439 13.4458Z"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function LikedSvg({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="40 0 62 72"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={`text-primary ${className}`}
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M53.0565 34.0675C53.9928 33.1733 55.1046 32.4639 56.3283 31.9799C57.552 31.4959 58.8636 31.2468 60.1881 31.2468C61.5127 31.2468 62.8243 31.4959 64.0479 31.9799C65.2716 32.4639 66.3834 33.1733 67.3198 34.0675L69.2631 35.9225L71.2065 34.0675C73.0979 32.2621 75.6632 31.2478 78.3381 31.2478C81.013 31.2478 83.5784 32.2621 85.4698 34.0675C87.3612 35.873 88.4238 38.3217 88.4238 40.875C88.4238 43.4283 87.3612 45.8771 85.4698 47.6825L69.2631 63.1525L53.0565 47.6825C52.1196 46.7887 51.3765 45.7274 50.8694 44.5594C50.3624 43.3913 50.1014 42.1394 50.1014 40.875C50.1014 39.6107 50.3624 38.3587 50.8694 37.1906C51.3765 36.0226 52.1196 34.9613 53.0565 34.0675Z"
-        fill="currentColor"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M84.6266 27.7377C80.166 26.1713 78.4662 20.2226 80.83 14.4509C83.1938 8.67914 88.726 5.27003 93.1866 6.83642C97.6472 8.4028 99.347 14.3515 96.9832 20.1233C94.6194 25.895 89.0872 29.3041 84.6266 27.7377Z"
-        fill="currentColor"
-      />
-      <path
-        d="M68.7632 26C64.0688 26 60.2632 21.0751 60.2632 15C60.2632 8.92487 64.0688 4 68.7632 4C73.4576 4 77.2632 8.92487 77.2632 15C77.2632 21.0751 73.4576 26 68.7632 26Z"
-        fill="currentColor"
-      />
-      <path
-        d="M53.4644 27.1165C57.8082 25.5911 59.4635 19.7981 57.1616 14.1774C54.8597 8.5567 49.4722 5.23681 45.1284 6.7622C40.7846 8.28759 39.1293 14.0806 41.4312 19.7013C43.7331 25.322 49.1206 28.6419 53.4644 27.1165Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-export default function LikeButton({
-  targetType,
-  targetId,
-  className = "",
-}: Props) {
   const [liked, setLiked] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Bumped on user toggles only, so a liked state that loads in doesn't animate
+  const [pulse, setPulse] = useState(0);
+  const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     let alive = true;
+    const params = new URLSearchParams({ targetType, targetId });
 
-    (async () => {
-      try {
-        const value = await fetchInitialLiked(targetType, targetId);
-        if (alive) {
-          setLiked(value);
-        }
-      } catch (error) {
-        if (!isExpectedAuthError(error)) {
-          console.error(error);
-        }
-      } finally {
-        if (alive) {
-          setLoading(false);
-        }
-      }
-    })();
+    fetchJson<{ data: { liked: boolean } }>(`/api/likes?${params}`, { cache: "no-store" })
+      .then((r) => alive && setLiked(r.data.liked))
+      .catch(() => {})
+      .finally(() => alive && setReady(true));
 
     return () => {
       alive = false;
     };
   }, [targetType, targetId]);
 
-  async function onToggle() {
-    if (loading) return;
+  useEffect(() => () => {
+    if (errorTimer.current) clearTimeout(errorTimer.current);
+  }, []);
 
-    const next = !liked;
-    setLiked(next);
+  const setTo = useCallback(
+    async (next: boolean) => {
+      setLiked(next);
+      setPulse((n) => n + 1);
+      setError(null);
 
-    try {
-      await updateLiked(targetType, targetId, next);
-    } catch (error) {
-      if (!isExpectedAuthError(error)) {
-        console.error(error);
+      try {
+        unwrap(await setLikeAction({ targetType, targetId }, next));
+      } catch (e) {
+        setLiked(!next);
+        setError(e instanceof Error ? e.message : "Couldn't update like.");
+        if (errorTimer.current) clearTimeout(errorTimer.current);
+        errorTimer.current = setTimeout(() => setError(null), 3000);
       }
+    },
+    [targetType, targetId],
+  );
 
-      setLiked(!next);
-      alert(error instanceof Error ? error.message : "Failed to update like.");
-    }
-  }
+  useImperativeHandle(
+    ref,
+    () => ({
+      like: () => {
+        if (ready && !liked) void setTo(true);
+      },
+    }),
+    [ready, liked, setTo],
+  );
+
+  const px = size === "lg" ? 32 : 26;
+  const animate = pulse > 0 && !reduce;
 
   return (
-    <motion.button
-      type="button"
-      onClick={onToggle}
-      whileTap={{ scale: 0.8 }}
-      disabled={loading}
-      className="cursor-pointer select-none disabled:opacity-60 hover:scale-105"
-      aria-pressed={liked}
-      aria-label={liked ? "Unlike" : "Like"}
-    >
-      <motion.div
-        key={liked ? "liked" : "like"}
-        initial={{ scale: 0.7, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        {liked ? (
-          <LikedSvg className={className} />
-        ) : (
-          <LikeSvg className={className} />
+    <span className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setTo(!liked)}
+        disabled={!ready}
+        aria-pressed={liked}
+        aria-label={liked ? "Unlike" : "Like"}
+        className={cn(
+          "relative flex size-12 cursor-pointer items-center justify-center rounded-full text-ink transition-colors hover:bg-sunshine-wash disabled:cursor-default disabled:opacity-60",
+          className,
         )}
-      </motion.div>
-    </motion.button>
+      >
+        <motion.span
+          key={pulse}
+          initial={animate ? { scale: liked ? 0.4 : 1.15 } : false}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 520, damping: 14 }}
+          className={cn("flex", liked && "text-sunshine-deep")}
+        >
+          <Heart size={px} weight={liked ? "fill" : "regular"} aria-hidden="true" />
+        </motion.span>
+
+        <AnimatePresence>
+          {liked && animate ? (
+            <span key={pulse} aria-hidden="true" className="pointer-events-none absolute inset-0">
+              {BURST.map((deg) => (
+                <motion.span
+                  key={deg}
+                  className="absolute top-1/2 left-1/2 size-1.5 rounded-full bg-sunshine"
+                  initial={{ x: "-50%", y: "-50%", opacity: 1, scale: 1 }}
+                  animate={{
+                    x: `calc(-50% + ${Math.cos((deg * Math.PI) / 180) * 26}px)`,
+                    y: `calc(-50% + ${Math.sin((deg * Math.PI) / 180) * 26}px)`,
+                    opacity: 0,
+                    scale: 0.4,
+                  }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                />
+              ))}
+            </span>
+          ) : null}
+        </AnimatePresence>
+      </button>
+
+      <span
+        role="status"
+        className={cn(
+          "pointer-events-none absolute top-full right-0 z-20 mt-2 w-max max-w-56 rounded-md bg-ink px-3 py-2 text-xs text-card shadow-float transition-opacity duration-200",
+          error ? "opacity-100" : "opacity-0",
+        )}
+      >
+        {error ?? ""}
+      </span>
+    </span>
   );
-}
+});
+
+export default LikeButton;

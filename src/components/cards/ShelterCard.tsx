@@ -81,7 +81,6 @@ export default function ShelterCard({
           <LikeButton
             targetType="shelter"
             targetId={id}
-            className="h-12 text-primary"
           />
         </div>
       </div>

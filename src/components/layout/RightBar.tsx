@@ -4,7 +4,7 @@ import Link from "next/link";
 import { cn } from "@/src/lib/cn";
 import Avatar from "../ui/Avatar";
 import ShareButton from "../ui/ShareButton";
-import LikeButton from "../ui/LikeButton";
+import LikeButton, { type LikeHandle } from "../ui/LikeButton";
 
 export type ShelterMini = {
   id: string;
@@ -16,10 +16,11 @@ type Props = {
   media_id?: string;
   shelter?: ShelterMini | null;
   className?: string;
+  likeRef?: React.Ref<LikeHandle>;
 };
 
 /** Shelter, like and share for the active video. */
-export default function RightBar({ media_id, shelter, className }: Props) {
+export default function RightBar({ media_id, shelter, className, likeRef }: Props) {
   const shelterName = shelter?.shelter_name ?? "Shelter";
 
   return (
@@ -36,9 +37,12 @@ export default function RightBar({ media_id, shelter, className }: Props) {
 
       {media_id ? (
         <LikeButton
+          ref={likeRef}
+          key={media_id}
           targetType="video"
           targetId={media_id}
-          className="size-12 rounded-full bg-card text-ink shadow-lift"
+          size="lg"
+          className="bg-card shadow-lift hover:bg-sunshine-wash"
         />
       ) : null}
 
