@@ -55,16 +55,6 @@ export interface PetFilters {
   status?: Multi<Pets["status"]>;
 }
 
-export interface IPetService {
-  getPets(filters?: PetFilters): Promise<Pets[]>;
-  getPetById(id: string): Promise<Pets | null>;
-  getPetsByIds(ids: string[]): Promise<Pets[]>;
-  getPetsByShelter(shelterId: string): Promise<Pets[]>;
-  getLongestStayPets(limit?: number): Promise<Pets[]>;
-  getAvailablePets(filters?: Omit<PetFilters, "status">): Promise<Pets[]>;
-  fetchSearchPets(filters?: Omit<PetFilters, "status">): Promise<Pets[]>;
-}
-
 export type Dashboard = {
   id: string;
   name: string | null;

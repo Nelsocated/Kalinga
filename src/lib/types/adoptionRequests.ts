@@ -78,12 +78,6 @@ export type AdoptionRequestRow = {
   updated_at: string;
 };
 
-export type PetRow = {
-  id: string;
-  status: PetStatus;
-  shelter_id: string | null;
-};
-
 export type answer = {
   id: string;
   full_name: string;

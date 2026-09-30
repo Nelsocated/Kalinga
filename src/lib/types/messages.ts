@@ -54,32 +54,6 @@ export type CreateMessageThreadInput = {
   senderSide: "user" | "shelter";
 };
 
-export type ReplyToThreadInput = {
-  threadId: string;
-  body: string;
-  senderSide: "user" | "shelter";
-  senderShelterId?: string;
-};
-
-export type UserSentMessageRow = {
-  id: string;
-  body: string;
-  created_at: string;
-  message_threads:
-    | {
-        subject: string | null;
-        shelter_id: string | null;
-        shelter:
-          | {
-              id: string | null;
-              shelter_name: string | null;
-              logo_url: string | null;
-            }[]
-          | null; // ← array, not single object
-      }[]
-    | null;
-};
-
 export type ThreadWithMeta = MessageThread & {
   pet_id?: string | null;
   adoption_status: string | null;

@@ -78,21 +78,6 @@ export type ShelterUpdatePayload = {
   contact_phone?: string;
 };
 
-type ShelterServiceSuccess = {
-  ok: true;
-  data: ShelterProfile;
-  status: number;
-};
-
-type ShelterServiceError = {
-  ok: false;
-  error: string;
-  details?: string | null;
-  status: number;
-};
-
-export type ShelterServiceResult = ShelterServiceSuccess | ShelterServiceError;
-
 export type PetCardProps = ShelterPetMini & {
   breed?: string | null;
   age: "kitten/puppy" | "young_adult" | "adult" | "senior";
