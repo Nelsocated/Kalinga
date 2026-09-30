@@ -1,10 +1,13 @@
 "use client";
 
-import { Suspense, type FormEvent, useEffect, useMemo, useState } from "react";
+import { Suspense, type FormEvent, useEffect, useId, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
+import { FileText, UploadSimple, X } from "@phosphor-icons/react";
 import Input from "@/src/components/ui/Input";
 import Button from "@/src/components/ui/Button";
+import Card from "@/src/components/ui/Card";
+import Modal from "@/src/components/ui/Modal";
 import { getAuthUser } from "@/src/lib/utils/clientAuth";
 
 type Step = 1 | 2 | 3;
@@ -16,44 +19,119 @@ type UploadFieldKey =
 
 const STEP_COPY: Record<Step, { title: string; subtitle: string }> = {
   1: {
-    title: "Create Shelter Account",
-    subtitle: "Sign up first so we can attach your shelter application.",
+    title: "Create your account",
+    subtitle: "Your shelter application is attached to this account.",
   },
   2: {
-    title: "Shelter Details",
-    subtitle: "Tell us the shelter name and complete address.",
+    title: "Shelter details",
+    subtitle: "The name and address people will see once you're approved.",
   },
   3: {
-    title: "Shelter Verification",
-    subtitle: "Upload the required documents for manual review.",
+    title: "Verification documents",
+    subtitle: "A Kalinga admin reviews these before your shelter goes live.",
   },
 };
 
-function UploadField({
+const PRIVATE_NOTE = "Only Kalinga admins can see this document.";
+
+function formatSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/** File picker as a dashed drop zone; shows the chosen file with a preview. */
+function FileDrop({
   label,
   accept,
+  hint,
+  file,
   onChange,
 }: {
   label: string;
   accept?: string;
+  hint?: string;
+  file: File | null;
   onChange: (file: File | null) => void;
 }) {
+  const id = useId();
+  const [dragging, setDragging] = useState(false);
+  const preview = useMemo(
+    () => (file && file.type.startsWith("image/") ? URL.createObjectURL(file) : null),
+    [file],
+  );
+
+  useEffect(() => () => {
+    if (preview) URL.revokeObjectURL(preview);
+  }, [preview]);
+
   return (
-    <label className="block">
-      <span className="mb-1 block text-sm font-medium text-black">{label}</span>
-      <div className="rounded-[15px] border border-black/20 bg-white px-3 py-2">
-        <input
-          type="file"
-          accept={accept}
-          className="block w-full text-sm text-black file:mr-3 file:rounded-[15px] file:border file:border-primary file:bg-background file:px-3 file:py-1 file:text-sm file:font-medium file:text-black hover:file:bg-primary"
-          onChange={(event) => onChange(event.target.files?.[0] ?? null)}
-        />
-      </div>
-    </label>
+    <div className="flex flex-col gap-1.5">
+      <span id={`${id}-label`} className="text-sm font-medium text-ink">
+        {label}
+      </span>
+
+      {file ? (
+        <div className="flex items-center gap-3 rounded-md border border-line bg-card p-3">
+          {preview ? (
+            // eslint-disable-next-line @next/next/no-img-element -- local blob preview
+            <img src={preview} alt="" className="size-12 shrink-0 rounded-sm object-cover" />
+          ) : (
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-sm bg-sunshine-soft text-ink">
+              <FileText size={24} aria-hidden="true" />
+            </span>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-ink">{file.name}</p>
+            <p className="text-xs text-muted">{formatSize(file.size)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onChange(null)}
+            aria-label={`Remove ${file.name}`}
+            className="flex size-11 shrink-0 items-center justify-center rounded-full text-ink transition-colors hover:bg-sunshine-wash"
+          >
+            <X size={18} aria-hidden="true" />
+          </button>
+        </div>
+      ) : (
+        <label
+          htmlFor={id}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            onChange(e.dataTransfer.files?.[0] ?? null);
+          }}
+          className={[
+            "flex cursor-pointer flex-col items-center gap-1 rounded-md border-2 border-dashed px-4 py-5 text-center transition-colors",
+            "focus-within:border-ink focus-within:ring-2 focus-within:ring-ink/15",
+            dragging ? "border-ink bg-sunshine-wash" : "border-line bg-card hover:bg-sunshine-wash",
+          ].join(" ")}
+        >
+          <UploadSimple size={24} className="text-ink" aria-hidden="true" />
+          <span className="text-sm font-medium text-ink">Choose a file or drop it here</span>
+          <span className="text-xs text-muted">{accept === "image/*" ? "JPG or PNG" : "PDF, JPG or PNG"}</span>
+          <input
+            id={id}
+            type="file"
+            accept={accept ?? "application/pdf,image/*"}
+            aria-labelledby={`${id}-label`}
+            className="sr-only"
+            onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+          />
+        </label>
+      )}
+
+      {hint ? <p className="text-xs text-muted">{hint}</p> : null}
+    </div>
   );
 }
 
-function ShelterSignupPageContent() {
+function ShelterSignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -61,7 +139,7 @@ function ShelterSignupPageContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,30 +154,19 @@ function ShelterSignupPageContent() {
     shelter_photo: null,
   });
 
-  const currentStepCopy = useMemo(() => STEP_COPY[step], [step]);
+  const copy = STEP_COPY[step];
   const displayStep = isLoggedIn ? Math.max(step - 1, 1) : step;
   const totalSteps = isLoggedIn ? 2 : 3;
 
   useEffect(() => {
     let mounted = true;
 
-    async function syncAuthState() {
-      const authUser = await getAuthUser();
-
+    getAuthUser().then((authUser) => {
       if (!mounted) return;
-
       const loggedIn = !!authUser;
       setIsLoggedIn(loggedIn);
-
-      if (loggedIn) {
-        const requestedStep = Number(searchParams.get("step"));
-        setStep(requestedStep === 3 ? 3 : 2);
-      } else {
-        setStep(1);
-      }
-    }
-
-    void syncAuthState();
+      setStep(loggedIn ? (Number(searchParams.get("step")) === 3 ? 3 : 2) : 1);
+    });
 
     return () => {
       mounted = false;
@@ -107,40 +174,22 @@ function ShelterSignupPageContent() {
   }, [searchParams]);
 
   function updateFile(key: UploadFieldKey, file: File | null) {
-    setFiles((current) => ({
-      ...current,
-      [key]: file,
-    }));
+    setFiles((current) => ({ ...current, [key]: file }));
   }
 
   function validateStep(currentStep: Step) {
-    if (currentStep === 1) {
-      if (isLoggedIn) {
-        return null;
-      }
-
-      if (
-        !email.trim() ||
-        !password.trim() ||
-        !fullName.trim() ||
-        !username.trim()
-      ) {
-        return "Please complete your account details first.";
+    if (currentStep === 1 && !isLoggedIn) {
+      if (!email.trim() || !password.trim() || !fullName.trim() || !username.trim()) {
+        return "Fill in all four account fields to continue.";
       }
     }
 
-    if (currentStep === 2) {
-      if (!shelterName.trim() || !completeAddress.trim()) {
-        return "Please provide the shelter name and complete address.";
-      }
+    if (currentStep === 2 && (!shelterName.trim() || !completeAddress.trim())) {
+      return "Add the shelter name and complete address to continue.";
     }
 
-    if (currentStep === 3) {
-      const missingFiles = Object.values(files).some((file) => !file);
-
-      if (missingFiles) {
-        return "Please upload all required shelter documents before submitting.";
-      }
+    if (currentStep === 3 && Object.values(files).some((file) => !file)) {
+      return "Upload all four documents before you submit.";
     }
 
     return null;
@@ -148,32 +197,29 @@ function ShelterSignupPageContent() {
 
   function goNext() {
     const error = validateStep(step);
-
     if (error) {
       setFormError(error);
       return;
     }
-
     setFormError(null);
-
-    if (step < 3) {
-      setStep((current) => (current + 1) as Step);
-    }
+    if (step < 3) setStep((current) => (current + 1) as Step);
   }
 
   function goBack() {
     setFormError(null);
-
-    if (step > 1) {
-      setStep((current) => (current - 1) as Step);
-    }
+    if (step > (isLoggedIn ? 2 : 1)) setStep((current) => (current - 1) as Step);
   }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
 
-    const error = validateStep(3);
+    // Enter on an earlier step moves forward instead of submitting
+    if (step < 3) {
+      goNext();
+      return;
+    }
 
+    const error = validateStep(3);
     if (error) {
       setFormError(error);
       return;
@@ -194,247 +240,165 @@ function ShelterSignupPageContent() {
 
       body.append("shelter_name", shelterName.trim());
       body.append("complete_address", completeAddress.trim());
-      body.append(
-        "registration_certificate",
-        files.registration_certificate as File,
-      );
+      body.append("registration_certificate", files.registration_certificate as File);
       body.append("owner_valid_id", files.owner_valid_id as File);
       body.append("lease_contract", files.lease_contract as File);
       body.append("shelter_photo", files.shelter_photo as File);
 
-      const res = await fetch("/api/auth/shelter-signup", {
-        method: "POST",
-        body,
-      });
-
+      const res = await fetch("/api/auth/shelter-signup", { method: "POST", body });
       const json = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setFormError(json?.error ?? "Shelter signup failed.");
+        setFormError(json?.error ?? "We couldn't submit your application. Try again.");
         return;
       }
 
-      setShowSuccessModal(true);
+      setShowSuccess(true);
     } catch {
-      setFormError("Network error. Try again.");
+      setFormError("Couldn't reach Kalinga. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
   }
 
+  const canGoBack = step > (isLoggedIn ? 2 : 1);
+
   return (
-    <div className="h-svh overflow-hidden bg-primary p-3 sm:p-4 lg:p-6">
-      <div className="mx-auto flex h-full w-full max-w-7xl rounded-[15px] bg-innerbg shadow-lg">
-        <main className="flex h-full w-full items-center justify-center p-8 py-1">
-          <div className="grid h-full w-full items-center gap-6 lg:grid-cols-2 lg:gap-12">
-            <div className="hidden h-full items-center justify-center lg:flex">
-              <div className="flex max-w-md flex-col items-center justify-center">
-                <Image
-                  src={"/kalinga_logo.svg"}
-                  alt="kalinga-logo"
-                  width={300}
-                  height={300}
-                  priority
-                  className="h-auto w-45 sm:w-55 lg:w-65 xl:w-75"
-                />
-                <h1 className="mt-4 text-center text-xl font-medium text-black sm:text-2xl lg:text-3xl">
-                  Give Care. Give Love.
-                  <br />A home for every paw.
-                </h1>
-              </div>
-            </div>
-            <div className="mx-auto flex w-full max-w-md flex-col justify-center rounded-[15px] border-2 bg-white px-4 py-4 shadow-sm sm:px-5 sm:py-5 lg:px-6 lg:py-6">
-              <div className="mb-3">
-                <p className="text-xs font-medium uppercase tracking-[0.25em] text-black/50">
-                  Step {displayStep} of {totalSteps}
-                </p>
-                <h1 className="mt-1 text-center text-subtitle font-bold text-black">
-                  {currentStepCopy.title}
-                </h1>
-                <p className="mt-1 text-center text-description text-black">
-                  {currentStepCopy.subtitle}
-                </p>
-              </div>
-
-              <form onSubmit={onSubmit} className="space-y-3">
-                {step === 1 && !isLoggedIn ? (
-                  <>
-                    <Input
-                      label="Email"
-                      type="email"
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      placeholder="you@email.com"
-                      autoComplete="email"
-                      required
-                    />
-
-                    <Input
-                      label="Password"
-                      type="password"
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                      placeholder="Password"
-                      autoComplete="new-password"
-                      required
-                    />
-
-                    <Input
-                      label="Fullname"
-                      value={fullName}
-                      onChange={(event) => setFullName(event.target.value)}
-                      placeholder="Enter your Fullname"
-                      required
-                    />
-
-                    <Input
-                      label="Username"
-                      value={username}
-                      onChange={(event) => setUsername(event.target.value)}
-                      placeholder="Enter your Username"
-                      required
-                    />
-                  </>
-                ) : null}
-
-                {step === 2 ? (
-                  <>
-                    <Input
-                      label="Shelter Name"
-                      value={shelterName}
-                      onChange={(event) => setShelterName(event.target.value)}
-                      placeholder="Shelter name"
-                      required
-                    />
-
-                    <Input
-                      label="Complete Address"
-                      value={completeAddress}
-                      onChange={(event) =>
-                        setCompleteAddress(event.target.value)
-                      }
-                      placeholder="Complete shelter address"
-                      required
-                    />
-                  </>
-                ) : null}
-
-                {step === 3 ? (
-                  <div className="space-y-2">
-                    <UploadField
-                      label="Registration Certificate"
-                      onChange={(file) =>
-                        updateFile("registration_certificate", file)
-                      }
-                    />
-
-                    <UploadField
-                      label="Valid ID of the Owner"
-                      onChange={(file) => updateFile("owner_valid_id", file)}
-                    />
-
-                    <UploadField
-                      label="Notarized Valid Contract of Lease"
-                      onChange={(file) => updateFile("lease_contract", file)}
-                    />
-
-                    <UploadField
-                      label="Photo of the Shelter"
-                      accept="image/*"
-                      onChange={(file) => updateFile("shelter_photo", file)}
-                    />
-                  </div>
-                ) : null}
-
-                {formError ? (
-                  <p className="text-sm text-red-600">{formError}</p>
-                ) : null}
-
-                <div className="flex gap-3 pt-1">
-                  {step > 1 ? (
-                    <Button
-                      type="button"
-                      onClick={goBack}
-                      className="w-full border-black/20 bg-white flex justify-center hover:scale-105"
-                    >
-                      Back
-                    </Button>
-                  ) : null}
-
-                  {step < 3 ? (
-                    <Button
-                      type="button"
-                      onClick={goNext}
-                      className="w-full flex justify-center bg-primary hover:scale-105"
-                    >
-                      Next
-                    </Button>
-                  ) : (
-                    <Button
-                      type="submit"
-                      loading={loading}
-                      className="w-full flex justify-center bg-primary hover:scale-105"
-                    >
-                      Submit Application
-                    </Button>
-                  )}
-                </div>
-              </form>
-
-              <hr className="mx-auto my-3 w-full border-black/50" />
-
-              {isLoggedIn ? (
-                <Button
-                  onClick={() => router.push("/site/home")}
-                  className="w-full flex justify-center hover:scale-105"
-                >
-                  Back to Home
-                </Button>
-              ) : (
-                <Button
-                  onClick={() =>
-                    router.push(
-                      `/login?next=${encodeURIComponent("/shelterSignup?step=2")}`,
-                    )
-                  }
-                  className="w-full flex justify-center hover:scale-105"
-                >
-                  Log in Instead
-                </Button>
-              )}
-            </div>
-          </div>
-        </main>
+    <Card className="w-full max-w-lg p-6 sm:p-8">
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-ink-soft">
+          Step {displayStep} of {totalSteps}
+        </p>
+        <div
+          role="progressbar"
+          aria-label="Application progress"
+          aria-valuemin={1}
+          aria-valuemax={totalSteps}
+          aria-valuenow={displayStep}
+          className="h-1.5 overflow-hidden rounded-full bg-line"
+        >
+          <div
+            className="h-full rounded-full bg-sunshine-deep transition-[width] duration-300 ease-out-expo"
+            style={{ width: `${(displayStep / totalSteps) * 100}%` }}
+          />
+        </div>
       </div>
 
-      {showSuccessModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="w-full max-w-md rounded-[15px] bg-white p-6 shadow-xl">
-            <h2 className="text-center text-lg font-bold text-black">
-              Application Submitted
-            </h2>
-            <p className="mt-3 text-center text-sm text-black/70">
-              Your shelter application has been received. You are signed in as a
-              regular user for now while we review your documents and contact
-              you with further details.
-            </p>
-            <Button
-              onClick={() => router.push("/site/home")}
-              className="mt-5 w-full flex justify-center hover:scale-105"
-            >
-              Continue to Home
+      <h1 className="mt-5 text-headline text-ink">{copy.title}</h1>
+      <p className="mt-1 text-sm text-muted">{copy.subtitle}</p>
+
+      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
+        {step === 1 && !isLoggedIn ? (
+          <>
+            <Input label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" required />
+            <Input label="Username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" required />
+            <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
+            <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required />
+          </>
+        ) : null}
+
+        {step === 2 ? (
+          <>
+            <Input label="Shelter name" value={shelterName} onChange={(e) => setShelterName(e.target.value)} autoComplete="organization" required />
+            <Input
+              label="Complete address"
+              value={completeAddress}
+              onChange={(e) => setCompleteAddress(e.target.value)}
+              autoComplete="street-address"
+              required
+            />
+          </>
+        ) : null}
+
+        {step === 3 ? (
+          <>
+            <FileDrop
+              label="Registration certificate"
+              hint={PRIVATE_NOTE}
+              file={files.registration_certificate}
+              onChange={(file) => updateFile("registration_certificate", file)}
+            />
+            <FileDrop
+              label="Valid ID of the owner"
+              hint={PRIVATE_NOTE}
+              file={files.owner_valid_id}
+              onChange={(file) => updateFile("owner_valid_id", file)}
+            />
+            <FileDrop
+              label="Notarized contract of lease"
+              hint={PRIVATE_NOTE}
+              file={files.lease_contract}
+              onChange={(file) => updateFile("lease_contract", file)}
+            />
+            <FileDrop
+              label="Photo of the shelter"
+              accept="image/*"
+              hint="Shown on your shelter profile once you're approved."
+              file={files.shelter_photo}
+              onChange={(file) => updateFile("shelter_photo", file)}
+            />
+          </>
+        ) : null}
+
+        {formError ? (
+          <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">
+            {formError}
+          </p>
+        ) : null}
+
+        <div className="flex gap-3 pt-1">
+          {canGoBack ? (
+            <Button type="button" variant="secondary" size="lg" onClick={goBack} className="flex-1">
+              Back
             </Button>
-          </div>
+          ) : null}
+          <Button type="submit" variant="primary" size="lg" loading={loading} className="flex-1">
+            {step < 3 ? "Continue" : "Submit application"}
+          </Button>
         </div>
-      ) : null}
-    </div>
+      </form>
+
+      <div className="mt-6 border-t border-line pt-5 text-sm text-ink-soft">
+        {isLoggedIn ? (
+          <Link href="/site/home" className="font-semibold text-ink underline underline-offset-4">
+            Back to the feed
+          </Link>
+        ) : (
+          <p>
+            Already have an account?{" "}
+            <Link
+              href={`/login?next=${encodeURIComponent("/shelterSignup?step=2")}`}
+              className="font-semibold text-ink underline underline-offset-4"
+            >
+              Log in first
+            </Link>
+          </p>
+        )}
+      </div>
+
+      <Modal
+        open={showSuccess}
+        onClose={() => router.push("/site/home")}
+        title="Application submitted"
+        footer={
+          <Button variant="primary" onClick={() => router.push("/site/home")}>
+            Continue to the feed
+          </Button>
+        }
+      >
+        <p className="text-sm text-ink-soft">
+          We received your shelter application. You can use Kalinga as a regular member while an
+          admin reviews your documents, and we&apos;ll contact you with the result.
+        </p>
+      </Modal>
+    </Card>
   );
 }
 
 export default function ShelterSignupPage() {
   return (
     <Suspense fallback={null}>
-      <ShelterSignupPageContent />
+      <ShelterSignupForm />
     </Suspense>
   );
 }

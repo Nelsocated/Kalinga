@@ -1,28 +1,27 @@
-// app/login/page.tsx
 "use client";
 
-import React, { Suspense, useState } from "react";
+import { Suspense, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Input from "@/src/components/ui/Input";
 import Button from "@/src/components/ui/Button";
-import Image from "next/image";
+import Card from "@/src/components/ui/Card";
 import { loginAction } from "@/src/app/actions/auth";
 
-function LoginPageContent() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next") || "/site/home";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const [loading, setloading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
-    setloading(true);
+    setLoading(true);
 
     try {
       const result = await loginAction({ email, password });
@@ -34,103 +33,68 @@ function LoginPageContent() {
 
       router.push(nextPath);
     } catch {
-      setFormError("Network error. Try again.");
+      setFormError("Couldn't reach Kalinga. Check your connection and try again.");
     } finally {
-      setloading(false);
+      setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-primary px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-      <div className="mx-auto grid min-h-[calc(100svh-2rem)] w-full max-w-7xl rounded-[15px] bg-innerbg shadow-lg sm:min-h-[calc(100svh-3rem)]">
-        <div className="col-start-1 row-start-1 z-10 justify-self-end self-start p-6 sm:p-6">
-          <Button onClick={() => router.push("/about")}>About Us</Button>
-        </div>
+    <Card className="w-full max-w-md p-6 sm:p-8">
+      <h1 className="text-headline text-ink">Log in</h1>
+      <p className="mt-1 text-sm text-muted">Welcome back. Pick up where you left off.</p>
 
-        <main className="col-start-1 row-start-1 flex min-h-0 items-center justify-center p-4 pt-20 sm:p-6 sm:pt-24 lg:p-10">
-          <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-16">
-            <div className="hidden min-h-0 flex-col items-center justify-center lg:flex">
-              <Image
-                src={"/kalinga_logo.svg"}
-                alt="kalinga-logo"
-                width={300}
-                height={300}
-                priority
-              />
-              <h1 className="mt-4 text-center text-2xl font-medium text-black sm:text-3xl">
-                Give Care. Give Love.
-                <br />A home for every paw.
-              </h1>
-            </div>
+      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          required
+        />
+        <Input
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+          required
+        />
 
-            <div className="mx-auto w-full max-w-md rounded-[15px] border-2 bg-white p-5 shadow-sm sm:p-6">
-              <div className="flex justify-center font-bold text-subtitle gap-1">
-                Log into <span className="text-primary">Kalinga</span>
-              </div>
-              <form onSubmit={onSubmit} className="space-y-4">
-                <Input
-                  label="Email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@email.com"
-                  autoComplete="email"
-                  required
-                />
+        {formError ? (
+          <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">
+            {formError}
+          </p>
+        ) : null}
 
-                <Input
-                  label="Password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  autoComplete="new-password"
-                  required
-                />
+        <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full">
+          Log in
+        </Button>
+      </form>
 
-                {formError ? (
-                  <p className="text-sm text-red-600">{formError}</p>
-                ) : null}
-
-                <Button
-                  type="submit"
-                  loading={loading}
-                  className="w-full flex justify-center bg-primary hover:scale-105"
-                >
-                  Log in
-                </Button>
-              </form>
-
-              <hr className="mx-auto my-3 w-full border-black/50" />
-
-              <Button
-                onClick={() => router.push("/signup")}
-                className="w-full flex justify-center hover:scale-105"
-              >
-                Sign up
-              </Button>
-
-              <p className="mt-4 text-sm text-black">
-                Do you own a shelter?{" "}
-                <a
-                  className="font-medium text-black hover:underline"
-                  href="/shelterSignup"
-                >
-                  Create a Page
-                </a>
-              </p>
-            </div>
-          </div>
-        </main>
+      <div className="mt-6 flex flex-col gap-2 border-t border-line pt-5 text-sm text-ink-soft">
+        <p>
+          New to Kalinga?{" "}
+          <Link href="/signup" className="font-semibold text-ink underline underline-offset-4">
+            Create an account
+          </Link>
+        </p>
+        <p>
+          Run a shelter?{" "}
+          <Link href="/shelterSignup" className="font-semibold text-ink underline underline-offset-4">
+            Apply as a shelter
+          </Link>
+        </p>
       </div>
-    </div>
+    </Card>
   );
 }
 
 export default function LoginPage() {
   return (
     <Suspense fallback={null}>
-      <LoginPageContent />
+      <LoginForm />
     </Suspense>
   );
 }
