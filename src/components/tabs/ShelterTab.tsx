@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PawPrint, PlayCircle, type Icon } from "@phosphor-icons/react";
 
 import VideoCard from "../cards/VideoCard";
 import PetCard from "../cards/PetCard";
@@ -15,30 +15,9 @@ import type {
 export type TabsKey = "videos" | "pets";
 
 const TAB_META = {
-  videos: {
-    icon: "/tabs/play.svg",
-    iconActive: "/tabs/at_play.svg",
-    alt: "play",
-    altActive: "at-play",
-    label: "Videos",
-  },
-  pets: {
-    icon: "/tabs/pet.svg",
-    iconActive: "/tabs/at_pet.svg",
-    alt: "pet",
-    altActive: "at-pet",
-    label: "Pets",
-  },
-} satisfies Record<
-  TabsKey,
-  {
-    icon: string;
-    iconActive: string;
-    alt: string;
-    altActive: string;
-    label: string;
-  }
->;
+  videos: { icon: PlayCircle, label: "Videos" },
+  pets: { icon: PawPrint, label: "Pets" },
+} satisfies Record<TabsKey, { icon: Icon; label: string }>;
 
 const ITEMS_PER_BATCH = 10;
 
@@ -120,11 +99,10 @@ export default function ShelterTopCard({ initialVideos, initialPets }: Props) {
                   onClick={() => handleTabChange(key)}
                   label={meta.label}
                 >
-                  <Image
-                    src={active ? meta.iconActive : meta.icon}
-                    alt={active ? meta.altActive : meta.alt}
-                    height={60}
-                    width={60}
+                  <meta.icon
+                    size={40}
+                    weight={active ? "fill" : "regular"}
+                    aria-hidden="true"
                   />
                 </TabButton>
               );

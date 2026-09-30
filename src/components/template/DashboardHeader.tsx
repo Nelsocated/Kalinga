@@ -1,5 +1,10 @@
 import type { DashboardStats } from "../../app/shelter/dashboard/DashboardClient";
-import Image from "next/image";
+import {
+  Heart,
+  PawPrint,
+  Play,
+} from "@phosphor-icons/react/dist/ssr";
+import type { Icon } from "@phosphor-icons/react";
 
 type Props = {
   stats: DashboardStats;
@@ -10,26 +15,19 @@ function formatCount(value: number) {
 }
 
 function StatCard({
-  icon,
+  icon: StatIcon,
   value,
   label,
-  custom,
 }: {
-  icon: string;
+  icon: Icon;
   value: number;
   label: string;
-  custom?: number;
 }) {
   return (
     <div className="grid grid-cols-[auto_1fr] items-center gap-3 rounded-[15px] bg-primary px-4 py-3">
       {/* Icon */}
       <div className="flex h-9 w-20 items-center justify-center">
-        <Image
-          src={icon}
-          alt={label}
-          width={custom ?? 35}
-          height={custom ?? 35}
-        />
+        <StatIcon size={32} weight="fill" aria-hidden="true" />
       </div>
 
       {/* Text */}
@@ -48,20 +46,19 @@ export default function DashboardHeader({ stats }: Props) {
     <section className="border-b-2 bg-white px-2 py-3">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatCard
-          icon={"/tabs/Play-icon.svg"}
+          icon={Play}
           value={stats.totalViews}
           label="Views"
         />
         <StatCard
-          icon={"/tabs/Heart.svg"}
+          icon={Heart}
           value={stats.totalLikes}
           label="Likes"
         />
         <StatCard
-          icon={"/tabs/at_pet.svg"}
+          icon={PawPrint}
           value={stats.totalAdoptionsCompleted}
           label="Adoption Completed"
-          custom={70}
         />
       </div>
     </section>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { Copy } from "@phosphor-icons/react";
 
 type ShareType = "pet" | "video" | "shelter";
 
@@ -52,12 +52,7 @@ export default function ShareButton({ id, type, className }: Props) {
       {copied ? (
         <span className="text-xs font-semibold">Copied</span>
       ) : (
-        <Image
-          src={"/buttons/Copy.svg"}
-          alt="copy-link"
-          width={43}
-          height={43}
-        />
+        <Copy size={43} aria-hidden="true" />
       )}
     </button>
   );

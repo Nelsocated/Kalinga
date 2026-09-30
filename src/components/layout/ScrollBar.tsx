@@ -1,6 +1,6 @@
-import Image from "next/image";
 import ShelterLinks from "../template/ShelterLink";
 import BackButton from "../ui/BackButton";
+import { CaretDown, CaretUp } from "@phosphor-icons/react/dist/ssr";
 
 type Props = {
   onNext: () => void;
@@ -53,7 +53,7 @@ export default function ScrollBar({
             hasPrev ? "" : "pointer-events-none opacity-50"
           }`}
         >
-          <Image src="/buttons/Up.svg" alt="Previous video" width={80} height={80} />
+          <CaretUp size={48} aria-hidden="true" />
         </button>
 
         <button
@@ -63,7 +63,7 @@ export default function ScrollBar({
             hasNext ? "" : "pointer-events-none opacity-50"
           }`}
         >
-          <Image src="/buttons/Down.svg" alt="Next video" width={80} height={80} />
+          <CaretDown size={48} aria-hidden="true" />
         </button>
       </div>
 

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { Handshake } from "@phosphor-icons/react";
 
 type Props = {
   id: string;
@@ -78,13 +78,7 @@ export default function Caption({ id, name, shelter_name, caption }: Props) {
                   <span className="leading-none">Meet {name}!</span>
 
                   <div className="flex items-center justify-center">
-                    <Image
-                      src={"/icons/meet.svg"}
-                      alt="meet-icon"
-                      width={50}
-                      height={50}
-                      className="relative bottom-2"
-                    />
+                    <Handshake size={48} className="relative bottom-2" aria-hidden="true" />
                   </div>
                 </button>
               </div>

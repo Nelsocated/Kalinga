@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 
 import type { Pets, SearchPetCardItem } from "@/src/lib/types/pets";
 import { fetchSearchPets } from "@/src/lib/services/petClient";
@@ -9,6 +8,7 @@ import { fetchSearchPets } from "@/src/lib/services/petClient";
 import PetCard from "../cards/PetCard";
 import Button from "../ui/Button";
 import FilterControls from "../ui/FilterControls";
+import { Funnel } from "@phosphor-icons/react";
 
 type ViewKey = "filters" | "results";
 
@@ -119,12 +119,7 @@ export default function FilterModal() {
         className="border hover:scale-105"
       >
         <div className="flex gap-3">
-          <Image
-            src={"/icons/Filter.svg"}
-            alt="filter-icon"
-            width={25}
-            height={25}
-          />
+          <Funnel size={25} aria-hidden="true" />
           Lookup
         </div>
       </Button>

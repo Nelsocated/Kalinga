@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 import { getAuthUser, type AuthUser } from "@/src/lib/utils/clientAuth";
 import Button from "../ui/Button";
 import BackButton from "../ui/BackButton";
 import LogoutButton from "../ui/LogoutButton";
+import { DotsThreeCircle, Gear, House, Info } from "@phosphor-icons/react";
 
 export default function MoreModal() {
   const router = useRouter();
@@ -58,12 +58,7 @@ export default function MoreModal() {
           onClick={() => setOpen(true)}
           className="flex w-full gap-3 border-none hover:scale-105"
         >
-          <Image
-            src={"/icons/More.svg"}
-            alt="more-icon"
-            width={25}
-            height={25}
-          />
+          <DotsThreeCircle size={25} aria-hidden="true" />
           <span>More</span>
         </Button>
       )}
@@ -87,12 +82,7 @@ export default function MoreModal() {
               onClick={() => router.push("/shelterSignup")}
               className={buttonStyle}
             >
-              <Image
-                src={"/icons/Home(ver3).svg"}
-                alt="home-icon"
-                width={25}
-                height={25}
-              />
+              <House size={25} aria-hidden="true" />
               <span>Create Shelter</span>
             </Button>
           ) : (
@@ -103,12 +93,7 @@ export default function MoreModal() {
             onClick={() => router.push("/about")}
             className={buttonStyle}
           >
-            <Image
-              src={"/icons/About.svg"}
-              alt="about-icon"
-              width={25}
-              height={25}
-            />
+            <Info size={25} aria-hidden="true" />
             <span>About</span>
           </Button>
           <Button
@@ -116,12 +101,7 @@ export default function MoreModal() {
             onClick={() => router.push("/site/settings")}
             className={buttonStyle}
           >
-            <Image
-              src={"/icons/Setting.svg"}
-              alt="setting-icon"
-              width={25}
-              height={25}
-            />
+            <Gear size={25} aria-hidden="true" />
             <span>Settings</span>
           </Button>
           <LogoutButton />

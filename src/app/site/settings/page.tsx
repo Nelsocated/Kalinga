@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import ChangePasswordView from "@/src/components/views/ChangePasswordView";
 import DeleteAccountView from "@/src/components/views/DeleteAccountView";
 import WebTemplate from "@/src/components/template/WebTemplate";
+import { Gear, UserCheck } from "@phosphor-icons/react";
 
 export default function SettingsPage() {
   return <WebTemplate header={<div>Settings</div>} main={SettingsTabsView()} />;
@@ -26,12 +26,7 @@ function SettingsTabsView() {
           className={`flex items-center hover:scale-105`}
         >
           <div className="bg-primary rounded-full w-12 h-12 flex items-center justify-center absolute">
-            <Image
-              src={"/icons/Setting.svg"}
-              alt="setting-icon"
-              width={25}
-              height={25}
-            />
+            <Gear size={25} aria-hidden="true" />
           </div>
           <span
             className={`${buttonStyle} ${activeTab === "change-password" ? "bg-primary" : "bg-white"}`}
@@ -46,12 +41,7 @@ function SettingsTabsView() {
           className={`flex items-center hover:scale-105`}
         >
           <div className="bg-primary rounded-full w-12 h-12 flex items-center justify-center absolute">
-            <Image
-              src={"/icons/CheckUser.svg"}
-              alt="checkuser-icon"
-              width={25}
-              height={25}
-            />
+            <UserCheck size={25} aria-hidden="true" />
           </div>
           <span
             className={`${buttonStyle} ${activeTab === "delete-account" ? "bg-primary" : "bg-white"}`}

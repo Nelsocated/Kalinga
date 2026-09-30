@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ClipboardText, FileText, Plus } from "@phosphor-icons/react";
 
 type Props = {
   isAdmin?: boolean;
@@ -22,12 +22,7 @@ export default function ShelterLinks({
           onClick={() => router.push("/admin/dashboard")}
           className="hover:scale-105 flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
         >
-          <Image
-            src={"/buttons/Application.svg"}
-            alt="application-icon"
-            width={40}
-            height={40}
-          />
+          <ClipboardText size={40} aria-hidden="true" />
         </button>
       ) : (
         <button
@@ -35,12 +30,7 @@ export default function ShelterLinks({
           onClick={onOpenCreation}
           className="hover:scale-105 flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
         >
-          <Image
-            src={"/icons/Plus.svg"}
-            alt="plus-icon"
-            width={40}
-            height={40}
-          />
+          <Plus size={40} aria-hidden="true" />
         </button>
       )}
 
@@ -48,7 +38,7 @@ export default function ShelterLinks({
         href="/shelter/notification"
         className="hover:scale-105 flex h-15 w-15 items-center justify-center rounded-full bg-primary shadow-sm transition hover:brightness-95"
       >
-        <Image src={"/icons/FIle.svg"} alt="file-icon" width={30} height={30} />
+        <FileText size={30} aria-hidden="true" />
       </Link>
     </div>
   );

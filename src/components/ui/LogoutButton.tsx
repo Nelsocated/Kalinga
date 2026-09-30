@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Button from "./Button";
 import { logoutAction } from "@/src/app/actions/auth";
+import { SignOut } from "@phosphor-icons/react";
 
 type LogoutButtonProps = {
   redirectTo?: string;
@@ -53,12 +53,7 @@ export default function LogoutButton({
         className={`bg-white border-0 flex items-center gap-3 ${className}`}
       >
         {withIcon ? (
-          <Image
-            src={"/icons/Logout.svg"}
-            alt="logout-icon"
-            width={25}
-            height={25}
-          />
+          <SignOut size={25} aria-hidden="true" />
         ) : null}
         <span>Log Out</span>
       </Button>

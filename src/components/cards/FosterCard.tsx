@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ReactNode } from "react";
-import Image from "next/image";
+import { ArrowRight } from "@phosphor-icons/react";
 
 type FosterCardProps = {
   href: string;
@@ -37,12 +37,7 @@ export default function FosterCard({
         </div>
         <div className="flex justify-end items-center mr-5">
           <Link href={href}>
-            <Image
-              src={"/buttons/Forward(2).svg"}
-              alt="forward-icon"
-              width={15}
-              height={15}
-            />
+            <ArrowRight size={16} aria-hidden="true" />
           </Link>
         </div>
       </div>

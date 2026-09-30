@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 import WebTemplate from "@/src/components/template/WebTemplate";
 import NotifCard from "@/src/components/cards/NotifCard";
@@ -11,6 +10,7 @@ import StatusModal from "@/src/components/modal/StatusModal";
 import { createClientSupabase } from "@/src/lib/supabase/client";
 
 import type { NotificationItem } from "./page";
+import { CalendarBlank, House, PawPrint } from "@phosphor-icons/react";
 
 type Props = {
   notifications: NotificationItem[];
@@ -126,36 +126,21 @@ export default function NotifClient({ notifications }: Props) {
             <div className="grid grid-cols-3 place-items-center gap-15 mb-5">
               <div className="relative flex items-center">
                 <span className="absolute">
-                  <Image
-                    src={"/icons/Home(ver2).svg"}
-                    alt="home-icon"
-                    width={50}
-                    height={50}
-                  />
+                  <House size={48} aria-hidden="true" />
                 </span>
                 <span className={headerStyle}>Shelter</span>
               </div>
 
               <div className="relative flex items-center">
                 <span className="absolute">
-                  <Image
-                    src={"/icons/species(ver2).svg"}
-                    alt="species-icon"
-                    width={50}
-                    height={50}
-                  />
+                  <PawPrint size={48} aria-hidden="true" />
                 </span>
                 <span className={headerStyle}>Applications</span>
               </div>
 
               <div className="relative flex items-center">
                 <span className="absolute rounded-full bg-primary">
-                  <Image
-                    src={"/icons/Date(ver2).svg"}
-                    alt="date-icon"
-                    width={50}
-                    height={50}
-                  />
+                  <CalendarBlank size={48} aria-hidden="true" />
                 </span>
                 <span className={headerStyle}>Date</span>
               </div>

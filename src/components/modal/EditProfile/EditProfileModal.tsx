@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import BackButton from "../../ui/BackButton";
 import Input from "../../ui/Input";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
+import { PencilSimple } from "@phosphor-icons/react";
 
 type Field = {
   key: string;
@@ -160,12 +161,7 @@ export default function EditProfileModal({
         className="flex w-fit items-center gap-2 rounded-[15px] border border-black/50 bg-primary px-7 py-1 text-description text-secondary font-semibold hover:scale-105"
       >
         {triggerLabel}
-        <Image
-          src={"/buttons/Edit(2).svg"}
-          alt="edit-button"
-          width={15}
-          height={15}
-        />
+        <PencilSimple size={16} aria-hidden="true" />
       </button>
 
       {open && (

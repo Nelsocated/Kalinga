@@ -3,6 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import {
+  Bell,
+  ChatCircle,
+  Compass,
+  House,
+  PlayCircle,
+  User,
+  type Icon,
+} from "@phosphor-icons/react";
 
 import Button from "../ui/Button";
 import FilterModal from "../modal/FilterModal";
@@ -18,7 +27,7 @@ import {
 
 type IconItem = {
   title: string;
-  image: string;
+  icon: Icon;
   link: string | ((authUser: AuthUser | null) => string | undefined | null);
 };
 
@@ -41,32 +50,32 @@ export default function Navbar() {
   const icons: IconItem[] = [
     {
       title: "For You",
-      image: "/icons/play-circle.svg",
+      icon: PlayCircle,
       link: "/site/home",
     },
     {
       title: "Explore",
-      image: "/icons/Explore.svg",
+      icon: Compass,
       link: "/site/explore",
     },
     {
       title: "Shelters",
-      image: "/icons/Home.svg",
+      icon: House,
       link: "/site/shelters",
     },
     {
       title: "Profile",
-      image: "/icons/user.svg",
+      icon: User,
       link: (user) => (user ? getProfileRouteByRole(user) : undefined),
     },
     {
       title: "Notifications",
-      image: "/icons/notifications.svg",
+      icon: Bell,
       link: (user) => (user ? getNotifRouteByRole(user) : undefined),
     },
     {
       title: "Messages",
-      image: "/icons/Messages.svg",
+      icon: ChatCircle,
       link: (user) => (user ? getMsgRouteByRole(user) : undefined),
     },
   ];
@@ -102,7 +111,7 @@ export default function Navbar() {
             className={buttonStyle}
             onClick={() => handleNavigate(item)}
           >
-            <Image src={item.image} alt={item.title} width={25} height={25} />
+            <item.icon size={25} aria-hidden="true" />
             <span>{item.title}</span>
           </Button>
         ))}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { createClientSupabase } from "@/src/lib/supabase/client";
 
@@ -16,6 +15,7 @@ import AdoptModal from "@/src/components/modal/AdoptModal";
 import AddPetPhotosModal from "@/src/components/modal/AddPetPhotosModal";
 
 import WebTemplate from "@/src/components/template/WebTemplate";
+import { GenderFemale, GenderMale } from "@phosphor-icons/react";
 
 export type PetGender = "male" | "female" | "unknown";
 type Media = {
@@ -57,23 +57,13 @@ type PetProfileClientProps = {
 export function getSexIcon(sex: PetGender, className?: number) {
   if (sex === "male") {
     return (
-      <Image
-        src={"/icons/male-icon.svg"}
-        alt="male-icon"
-        width={className ? className : 40}
-        height={className ? className : 40}
-      />
+      <GenderMale size={className ?? 40} className="text-male" aria-label="Male" role="img" />
     );
   }
 
   if (sex === "female") {
     return (
-      <Image
-        src={"/icons/female-icon.svg"}
-        alt="female-icon"
-        width={className ? className : 40}
-        height={className ? className : 40}
-      />
+      <GenderFemale size={className ?? 40} className="text-female" aria-label="Female" role="img" />
     );
   }
 

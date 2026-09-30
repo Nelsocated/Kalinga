@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import BackButton from "../ui/BackButton";
+import { HandCoins, QrCode } from "@phosphor-icons/react";
 
 type Donation = {
   id: string;
@@ -97,12 +98,7 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
           buttonClassName,
         ].join(" ")}
       >
-        <Image
-          src={"/buttons/Donate.svg"}
-          alt="donate-icon"
-          width={42}
-          height={42}
-        />
+        <HandCoins size={42} aria-hidden="true" />
       </button>
 
       {isOpen && (
@@ -195,12 +191,7 @@ export default function DonationModal({ shelterId, buttonClassName }: Props) {
                                 isQrOpen ? "Hide QR code" : "Show QR code"
                               }
                             >
-                              <Image
-                                src={"/buttons/QR.svg"}
-                                alt="qr-icon"
-                                width={23}
-                                height={23}
-                              />
+                              <QrCode size={23} aria-hidden="true" />
                             </button>
                           </div>
 

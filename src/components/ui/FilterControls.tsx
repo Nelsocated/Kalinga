@@ -1,8 +1,8 @@
-import Image from "next/image";
 import BackButton from "./BackButton";
 import Button from "./Button";
 
 import type { Pets } from "@/src/lib/types/pets";
+import { CalendarBlank, Cat, Dog, GenderFemale, GenderIntersex, GenderMale, Handshake, PawPrint, Ruler } from "@phosphor-icons/react/dist/ssr";
 
 const sectionTitle = "flex items-center gap-2 text-subtitle font-semibold";
 const buttonGroup = "mt-1 flex flex-nowrap gap-2 ";
@@ -36,12 +36,7 @@ function SpeciesSection({
   return (
     <div>
       <div className={sectionTitle}>
-        <Image
-          src={"/icons/Species.svg"}
-          alt="species-icon"
-          width={45}
-          height={45}
-        />
+        <PawPrint size={45} aria-hidden="true" />
         Species
       </div>
       <div className={buttonGroup}>
@@ -50,7 +45,7 @@ function SpeciesSection({
           className={filterBtn(selected.includes("dog"))}
           onClick={() => onToggle("dog")}
         >
-          <Image src={"/icons/Dog.svg"} alt="dog-icon" width={32} height={32} />
+          <Dog size={32} aria-hidden="true" />
           Dog
         </button>
         <button
@@ -58,7 +53,7 @@ function SpeciesSection({
           className={filterBtn(selected.includes("cat"))}
           onClick={() => onToggle("cat")}
         >
-          <Image src={"/icons/Cat.svg"} alt="cat-icon" width={30} height={30} />
+          <Cat size={30} aria-hidden="true" />
           Cat
         </button>
       </div>
@@ -76,7 +71,7 @@ function GenderSection({
   return (
     <div>
       <div className={sectionTitle}>
-        <Image src={"/icons/Gender.svg"} alt="gender" width={40} height={40} />
+        <GenderIntersex size={40} aria-hidden="true" />
         Gender
       </div>
       <div className={buttonGroup}>
@@ -85,12 +80,7 @@ function GenderSection({
           className={filterBtn(selected.includes("male"))}
           onClick={() => onToggle("male")}
         >
-          <Image
-            src={"/icons/male-icon.svg"}
-            alt="male icon"
-            width={26}
-            height={26}
-          />
+          <GenderMale size={26} aria-hidden="true" />
           Male
         </button>
         <button
@@ -98,12 +88,7 @@ function GenderSection({
           className={filterBtn(selected.includes("female"))}
           onClick={() => onToggle("female")}
         >
-          <Image
-            src={"/icons/female-icon.svg"}
-            alt="female icon"
-            width={26}
-            height={26}
-          />
+          <GenderFemale size={26} aria-hidden="true" />
           Female
         </button>
       </div>
@@ -121,7 +106,7 @@ function AgeSection({
   return (
     <div>
       <div className={sectionTitle}>
-        <Image src={"/icons/Date.svg"} alt="date-icon" width={35} height={35} />
+        <CalendarBlank size={35} aria-hidden="true" />
         Age
       </div>
       <div className={buttonGroup}>
@@ -184,7 +169,7 @@ function SizeSection({
   return (
     <div>
       <div className={sectionTitle}>
-        <Image src={"/icons/Size.svg"} alt="size-icon" width={35} height={35} />
+        <Ruler size={35} aria-hidden="true" />
         Size
       </div>
       <div className={buttonGroup}>
@@ -243,12 +228,7 @@ function Actions({
           onClick={onSearch}
           className="flex items-center justify-center gap-2 px-y bg-primary hover:scale-105 "
         >
-          <Image
-            src={"/icons/meet(ver2).svg"}
-            alt="meet-icon"
-            width={32}
-            height={32}
-          />
+          <Handshake size={32} aria-hidden="true" />
           See Pets
         </Button>
       </div>

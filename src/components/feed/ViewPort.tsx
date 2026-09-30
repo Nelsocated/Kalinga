@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Caption from "./Caption";
 import type { FeedItem } from "@/src/lib/services/feedService";
+import { Play } from "@phosphor-icons/react";
 
 type Props = {
   item: FeedItem;
@@ -73,7 +73,7 @@ export default function ViewPort({ item, isActive }: Props) {
 
       {isPaused && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <Image src={"/icons/Play-icon.svg"} alt="play" />
+          <Play size={64} weight="fill" className="text-white drop-shadow-lg" aria-hidden="true" />
         </div>
       )}
 

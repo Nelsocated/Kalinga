@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { ArrowLeft } from "@phosphor-icons/react";
 
 type Props = {
   onClick?: () => void;
@@ -32,14 +32,13 @@ export default function BackButton({
     <button
       type="button"
       onClick={handleClick}
+      aria-label="Go back"
       className={`flex items-center justify-center hover:scale-110 ${className ?? ""}`}
     >
-      <Image
-        src={isModal ? "/buttons/WhiteBack.svg" : "/buttons/Back(2).svg"}
-        alt="Back"
-        width={15}
-        height={15}
-        priority
+      <ArrowLeft
+        size={22}
+        className={isModal ? "text-white" : "text-ink"}
+        aria-hidden="true"
       />
     </button>
   );

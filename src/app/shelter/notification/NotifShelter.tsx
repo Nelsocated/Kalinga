@@ -9,7 +9,7 @@ import FilterView, {
 import type { PetGender } from "@/src/lib/types/shelters";
 import NotifShelterCard from "@/src/components/cards/NotifShelterCard";
 import Button from "@/src/components/ui/Button";
-import Image from "next/image";
+import { Funnel } from "@phosphor-icons/react";
 
 export type ShelterAdoptionStatus =
   | "pending"
@@ -122,12 +122,7 @@ export default function NotifShelter({ items = [] }: Props) {
                   onClick={() => setIsReviewing(false)}
                   className="rounded-[15px] border bg-transparent px-3 py-1 text-sm font-semibold text-black"
                 >
-                  <Image
-                    src={"/icons/Filter.svg"}
-                    alt="filter-icon"
-                    width={30}
-                    height={30}
-                  />
+                  <Funnel size={30} aria-hidden="true" />
                 </Button>
               </div>
 

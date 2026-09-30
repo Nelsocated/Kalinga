@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { ChatCircle, PawPrint } from "@phosphor-icons/react/dist/ssr";
 
 type ViewMode = "inbox" | "compose";
 
@@ -18,17 +18,12 @@ export default function MessagesTabs({ mode, setMode }: Props) {
           label="Inbox"
         />
         <span className="absolute rounded-full bg-white">
-          <Image src={"/tabs/mail.svg"} alt="mail" width={36} height={36} />
+          <ChatCircle size={36} aria-hidden="true" />
         </span>
       </div>
       <div className="relative flex items-center hover:scale-105 ">
         <span className="absolute">
-          <Image
-            src={"/tabs/at_pet.svg"}
-            alt="at_play"
-            width={41}
-            height={41}
-          />
+          <PawPrint size={41} weight="fill" aria-hidden="true" />
         </span>
         <TabButton
           active={mode === "compose"}

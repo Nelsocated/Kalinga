@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 
 import WebTemplate from "@/src/components/template/WebTemplate";
 import PetCard from "@/src/components/cards/PetCard";
@@ -9,6 +8,7 @@ import FosterCard from "@/src/components/cards/FosterCard";
 import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
 
 import type { LongestPet, FosterStory } from "./page";
+import { ArrowLeft, ArrowRight } from "@phosphor-icons/react";
 
 type ExplorePageProps = {
   longest: LongestPet[];
@@ -36,19 +36,9 @@ function SectionHeader({
         aria-label={expanded ? `Collapse ${title}` : `Expand ${title}`}
       >
         {expanded ? (
-          <Image
-            src={"/buttons/Back(2).svg"}
-            alt="back-icon"
-            width={13}
-            height={13}
-          />
+          <ArrowLeft size={16} aria-hidden="true" />
         ) : (
-          <Image
-            src={"/buttons/Forward(2).svg"}
-            alt="forward-icon"
-            width={13}
-            height={13}
-          />
+          <ArrowRight size={16} aria-hidden="true" />
         )}
       </button>
     </div>

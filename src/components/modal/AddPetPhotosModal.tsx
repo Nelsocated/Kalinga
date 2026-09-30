@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import BackButton from "../ui/BackButton";
+import { Plus } from "@phosphor-icons/react";
 
 type Props = {
   petId: string;
@@ -106,7 +107,7 @@ export default function AddPetPhotosModal({ petId, buttonClassName }: Props) {
           buttonClassName,
         ].join(" ")}
       >
-        <Image src={"/icons/Plus.svg"} alt="plus-icon" width={40} height={40} />
+        <Plus size={40} aria-hidden="true" />
       </button>
 
       {/* MODAL */}

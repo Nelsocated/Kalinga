@@ -1,11 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import WebTemplate from "@/src/components/template/WebTemplate";
 
-import Species from "@/public/icons/species(ver2).svg";
-import Date from "@/public/icons/Date(ver2).svg";
-import Home from "@/public/icons/Home(ver2).svg";
+import { CalendarBlank, House, PawPrint } from "@phosphor-icons/react";
 
 export default function Loading() {
   const headerStyle =
@@ -20,26 +17,21 @@ export default function Loading() {
           <div className="mb-5 grid grid-cols-3 place-items-center gap-15">
             <div className="relative flex items-center">
               <span className="absolute">
-                <Image src={Home} alt="home-icon" width={50} height={50} />
+                <House size={40} aria-hidden="true" />
               </span>
               <span className={headerStyle}>Shelter</span>
             </div>
 
             <div className="relative flex items-center">
               <span className="absolute">
-                <Image
-                  src={Species}
-                  alt="species-icon"
-                  width={50}
-                  height={50}
-                />
+                <PawPrint size={40} aria-hidden="true" />
               </span>
               <span className={headerStyle}>Applications</span>
             </div>
 
             <div className="relative flex items-center">
               <span className="absolute rounded-full bg-primary">
-                <Image src={Date} alt="date-icon" width={50} height={50} />
+                <CalendarBlank size={40} aria-hidden="true" />
               </span>
               <span className={headerStyle}>Date</span>
             </div>

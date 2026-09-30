@@ -1,7 +1,7 @@
 "use client";
 import type { ShelterAdoptionStatus } from "../../app/shelter/notification/NotifShelter";
 import Button from "../ui/Button";
-import Image from "next/image";
+import { Cat, Dog } from "@phosphor-icons/react";
 
 export type SpeciesFilter = "dog" | "cat";
 
@@ -135,10 +135,10 @@ export default function FilterView({
 export function getIcon(species: string) {
   if (species == "cat") {
     return (
-      <Image src={"/icons/Cat.svg"} alt={`cat-icon`} width={40} height={40} />
+      <Cat size={40} aria-hidden="true" />
     );
   }
   if (species == "dog") {
-    return <Image src={"/icons/Dog.svg"} alt={`dog`} width={30} height={30} />;
+    return <Dog size={30} aria-hidden="true" />;
   }
 }
