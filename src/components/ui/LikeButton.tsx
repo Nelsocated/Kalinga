@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Heart } from "@phosphor-icons/react";
+import { PawHeartFilled, PawHeartOutline } from "./PawHeart";
 import { cn } from "@/src/lib/cn";
 import { fetchJson } from "@/src/lib/fetchJson";
 import { unwrap } from "@/src/lib/actionResult";
@@ -89,7 +89,7 @@ const LikeButton = forwardRef<LikeHandle, Props>(function LikeButton(
     [ready, liked, setTo],
   );
 
-  const px = size === "lg" ? 32 : 26;
+  const iconSize = size === "lg" ? "size-9" : "size-7";
   const animate = pulse > 0 && !reduce;
 
   return (
@@ -110,9 +110,9 @@ const LikeButton = forwardRef<LikeHandle, Props>(function LikeButton(
           initial={animate ? { scale: liked ? 0.4 : 1.15 } : false}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 520, damping: 14 }}
-          className={cn("flex", liked && "text-sunshine-deep")}
+          className="flex text-sunshine"
         >
-          <Heart size={px} weight={liked ? "fill" : "regular"} aria-hidden="true" />
+          {liked ? <PawHeartFilled className={iconSize} /> : <PawHeartOutline className={iconSize} />}
         </motion.span>
 
         <AnimatePresence>

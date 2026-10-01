@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Heart, Play } from "@phosphor-icons/react";
+import { Play } from "@phosphor-icons/react";
+import { PawHeartFilled } from "../ui/PawHeart";
 import Caption from "./Caption";
 import type { FeedItem } from "@/src/lib/services/feedService";
 import { getViewSessionId } from "@/src/lib/session/getViewSessionId";
@@ -131,7 +132,7 @@ export default function ViewPort({ item, isActive, preload, onDoubleTap }: Props
               transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               className="flex text-sunshine drop-shadow-lg"
             >
-              <Heart size={96} weight="fill" />
+              <PawHeartFilled className="size-28" />
             </motion.span>
           </motion.div>
         ) : null}
