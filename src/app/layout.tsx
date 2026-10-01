@@ -8,18 +8,21 @@ const rubik = Rubik({
   display: "swap",
 });
 
-const description =
-  "Kalinga helps rescued dogs and cats find a home. Watch short videos from " +
-  "partner shelters, save the pets you love, and apply to adopt.";
+const title = "Kalinga | Give Care. Give Love. A Home for Every Paw";
 
-// The favicon comes from src/app/icon.svg
+const description =
+  "Watch short videos of rescued dogs and cats from verified shelters, " +
+  "save the pets you love, and apply to adopt on Kalinga.";
+
+// Icons come from the paw logo: src/app/icon.svg (favicon) and src/app/apple-icon.tsx
 export const metadata: Metadata = {
   title: {
-    default: "Kalinga · Pet Adoption",
-    template: "%s · Kalinga",
+    default: title,
+    template: "%s | Kalinga",
   },
   description,
   applicationName: "Kalinga",
+  manifest: "/manifest.webmanifest",
   keywords: [
     "pet adoption",
     "adopt a dog",
@@ -30,12 +33,12 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Kalinga",
-    title: "Kalinga · Pet Adoption",
+    title,
     description,
   },
   twitter: {
     card: "summary",
-    title: "Kalinga · Pet Adoption",
+    title,
     description,
   },
 };

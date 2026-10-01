@@ -11,9 +11,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
       <aside className="hidden flex-col justify-between bg-sunshine p-12 lg:sticky lg:top-0 lg:flex lg:h-dvh">
-        <Link href="/" className="flex w-fit items-center gap-3 rounded-full">
+        <Link href="/" className="flex w-fit items-center gap-3 rounded-full bg-ground py-2 pr-5 pl-2">
           <Image src="/kalinga_logo(ver2).svg" alt="" width={48} height={48} priority />
-          <span className="text-xl font-bold text-ink">Kalinga</span>
+          <span className="text-xl font-bold text-sunshine">Kalinga</span>
         </Link>
         <p className="max-w-[14ch] text-display text-ink">{TAGLINE}</p>
         <Link href="/about" className="w-fit text-sm font-medium text-ink underline-offset-4 hover:underline">

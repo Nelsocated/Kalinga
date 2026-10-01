@@ -26,7 +26,7 @@ export default function Navbar() {
         className="flex items-center justify-center gap-3 rounded-full px-2 lg:justify-start"
       >
         <Image src="/kalinga_logo(ver2).svg" alt="" width={40} height={40} priority />
-        <span className="hidden text-xl font-bold text-ink lg:inline">Kalinga</span>
+        <span className="hidden text-xl font-bold text-sunshine lg:inline">Kalinga</span>
       </Link>
 
       <nav aria-label="Main" className="flex flex-col gap-1">
