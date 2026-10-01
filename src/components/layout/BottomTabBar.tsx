@@ -7,7 +7,8 @@ import { cn } from "@/src/lib/cn";
 import { getAuthUser, type AuthUser } from "@/src/lib/utils/clientAuth";
 import { NAV_ITEMS, isActive } from "./navItems";
 
-const TAB_KEYS = ["home", "explore", "shelters", "messages", "profile"] as const;
+// For You sits in the middle, Profile at the far right
+const TAB_KEYS = ["explore", "shelters", "home", "messages", "profile"] as const;
 
 /** Phone navigation; hidden from md up where the sidebar takes over. */
 export default function BottomTabBar() {
@@ -18,7 +19,7 @@ export default function BottomTabBar() {
     getAuthUser().then(setUser);
   }, []);
 
-  const tabs = NAV_ITEMS.filter((i) => (TAB_KEYS as readonly string[]).includes(i.key));
+  const tabs = TAB_KEYS.map((key) => NAV_ITEMS.find((i) => i.key === key)!);
 
   return (
     <nav
