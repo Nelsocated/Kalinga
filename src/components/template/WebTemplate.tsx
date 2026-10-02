@@ -1,6 +1,7 @@
 "use client";
 
 import BackButton from "../ui/BackButton";
+import PageFrame from "./PageFrame";
 import { cn } from "@/src/lib/cn";
 
 type Props = {
@@ -14,7 +15,7 @@ type Props = {
   scrollable?: boolean;
 };
 
-/** Page shell: title row on the ground, then content; optional side column on lg. */
+/** Page shell: a soft panel with the title row (back, title, actions), then content; optional side column on lg. */
 export default function WebTemplate({
   header,
   main,
@@ -24,7 +25,7 @@ export default function WebTemplate({
   scrollable = true,
 }: Props) {
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 md:py-8">
+    <PageFrame>
       <header className="flex items-center gap-3">
         <BackButton />
         {typeof header === "string" ? (
@@ -47,6 +48,6 @@ export default function WebTemplate({
           {main}
         </section>
       )}
-    </div>
+    </PageFrame>
   );
 }

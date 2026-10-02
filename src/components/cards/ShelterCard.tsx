@@ -17,11 +17,14 @@ export type ShelterCardProps = {
   className?: string;
 };
 
-function countLabel(available?: number | null, adopted?: number | null) {
-  const parts: string[] = [];
-  if (typeof available === "number") parts.push(`${available} available`);
-  if (typeof adopted === "number") parts.push(`${adopted} adopted`);
-  return parts.join(" · ");
+/** A small Sunshine Soft block: bold count, then what it counts. */
+function Stat({ value, label }: { value: number; label: string }) {
+  return (
+    <li className="flex items-baseline gap-1.5 rounded-md bg-sunshine-soft px-2 py-1 text-ink">
+      <span className="text-base font-bold tabular-nums leading-none">{value}</span>
+      <span className="text-xs font-medium leading-none">{label}</span>
+    </li>
+  );
 }
 
 /** Shelter row: logo, name, location and pet counts, with a like button. */
@@ -35,12 +38,13 @@ export default function ShelterCard({
   petsAdopted,
   className,
 }: ShelterCardProps) {
-  const counts = countLabel(petsAvailable, petsAdopted);
+  const hasAvailable = typeof petsAvailable === "number";
+  const hasAdopted = typeof petsAdopted === "number";
 
   return (
     <div
       className={cn(
-        "relative flex items-center gap-4 rounded-lg border border-line bg-card p-3 transition-[box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift sm:p-4",
+        "relative flex items-center gap-3 rounded-lg border border-line bg-card p-3 sm:gap-4 transition-[box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift sm:p-4",
         className,
       )}
     >
@@ -58,7 +62,12 @@ export default function ShelterCard({
           <MapPin size={14} aria-hidden="true" className="shrink-0" />
           <span className="truncate">{location || "Location not listed"}</span>
         </p>
-        {counts ? <p className="text-sm text-ink-soft">{counts}</p> : null}
+        {hasAvailable || hasAdopted ? (
+          <ul aria-label="Pets" className="mt-1.5 flex flex-wrap gap-1.5">
+            {hasAvailable ? <Stat value={petsAvailable} label="available" /> : null}
+            {hasAdopted ? <Stat value={petsAdopted} label="adopted" /> : null}
+          </ul>
+        ) : null}
       </div>
 
       <div className="relative z-10">

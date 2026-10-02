@@ -18,7 +18,7 @@ export default async function SheltersPage() {
         ) : shelters.length === 0 ? (
           <EmptyState icon={<House aria-hidden="true" />} title="No shelters yet" />
         ) : (
-          <ul className="grid gap-3 lg:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {shelters.map((shelter) => (
               <li key={shelter.id}>
                 <ShelterCard

@@ -117,7 +117,7 @@ export default function UserTab() {
             }
           />
         ) : tab === "shelters" ? (
-          <ul className="grid gap-3 lg:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {visibleItems.map((item) => (
               <li key={`shelter-${item.id}`}>
                 <ShelterCard

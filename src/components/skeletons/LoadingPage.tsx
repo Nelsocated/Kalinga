@@ -1,6 +1,7 @@
 import PageHeaderSkeleton from "./PageHeaderSkeleton";
+import PageFrame from "../template/PageFrame";
 
-/** WebTemplate's frame for loading.tsx files: same container, header, then the body. */
+/** WebTemplate's frame for loading.tsx files: same panel, header, then the body. */
 export default function LoadingPage({
   children,
   header = <PageHeaderSkeleton />,
@@ -9,14 +10,10 @@ export default function LoadingPage({
   header?: React.ReactNode;
 }) {
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 md:py-8"
-    >
+    <PageFrame role="status" aria-live="polite">
       <span className="sr-only">Loading</span>
       {header}
       {children}
-    </div>
+    </PageFrame>
   );
 }
