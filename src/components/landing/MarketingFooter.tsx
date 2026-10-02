@@ -1,18 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
 
-// Help, Terms and Privacy join this list as those pages ship
 const LINKS = [
   { href: "/about", label: "About" },
   { href: "/site/explore", label: "Explore pets" },
   { href: "/shelterSignup", label: "Apply as a shelter" },
+  { href: "/help", label: "Help" },
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
   { href: "/login", label: "Log in" },
 ];
 
 export default function MarketingFooter() {
   return (
     <footer className="border-t border-line">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-3">
           <Image src="/kalinga_logo(ver2).svg" alt="" width={32} height={32} />
           <p className="text-sm text-ink-soft">Give Care. Give Love. A Home for Every Paw</p>

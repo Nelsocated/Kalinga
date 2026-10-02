@@ -44,6 +44,9 @@ export default function SettingsPage() {
           <SettingsSection title="About Kalinga">
             <nav aria-label="Kalinga pages" className="flex flex-wrap gap-x-5 gap-y-2">
               <Link href="/about" className={linkClass}>About</Link>
+              <Link href="/help" className={linkClass}>Help</Link>
+              <Link href="/terms" className={linkClass}>Terms</Link>
+              <Link href="/privacy" className={linkClass}>Privacy</Link>
             </nav>
           </SettingsSection>
 
