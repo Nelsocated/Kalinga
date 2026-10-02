@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Eye, EyeSlash } from "@phosphor-icons/react";
 import { cn } from "@/src/lib/cn";
 
 export const fieldStyles =
@@ -89,10 +90,14 @@ export default function Input({
   labelClassName,
   id: idProp,
   required,
+  type,
   ...props
 }: InputProps) {
   const autoId = React.useId();
   const id = idProp ?? autoId;
+  // Password fields get a show/hide toggle on the right
+  const isPassword = type === "password";
+  const [revealed, setRevealed] = React.useState(false);
 
   return (
     <FieldShell
@@ -118,6 +123,7 @@ export default function Input({
 
         <input
           id={id}
+          type={isPassword && revealed ? "text" : type}
           required={required}
           aria-invalid={error ? true : undefined}
           aria-describedby={error || hint ? `${id}-desc` : undefined}
@@ -125,10 +131,24 @@ export default function Input({
             fieldStyles,
             icon && iconPosition === "left" && "pl-10",
             icon && iconPosition === "right" && "pr-10",
+            isPassword && "pr-12",
             inputClassName,
           )}
           {...props}
         />
+
+        {isPassword ? (
+          <button
+            type="button"
+            onClick={() => setRevealed((r) => !r)}
+            aria-label={revealed ? "Hide password" : "Show password"}
+            aria-controls={id}
+            disabled={props.disabled}
+            className="absolute top-1/2 right-0.5 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-xl text-ink-soft transition-colors hover:bg-sunshine-wash hover:text-ink disabled:pointer-events-none disabled:opacity-50"
+          >
+            {revealed ? <EyeSlash aria-hidden="true" /> : <Eye aria-hidden="true" />}
+          </button>
+        ) : null}
       </div>
     </FieldShell>
   );
