@@ -31,7 +31,9 @@ function LoginForm() {
         return;
       }
 
-      router.push(nextPath);
+      // Re-render the server layouts so the nav picks up the new session
+      router.replace(nextPath);
+      router.refresh();
     } catch {
       setFormError("Couldn't reach Kalinga. Check your connection and try again.");
     } finally {

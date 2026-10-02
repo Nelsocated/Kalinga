@@ -39,6 +39,19 @@ export async function getAuthUser(): Promise<AuthUser | null> {
   };
 }
 
+/**
+ * The user the nav is built from. Unlike getAuthUser, a signed-in account whose
+ * role row can't be read still counts as signed in, so the nav never sends it to login.
+ * Not for permission checks: use requireAuth / requireRole for those.
+ */
+export async function getNavUser(): Promise<AuthUser | null> {
+  const user = await getAuthUser();
+  if (user) return user;
+
+  const id = await getUserId();
+  return id ? { id, role: "user" } : null;
+}
+
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getAuthUser();
 

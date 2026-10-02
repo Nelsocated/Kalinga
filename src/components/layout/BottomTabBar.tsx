@@ -5,12 +5,14 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/src/lib/cn";
 import type { AuthUser } from "@/src/lib/utils/clientAuth";
 import { NAV_ITEMS, isActive } from "./navItems";
+import { useNavUser } from "./useNavUser";
 
 // For You sits in the middle, Profile at the far right
 const TAB_KEYS = ["explore", "shelters", "home", "messages", "profile"] as const;
 
 /** Phone navigation; hidden from md up where the sidebar takes over. */
-export default function BottomTabBar({ user }: { user: AuthUser | null }) {
+export default function BottomTabBar({ user: serverUser }: { user: AuthUser | null }) {
+  const user = useNavUser(serverUser);
   const pathname = usePathname();
   const tabs = TAB_KEYS.map((key) => NAV_ITEMS.find((i) => i.key === key)!);
 

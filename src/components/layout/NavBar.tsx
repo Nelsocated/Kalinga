@@ -7,9 +7,11 @@ import type { AuthUser } from "@/src/lib/utils/clientAuth";
 import FilterModal from "../modal/FilterModal";
 import MoreModal from "../modal/MoreModal";
 import { NAV_ITEMS, isActive, sidebarItemClass } from "./navItems";
+import { useNavUser } from "./useNavUser";
 
 /** Sidebar for tablets and desktops; phones get BottomTabBar instead. */
-export default function Navbar({ user }: { user: AuthUser | null }) {
+export default function Navbar({ user: serverUser }: { user: AuthUser | null }) {
+  const user = useNavUser(serverUser);
   const pathname = usePathname();
   return (
     <aside className="sticky top-0 hidden h-dvh w-20 shrink-0 flex-col gap-6 px-3 py-6 md:flex lg:w-60 lg:px-5">

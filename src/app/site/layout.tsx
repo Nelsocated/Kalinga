@@ -1,6 +1,6 @@
 import Navbar from "@/src/components/layout/NavBar";
 import BottomTabBar from "@/src/components/layout/BottomTabBar";
-import { getAuthUser } from "@/src/lib/utils/auth";
+import { getNavUser } from "@/src/lib/utils/auth";
 
 export default async function MainLayout({
   children,
@@ -8,7 +8,7 @@ export default async function MainLayout({
   children: React.ReactNode;
 }) {
   // Read on the server so the nav's account links are right on the first paint
-  const user = await getAuthUser();
+  const user = await getNavUser();
 
   return (
     <div className="flex min-h-dvh">
