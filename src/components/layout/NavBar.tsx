@@ -3,21 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getAuthUser, type AuthUser } from "@/src/lib/utils/clientAuth";
+import type { AuthUser } from "@/src/lib/utils/clientAuth";
 import FilterModal from "../modal/FilterModal";
 import MoreModal from "../modal/MoreModal";
 import { NAV_ITEMS, isActive, sidebarItemClass } from "./navItems";
 
 /** Sidebar for tablets and desktops; phones get BottomTabBar instead. */
-export default function Navbar() {
+export default function Navbar({ user }: { user: AuthUser | null }) {
   const pathname = usePathname();
-  const [user, setUser] = useState<AuthUser | null>(null);
-
-  useEffect(() => {
-    getAuthUser().then(setUser);
-  }, []);
-
   return (
     <aside className="sticky top-0 hidden h-dvh w-20 shrink-0 flex-col gap-6 px-3 py-6 md:flex lg:w-60 lg:px-5">
       <Link

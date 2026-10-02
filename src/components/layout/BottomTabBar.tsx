@@ -2,23 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { cn } from "@/src/lib/cn";
-import { getAuthUser, type AuthUser } from "@/src/lib/utils/clientAuth";
+import type { AuthUser } from "@/src/lib/utils/clientAuth";
 import { NAV_ITEMS, isActive } from "./navItems";
 
 // For You sits in the middle, Profile at the far right
 const TAB_KEYS = ["explore", "shelters", "home", "messages", "profile"] as const;
 
 /** Phone navigation; hidden from md up where the sidebar takes over. */
-export default function BottomTabBar() {
+export default function BottomTabBar({ user }: { user: AuthUser | null }) {
   const pathname = usePathname();
-  const [user, setUser] = useState<AuthUser | null>(null);
-
-  useEffect(() => {
-    getAuthUser().then(setUser);
-  }, []);
-
   const tabs = TAB_KEYS.map((key) => NAV_ITEMS.find((i) => i.key === key)!);
 
   return (
