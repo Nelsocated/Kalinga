@@ -225,3 +225,21 @@ export async function getAdoptionMetaMap(
     ]),
   );
 }
+
+/** True when this user has sent at least one adoption request to this shelter. */
+export async function hasAppliedToShelter(
+  userId: string,
+  shelterId: string,
+): Promise<boolean> {
+  const supabase = await createServerSupabase();
+
+  const { count, error } = await supabase
+    .from("adoption_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("shelter_id", shelterId);
+
+  if (error) throw new Error(error.message);
+
+  return (count ?? 0) > 0;
+}

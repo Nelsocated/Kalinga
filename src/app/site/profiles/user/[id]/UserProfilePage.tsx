@@ -21,7 +21,15 @@ type UserUI = {
 
 const iconLink = buttonStyles({ variant: "ghost", size: "icon", className: "md:hidden" });
 
-export default function UserProfilePage({ user, tabs }: { user: UserUI; tabs: React.ReactNode }) {
+export default function UserProfilePage({
+  user,
+  isOwner,
+  tabs,
+}: {
+  user: UserUI;
+  isOwner: boolean;
+  tabs: React.ReactNode;
+}) {
   return (
     <WebTemplate
       header={
@@ -30,16 +38,19 @@ export default function UserProfilePage({ user, tabs }: { user: UserUI; tabs: Re
           subtitle={`@${user.username}`}
           imageUrl={user.avatar_url}
           rightSlot={
-            <div className="flex items-center gap-1">
-              <UserEditProfileModal />
-              {/* The sidebar holds these from md; phones reach them here */}
-              <Link href="/site/notification" aria-label="Notifications" className={iconLink}>
-                <Bell aria-hidden="true" />
-              </Link>
-              <Link href="/site/settings" aria-label="Settings" className={iconLink}>
-                <Gear aria-hidden="true" />
-              </Link>
-            </div>
+            // Editing and account links are only for the profile's owner
+            isOwner ? (
+              <div className="flex items-center gap-1">
+                <UserEditProfileModal />
+                {/* The sidebar holds these from md; phones reach them here */}
+                <Link href="/site/notification" aria-label="Notifications" className={iconLink}>
+                  <Bell aria-hidden="true" />
+                </Link>
+                <Link href="/site/settings" aria-label="Settings" className={iconLink}>
+                  <Gear aria-hidden="true" />
+                </Link>
+              </div>
+            ) : null
           }
         />
       }
@@ -49,9 +60,9 @@ export default function UserProfilePage({ user, tabs }: { user: UserUI; tabs: Re
             <ProfileSection title="Bio">
               <p className="max-w-[65ch] whitespace-pre-line">{user.bio || "No bio yet."}</p>
             </ProfileSection>
-            <ProfileSection title="Contact">{user.contact}</ProfileSection>
+            {user.contact ? <ProfileSection title="Contact">{user.contact}</ProfileSection> : null}
           </div>
-          <div className="pt-8">{tabs}</div>
+          {tabs ? <div className="pt-8">{tabs}</div> : null}
         </div>
       }
     />

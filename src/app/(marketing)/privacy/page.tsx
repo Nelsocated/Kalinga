@@ -68,8 +68,9 @@ const SECTIONS: ContentSection[] = [
           photo) and the donation details a shelter lists.
         </li>
         <li>
-          <strong>Your profile page</strong> (name, username, photo, bio and the contact details on your profile) can
-          be opened by anyone with its link. Shelters see it when you send them an adoption request.
+          <strong>Your profile page</strong> (name, username, photo and bio) can be opened by anyone with its link.
+          The contact details on your profile are shown only to you, to Kalinga admins and to shelters you have sent
+          an adoption request.
         </li>
         <li>
           <strong>Adoption requests</strong> are seen only by you and the shelter you sent them to.
