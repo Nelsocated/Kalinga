@@ -9,6 +9,7 @@ import CharacteristicChip, {
   CharacteristicItem,
 } from "@/src/components/template/pet/CharacteristicChip";
 import PhotoView from "@/src/components/views/PhotoView";
+import ShareButton from "@/src/components/ui/ShareButton";
 import LikeButton from "@/src/components/ui/LikeButton";
 import AdoptModal from "@/src/components/modal/AdoptModal";
 import AddPetPhotosModal from "@/src/components/modal/AddPetPhotosModal";
@@ -93,7 +94,12 @@ export default function PetProfileClient({
             photo_url={initialPet.photo_url ?? ""}
             pet_media={initialPet.pet_media ?? []}
           />
-          <AdoptModal petId={id} />
+          {/* One action row: the primary ask, then like and share at the same height */}
+          <div className="flex items-center gap-2">
+            <AdoptModal petId={id} />
+            <LikeButton targetType="pet" targetId={initialPet.id} variant="outlined" />
+            <ShareButton id={initialPet.id} type="pet" variant="outlined" />
+          </div>
         </div>
       }
       main={
@@ -109,12 +115,6 @@ export default function PetProfileClient({
             }
             location={initialPet.shelter?.location ?? "Unknown Location"}
             imageUrl={initialPet.shelter?.logo_url}
-            likeButton={
-              <LikeButton
-                targetType="pet"
-                targetId={initialPet.id}
-              />
-            }
             actions={isOwner ? <AddPetPhotosModal petId={id} /> : null}
           />
 

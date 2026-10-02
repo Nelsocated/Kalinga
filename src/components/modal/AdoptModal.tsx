@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, type FormEvent } from "react";
-import { Heart } from "@phosphor-icons/react";
+import { House } from "@phosphor-icons/react";
 import Input from "../ui/Input";
 import Textarea from "../ui/Textarea";
 import Button, { LinkButton } from "../ui/Button";
@@ -142,8 +142,8 @@ export default function AdoptModal({ petId }: Props) {
 
   return (
     <>
-      <Button variant="primary" size="lg" onClick={openModal} icon={<Heart weight="fill" aria-hidden="true" />} className="w-full">
-        Adopt
+      <Button variant="primary" size="lg" onClick={openModal} icon={<House weight="fill" aria-hidden="true" />} className="min-w-0 flex-1">
+        Apply to adopt
       </Button>
 
       <Modal open={isOpen} onClose={closeModal} title={TITLES[view]} footer={footer}>

@@ -19,19 +19,19 @@ type Props = {
   likeRef?: React.Ref<LikeHandle>;
 };
 
-/** Shelter, like and share for the active video. */
+/** Shelter, like and share for the active video: over the video on phones, beside it from md. */
 export default function RightBar({ media_id, shelter, className, likeRef }: Props) {
   const shelterName = shelter?.shelter_name ?? "Shelter";
 
   return (
-    <div className={cn("flex flex-col items-center gap-5", className)}>
+    <div className={cn("flex flex-col items-center gap-4", className)}>
       {shelter?.id ? (
         <Link
           href={`/site/profiles/shelter/${shelter.id}`}
           aria-label={`Open ${shelterName}`}
-          className="rounded-full transition-transform duration-200 ease-out-expo hover:scale-105"
+          className="mb-1 rounded-full transition-transform duration-200 ease-out-expo hover:scale-105 active:scale-95"
         >
-          <Avatar src={shelter.logo_url} name={shelterName} size={56} className="ring-2 ring-card" />
+          <Avatar src={shelter.logo_url} name={shelterName} size={52} className="ring-2 ring-card md:ring-line" />
         </Link>
       ) : null}
 
@@ -42,7 +42,8 @@ export default function RightBar({ media_id, shelter, className, likeRef }: Prop
           targetType="video"
           targetId={media_id}
           size="lg"
-          className="bg-card shadow-lift hover:bg-sunshine-wash"
+          variant="overlay"
+          showLabel
         />
       ) : null}
 
@@ -50,7 +51,8 @@ export default function RightBar({ media_id, shelter, className, likeRef }: Prop
         <ShareButton
           id={media_id}
           type="video"
-          className="size-12 bg-card text-ink shadow-lift"
+          variant="overlay"
+          showLabel
         />
       ) : null}
     </div>

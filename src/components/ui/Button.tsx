@@ -5,15 +5,17 @@ import { cn } from "@/src/lib/cn";
 type Variant = "primary" | "secondary" | "ghost" | "destructive";
 type Size = "sm" | "md" | "lg" | "icon";
 
+// Pills that press: a quick 0.96 squeeze on tap, lift on hover, icons sized to the label
 const base =
-  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full font-medium whitespace-nowrap select-none " +
-  "transition-[background-color,box-shadow,transform,color] duration-200 ease-out-expo " +
-  "active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap select-none " +
+  "transition-[background-color,border-color,box-shadow,transform,color] duration-200 ease-out-expo " +
+  "active:scale-[0.96] active:duration-100 disabled:pointer-events-none disabled:opacity-50 " +
+  "[&_svg]:size-[1.25em] [&_svg]:shrink-0";
 
 const variants: Record<Variant, string> = {
   primary: "bg-sunshine text-ink hover:bg-sunshine-deep hover:shadow-lift",
   secondary:
-    "border border-line bg-card text-ink hover:bg-sunshine-wash hover:shadow-lift",
+    "border border-line bg-card text-ink hover:border-ink/20 hover:bg-sunshine-wash hover:shadow-lift",
   ghost: "text-ink hover:bg-sunshine-wash",
   destructive: "bg-reject text-white hover:bg-reject-text hover:shadow-lift",
 };
@@ -21,8 +23,8 @@ const variants: Record<Variant, string> = {
 const sizes: Record<Size, string> = {
   sm: "h-9 px-4 text-sm",
   md: "h-11 px-5 text-sm",
-  lg: "h-12 px-7 text-base",
-  icon: "size-11 text-xl",
+  lg: "h-12 px-6 text-base",
+  icon: "size-11 text-xl [&_svg]:size-6",
 };
 
 export function buttonStyles({

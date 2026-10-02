@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { PawHeartFilled, PawHeartOutline } from "./PawHeart";
+import { PawHeartMorph } from "./PawHeart";
 import { cn } from "@/src/lib/cn";
 import { fetchJson } from "@/src/lib/fetchJson";
 import { unwrap } from "@/src/lib/actionResult";
@@ -22,17 +22,29 @@ type Props = {
   targetType: LikeTargetType;
   targetId: string;
   size?: "md" | "lg";
+  /**
+   * plain: icon on a light surface. outlined: bordered circle, for action rows.
+   * overlay: white icon over video on phones, plain from md where the rail sits on the ground.
+   */
+  variant?: "plain" | "outlined" | "overlay";
+  /** Shows "Like" / "Liked" under the icon (the feed rail). */
+  showLabel?: boolean;
   className?: string;
 };
 
-const BURST = [0, 60, 120, 180, 240, 300];
+const VARIANTS = {
+  plain: "text-ink hover:bg-sunshine-wash",
+  outlined: "border border-line bg-card text-ink hover:bg-sunshine-wash hover:shadow-lift",
+  overlay:
+    "text-card drop-shadow-[0_1px_6px_rgb(4_38_102/0.55)] md:text-ink md:drop-shadow-none md:hover:bg-sunshine-wash",
+};
 
 /**
- * Heart toggle with a spring and a small burst when liked.
+ * The paw-heart toggle: liking morphs the heart into a paw with a sunshine ring.
  * The ref's like() only ever likes, for double-tap on the feed.
  */
 const LikeButton = forwardRef<LikeHandle, Props>(function LikeButton(
-  { targetType, targetId, size = "md", className },
+  { targetType, targetId, size = "md", variant = "plain", showLabel = false, className },
   ref,
 ) {
   const [liked, setLiked] = useState(false);
@@ -90,52 +102,54 @@ const LikeButton = forwardRef<LikeHandle, Props>(function LikeButton(
   );
 
   const iconSize = size === "lg" ? "size-9" : "size-7";
-  const animate = pulse > 0 && !reduce;
 
   return (
     <span className="relative inline-flex">
-      <button
-        type="button"
-        onClick={() => setTo(!liked)}
-        disabled={!ready}
-        aria-pressed={liked}
-        aria-label={liked ? "Unlike" : "Like"}
-        className={cn(
-          "relative flex size-12 cursor-pointer items-center justify-center rounded-full text-ink transition-colors hover:bg-sunshine-wash disabled:cursor-default disabled:opacity-60",
-          className,
-        )}
-      >
-        <motion.span
-          key={pulse}
-          initial={animate ? { scale: liked ? 0.4 : 1.15 } : false}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 520, damping: 14 }}
-          className="flex text-sunshine"
+      <span className="flex flex-col items-center gap-0.5">
+        <button
+          type="button"
+          onClick={() => setTo(!liked)}
+          disabled={!ready}
+          aria-pressed={liked}
+          aria-label={liked ? "Unlike" : "Like"}
+          className={cn(
+            "relative flex size-12 cursor-pointer items-center justify-center rounded-full transition-[background-color,box-shadow,transform] duration-200 ease-out-expo active:scale-90 disabled:cursor-default disabled:opacity-60",
+            VARIANTS[variant],
+            className,
+          )}
         >
-          {liked ? <PawHeartFilled className={iconSize} /> : <PawHeartOutline className={iconSize} />}
-        </motion.span>
+          <PawHeartMorph liked={liked} reduce={!!reduce} className={iconSize} />
 
-        <AnimatePresence>
-          {liked && animate ? (
-            <span key={pulse} aria-hidden="true" className="pointer-events-none absolute inset-0">
-              {BURST.map((deg) => (
-                <motion.span
-                  key={deg}
-                  className="absolute top-1/2 left-1/2 size-1.5 rounded-full bg-sunshine"
-                  initial={{ x: "-50%", y: "-50%", opacity: 1, scale: 1 }}
-                  animate={{
-                    x: `calc(-50% + ${Math.cos((deg * Math.PI) / 180) * 26}px)`,
-                    y: `calc(-50% + ${Math.sin((deg * Math.PI) / 180) * 26}px)`,
-                    opacity: 0,
-                    scale: 0.4,
-                  }}
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                />
-              ))}
-            </span>
-          ) : null}
-        </AnimatePresence>
-      </button>
+          {/* One soft sunshine ring per like; keyed so repeat likes replay it */}
+          <AnimatePresence>
+            {liked && pulse > 0 && !reduce ? (
+              <motion.span
+                key={pulse}
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-1 rounded-full border-2 border-sunshine"
+                initial={{ scale: 0.5, opacity: 0.9 }}
+                animate={{ scale: 1.35, opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              />
+            ) : null}
+          </AnimatePresence>
+        </button>
+
+        {showLabel ? (
+          <span
+            aria-hidden="true"
+            className={cn(
+              "text-xs font-semibold",
+              variant === "overlay"
+                ? "text-card drop-shadow-[0_1px_4px_rgb(4_38_102/0.6)] md:text-ink md:drop-shadow-none"
+                : "text-ink",
+            )}
+          >
+            {liked ? "Liked" : "Like"}
+          </span>
+        ) : null}
+      </span>
 
       <span
         role="status"

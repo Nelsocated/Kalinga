@@ -40,10 +40,10 @@ export default function ShelterProfileClient({ shelter, tabs }: ShelterProfileCl
           subtitle={shelter.location ?? ""}
           imageUrl={shelter.logo_url}
           actions={
-            <div className="flex items-center gap-1">
-              <DonationModal shelterId={shelter.id} />
-              <ShareButton id={shelter.id} type="shelter" className="size-12 hover:bg-sunshine-wash" />
-              <LikeButton targetId={shelter.id} targetType="shelter" />
+            <div className="flex items-center gap-2">
+              <DonationModal shelterId={shelter.id} buttonClassName="h-12" />
+              <ShareButton id={shelter.id} type="shelter" variant="outlined" />
+              <LikeButton targetId={shelter.id} targetType="shelter" variant="outlined" />
             </div>
           }
         />
