@@ -12,7 +12,7 @@ const LINKS = [
 export default function MarketingFooter() {
   return (
     <footer className="border-t border-line">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-center gap-3">
           <Image src="/kalinga_logo(ver2).svg" alt="" width={32} height={32} />
           <p className="text-sm text-ink-soft">Give Care. Give Love. A Home for Every Paw</p>

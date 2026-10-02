@@ -17,10 +17,10 @@ export default function FeaturedPets({ pets }: { pets: Pets[] }) {
   if (!pets.length) return null;
 
   return (
-    <section aria-labelledby="residents-title" className="bg-sunshine-wash py-20 md:py-28">
-      <Reveal className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 sm:px-6">
+    <section aria-labelledby="residents-title" className="bg-sunshine-wash py-24 md:py-32">
+      <Reveal className="mx-auto flex w-full max-w-7xl flex-col gap-10 md:gap-14 px-4 sm:px-6">
         <div data-reveal className="flex flex-wrap items-end justify-between gap-4">
-          <h2 id="residents-title" className="max-w-[18ch] text-headline text-ink">
+          <h2 id="residents-title" className="max-w-[16ch] text-display text-ink">
             They have waited the longest
           </h2>
           <Link

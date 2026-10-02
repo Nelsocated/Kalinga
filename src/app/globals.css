@@ -38,6 +38,11 @@
 
   /* Type: Rubik is loaded with next/font in the root layout */
   --font-sans: var(--font-rubik), system-ui, sans-serif;
+  /* Landing only: the hero tagline and the big verbs */
+  --text-hero: clamp(2.5rem, 6.5vw + 0.5rem, 6rem);
+  --text-hero--line-height: 0.98;
+  --text-hero--letter-spacing: -0.035em;
+  --text-hero--font-weight: 800;
   --text-display: clamp(2rem, 4vw + 1rem, 3.5rem);
   --text-display--line-height: 1.05;
   --text-display--letter-spacing: -0.02em;

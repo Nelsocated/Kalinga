@@ -34,7 +34,7 @@ export default async function LandingPage() {
       <HowItWorks />
       <FeaturedPets pets={pets} />
       <ForShelters />
-      <FinalCta />
+      <FinalCta videos={videos} />
     </>
   );
 }

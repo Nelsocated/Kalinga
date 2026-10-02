@@ -6,7 +6,7 @@ import { LinkButton } from "@/src/components/ui/Button";
 export default function MarketingNav() {
   return (
     <header className="sticky top-0 z-30 border-b border-transparent bg-ground/90 backdrop-blur supports-[backdrop-filter]:bg-ground/75">
-      <nav aria-label="Main" className="mx-auto flex h-18 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <nav aria-label="Main" className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5 rounded-full" aria-label="Kalinga home">
           <Image src="/kalinga_logo(ver2).svg" alt="" width={36} height={36} priority />
           <span className="text-lg font-bold text-sunshine">Kalinga</span>
