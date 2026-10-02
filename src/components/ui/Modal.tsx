@@ -124,7 +124,7 @@ export default function Modal({
               <h2
                 id={titleId}
                 className={cn(
-                  "text-xl font-semibold text-ink",
+                  "min-w-0 text-xl font-semibold [overflow-wrap:anywhere] text-ink",
                   hideTitle && "sr-only",
                 )}
               >

@@ -62,7 +62,7 @@ export default function ThreadList({
               <Avatar src={thread.other_party?.image} name={name} size={44} />
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="flex items-baseline justify-between gap-2">
-                  <span className="truncate font-semibold text-ink">{name}</span>
+                  <span className="min-w-0 truncate font-semibold text-ink">{name}</span>
                   <span className="shrink-0 text-xs text-muted">{formatShortDate(thread.last_message_at)}</span>
                 </span>
                 <span className="truncate text-sm text-ink">{thread.subject}</span>

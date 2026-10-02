@@ -26,8 +26,8 @@ export default function SentMessagesList({ items, loading, onOpenMessage }: Prop
             onClick={() => onOpenMessage(item)}
             className="flex w-full flex-col gap-0.5 rounded-lg px-3 py-3 text-left transition-colors hover:bg-sunshine-wash/60"
           >
-            <span className="flex items-baseline justify-between gap-2">
-              <span className="truncate font-semibold text-ink">To {item.receiver.name}</span>
+            <span className="flex min-w-0 items-baseline justify-between gap-2">
+              <span className="min-w-0 truncate font-semibold text-ink">To {item.receiver.name}</span>
               <span className="shrink-0 text-xs text-muted">{formatShortDate(item.created_at)}</span>
             </span>
             <span className="truncate text-sm text-ink">{item.subject || "No subject"}</span>

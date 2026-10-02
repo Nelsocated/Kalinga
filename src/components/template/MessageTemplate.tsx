@@ -184,8 +184,9 @@ export default function MessagesLayout({
               </p>
             ) : null}
 
-            <div className="grid gap-4 md:h-[calc(100dvh-11rem)] md:grid-cols-[320px_minmax(0,1fr)]">
-              <div className={cn("flex min-h-0 flex-col gap-3", showDetail && "hidden md:flex")}>
+            {/* minmax(0,1fr) on phones too, so a long word or link can't stretch the column past the screen */}
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:h-[calc(100dvh-11rem)] md:grid-cols-[320px_minmax(0,1fr)]">
+              <div className={cn("flex min-h-0 min-w-0 flex-col gap-3", showDetail && "hidden md:flex")}>
                 <MessagesTabs mode={mode} setMode={setMode} />
                 <div className="min-h-0 flex-1 md:overflow-y-auto">
                   {mode === "inbox" ? (
@@ -208,12 +209,13 @@ export default function MessagesLayout({
 
               <div
                 className={cn(
-                  "min-h-[60dvh] overflow-hidden rounded-lg border border-line bg-card md:min-h-0",
+                  // Phones: the thread flows with the page (no inner scroll box to clip it); from md it scrolls inside the pane
+                  "min-w-0 rounded-lg border border-line bg-card md:min-h-0 md:overflow-hidden",
                   mode === "sent" && "hidden md:block",
                   !showDetail && "hidden md:block",
                 )}
               >
-                <div className="border-b border-line px-2 py-2 md:hidden">
+                <div className="sticky top-0 z-10 rounded-t-lg border-b border-line bg-card px-2 py-2 md:hidden">
                   <Button variant="ghost" size="sm" onClick={() => setShowDetail(false)} icon={<ArrowLeft aria-hidden="true" />}>
                     All messages
                   </Button>
@@ -225,6 +227,7 @@ export default function MessagesLayout({
                   loadingThread={loadingThread}
                   onOpenReplyModal={() => setReplyOpen(true)}
                   senderSide={senderSide}
+                  visible={showDetail}
                 />
               </div>
             </div>
@@ -245,7 +248,7 @@ export default function MessagesLayout({
               </span>
               <span>{new Date(openedMessage.created_at).toLocaleString()}</span>
             </p>
-            <p className="whitespace-pre-wrap text-ink">{openedMessage.body}</p>
+            <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-ink">{openedMessage.body}</p>
           </div>
         ) : null}
       </Modal>

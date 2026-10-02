@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { ArrowBendUpLeft, ChatCircle } from "@phosphor-icons/react";
 import type { PersonCard, MessageThread, Message } from "@/src/lib/types/messages";
 import ThreadViewSkeleton from "@/src/components/skeletons/ThreadViewSkeleton";
@@ -16,6 +19,8 @@ type Props = {
   onOpenReplyModal: () => void;
   /** Which side the viewer writes as, to tell their own messages apart. */
   senderSide: "user" | "shelter";
+  /** Phones hide the thread until it's opened; scroll to the latest message once it shows. */
+  visible?: boolean;
 };
 
 function formatFullDate(value: string) {
@@ -35,7 +40,15 @@ export default function ThreadView({
   loadingThread,
   onOpenReplyModal,
   senderSide,
+  visible = true,
 }: Props) {
+  const endRef = useRef<HTMLLIElement>(null);
+
+  // Open on the latest message, like a chat app
+  useEffect(() => {
+    if (visible && !loadingThread) endRef.current?.scrollIntoView({ block: "nearest" });
+  }, [visible, loadingThread, messages]);
+
   if (!selectedThreadId) {
     return (
       <EmptyState
@@ -60,13 +73,13 @@ export default function ThreadView({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <header className="shrink-0 border-b border-line px-4 py-4 sm:px-6">
-        <h2 className="text-lg font-semibold text-ink">{selectedThread.subject}</h2>
+        <h2 className="text-lg font-semibold [overflow-wrap:anywhere] text-ink">{selectedThread.subject}</h2>
         <p className="text-sm text-muted">
           {selectedThread.thread_type === "adoption" ? "About an adoption application" : "General message"}
         </p>
       </header>
 
-      <ol className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-5 sm:px-6">
+      <ol className="flex min-h-0 flex-1 flex-col gap-4 px-3 py-5 sm:px-6 md:overflow-y-auto">
         {ordered.length === 0 ? (
           <li className="text-sm text-muted">No messages yet.</li>
         ) : (
@@ -75,11 +88,11 @@ export default function ThreadView({
               senderSide === "user" ? !!message.sender_user_id : !!message.sender_shelter_id;
             return (
               <li key={message.id} className={cn("flex items-end gap-2", mine && "flex-row-reverse")}>
-                <Avatar src={message.sender.image} name={message.sender.name} size={32} />
-                <div className={cn("flex max-w-[80%] flex-col gap-1", mine && "items-end")}>
+                <Avatar src={message.sender.image} name={message.sender.name} size={32} className="shrink-0" />
+                <div className={cn("flex min-w-0 max-w-[85%] flex-col gap-1 sm:max-w-[80%]", mine && "items-end")}>
                   <div
                     className={cn(
-                      "rounded-lg px-4 py-3 text-base leading-relaxed whitespace-pre-wrap text-ink",
+                      "max-w-full rounded-lg px-4 py-3 text-base leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere] text-ink",
                       mine ? "bg-sunshine-soft" : "border border-line bg-card",
                     )}
                   >
@@ -94,9 +107,11 @@ export default function ThreadView({
             );
           })
         )}
+        <li ref={endRef} aria-hidden="true" className="scroll-mb-40 md:scroll-mb-0" />
       </ol>
 
-      <footer className="shrink-0 border-t border-line px-4 py-3 sm:px-6">
+      {/* Phones: Reply stays reachable above the tab bar while reading a long thread */}
+      <footer className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] shrink-0 rounded-b-lg border-t border-line bg-card px-4 py-3 sm:px-6 md:static">
         <Button variant="primary" onClick={onOpenReplyModal} icon={<ArrowBendUpLeft aria-hidden="true" />}>
           Reply
         </Button>
