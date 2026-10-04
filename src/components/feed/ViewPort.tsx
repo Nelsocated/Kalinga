@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Play } from "@phosphor-icons/react";
+import { Play, SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import { PawHeartFilled } from "../ui/PawHeart";
 import Caption from "./Caption";
 import type { FeedItem } from "@/src/lib/services/feedService";
@@ -12,13 +12,16 @@ type Props = {
   item: FeedItem;
   isActive: boolean;
   preload: "auto" | "metadata" | "none";
+  /** Sound is shared across the feed: on for one video means on for the next. */
+  muted: boolean;
+  onMutedChange: (muted: boolean) => void;
   onDoubleTap?: () => void;
 };
 
 const DOUBLE_TAP_MS = 300;
 const VIEW_AFTER_MS = 2000;
 
-export default function ViewPort({ item, isActive, preload, onDoubleTap }: Props) {
+export default function ViewPort({ item, isActive, preload, muted, onMutedChange, onDoubleTap }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const viewRecorded = useRef(false);
@@ -26,19 +29,35 @@ export default function ViewPort({ item, isActive, preload, onDoubleTap }: Props
   const [hearts, setHearts] = useState(0);
   const reduce = useReducedMotion();
 
+  // React doesn't keep the muted attribute in sync, so set the property directly
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted;
+  }, [muted]);
+
   // Only the active video plays
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    if (isActive) {
-      video
-        .play()
-        .then(() => setIsPaused(false))
-        .catch(() => setIsPaused(true));
-    } else {
+    if (!isActive) {
       video.pause();
+      return;
     }
+
+    video
+      .play()
+      .then(() => setIsPaused(false))
+      .catch(() => {
+        // Browsers refuse autoplay with sound until the visitor has interacted; fall back to muted
+        if (video.muted) return setIsPaused(true);
+        video.muted = true;
+        onMutedChange(true);
+        video
+          .play()
+          .then(() => setIsPaused(false))
+          .catch(() => setIsPaused(true));
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run when this item becomes active
   }, [isActive]);
 
   // Count a view once the video has been on screen for 2 seconds
@@ -100,7 +119,7 @@ export default function ViewPort({ item, isActive, preload, onDoubleTap }: Props
           className="h-full w-full object-cover"
           playsInline
           loop
-          muted
+          muted={muted}
           onClick={handleTap}
         />
       ) : (
@@ -108,6 +127,22 @@ export default function ViewPort({ item, isActive, preload, onDoubleTap }: Props
           This video isn&apos;t available.
         </div>
       )}
+
+      {item.url && isActive ? (
+        <button
+          type="button"
+          onClick={() => onMutedChange(!muted)}
+          aria-label={muted ? "Turn sound on" : "Turn sound off"}
+          aria-pressed={!muted}
+          className="absolute top-3 left-3 z-10 flex size-12 cursor-pointer items-center justify-center rounded-full text-card drop-shadow-[0_1px_6px_rgb(4_38_102/0.55)] transition-transform duration-200 ease-out-expo active:scale-90"
+        >
+          {muted ? (
+            <SpeakerSlash size={26} weight="bold" aria-hidden="true" />
+          ) : (
+            <SpeakerHigh size={26} weight="bold" aria-hidden="true" />
+          )}
+        </button>
+      ) : null}
 
       {isPaused ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

@@ -50,6 +50,8 @@ export default function Feed({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [status, setStatus] = useState<"loading" | "error" | "ready">("loading");
   const [attempt, setAttempt] = useState(0);
+  // Starts muted because browsers only allow silent autoplay
+  const [muted, setMuted] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -170,7 +172,7 @@ export default function Feed({
     <div
       ref={containerRef}
       tabIndex={0}
-      aria-label="Pet videos. Use the up and down arrow keys to move between videos."
+      aria-label="Pet videos. Use the up and down arrow keys to move between videos, and M to turn sound on or off."
       onKeyDown={(e) => {
         if (e.key === "ArrowDown" || e.key === "j") {
           e.preventDefault();
@@ -180,6 +182,7 @@ export default function Feed({
           e.preventDefault();
           scrollToIndex(currentIndex - 1);
         }
+        if (e.key === "m") setMuted((m) => !m);
       }}
       className="h-dvh w-full snap-y snap-mandatory overflow-y-scroll overscroll-contain bg-ink [scrollbar-width:none] md:h-[calc(100dvh-4rem)] md:w-[min(56dvh,480px)] md:rounded-xl"
     >
@@ -195,6 +198,8 @@ export default function Feed({
               item={item}
               isActive={i === currentIndex}
               preload={win.preloadFor(i)}
+              muted={muted}
+              onMutedChange={setMuted}
               onDoubleTap={onDoubleTap}
             />
           ) : null}
