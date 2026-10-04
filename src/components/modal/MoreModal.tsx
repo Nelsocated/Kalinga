@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { DotsThreeCircle, Gear, House, Info } from "@phosphor-icons/react";
+import { DotsThreeCircle, Gear, House, Info, SignOut } from "@phosphor-icons/react";
 
 import { getAuthUser, type AuthUser } from "@/src/lib/utils/clientAuth";
 import Modal from "../ui/Modal";
-import LogoutButton from "../ui/LogoutButton";
+import { LogoutModal } from "../ui/LogoutButton";
 import { sidebarItemClass } from "../layout/navItems";
 
 const rowClass =
@@ -14,6 +14,7 @@ const rowClass =
 
 export default function MoreModal() {
   const [open, setOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
@@ -45,9 +46,24 @@ export default function MoreModal() {
             <Gear size={22} aria-hidden="true" />
             Settings
           </Link>
-          {authUser ? <LogoutButton className={rowClass} /> : null}
+          {authUser ? (
+            <button
+              type="button"
+              onClick={() => {
+                // Swap the menu for the confirmation instead of stacking two dialogs
+                close();
+                setConfirmLogout(true);
+              }}
+              className={`cursor-pointer ${rowClass}`}
+            >
+              <SignOut size={22} aria-hidden="true" />
+              Log out
+            </button>
+          ) : null}
         </nav>
       </Modal>
+
+      <LogoutModal open={confirmLogout} onClose={() => setConfirmLogout(false)} />
     </>
   );
 }

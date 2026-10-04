@@ -13,14 +13,15 @@ type LogoutButtonProps = {
   withIcon?: boolean;
 };
 
-/** Log out, after a quick confirmation. */
-export default function LogoutButton({
-  redirectTo = "/login",
-  className = "",
-  withIcon = true,
-}: LogoutButtonProps) {
+type LogoutModalProps = {
+  open: boolean;
+  onClose: () => void;
+  redirectTo?: string;
+};
+
+/** The "Log out of Kalinga?" confirmation. Owned by whoever opens it. */
+export function LogoutModal({ open, onClose, redirectTo = "/login" }: LogoutModalProps) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,7 +34,7 @@ export default function LogoutButton({
         setError(result.error);
         return;
       }
-      setOpen(false);
+      onClose();
       router.replace(redirectTo);
       router.refresh();
     } catch {
@@ -45,9 +46,45 @@ export default function LogoutButton({
 
   function close() {
     if (loading) return;
-    setOpen(false);
     setError("");
+    onClose();
   }
+
+  return (
+    <Modal
+      open={open}
+      onClose={close}
+      title="Log out of Kalinga?"
+      className="sm:max-w-sm"
+      footer={
+        <>
+          <Button variant="ghost" onClick={close} disabled={loading}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleLogout} loading={loading}>
+            Log out
+          </Button>
+        </>
+      }
+    >
+      {error ? (
+        <p role="alert" className="text-sm text-reject-text">
+          {error}
+        </p>
+      ) : (
+        <p className="text-sm text-ink-soft">You can log back in any time.</p>
+      )}
+    </Modal>
+  );
+}
+
+/** Log out, after a quick confirmation. */
+export default function LogoutButton({
+  redirectTo = "/login",
+  className = "",
+  withIcon = true,
+}: LogoutButtonProps) {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -61,30 +98,7 @@ export default function LogoutButton({
         Log out
       </Button>
 
-      <Modal
-        open={open}
-        onClose={close}
-        title="Log out of Kalinga?"
-        className="sm:max-w-sm"
-        footer={
-          <>
-            <Button variant="ghost" onClick={close} disabled={loading}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={handleLogout} loading={loading}>
-              Log out
-            </Button>
-          </>
-        }
-      >
-        {error ? (
-          <p role="alert" className="text-sm text-reject-text">
-            {error}
-          </p>
-        ) : (
-          <p className="text-sm text-ink-soft">You can log back in any time.</p>
-        )}
-      </Modal>
+      <LogoutModal open={open} onClose={() => setOpen(false)} redirectTo={redirectTo} />
     </>
   );
 }
