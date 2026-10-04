@@ -1,13 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { BookOpen, PawPrint } from "@phosphor-icons/react";
+import { useEffect, useMemo, useState } from "react";
+import { BookOpen, MagnifyingGlass, PawPrint, WarningCircle } from "@phosphor-icons/react";
 
 import WebTemplate from "@/src/components/template/WebTemplate";
 import PetCard from "@/src/components/cards/PetCard";
 import FosterCard from "@/src/components/cards/FosterCard";
 import EmptyState from "@/src/components/ui/EmptyState";
 import FilterModal from "@/src/components/modal/FilterModal";
+import Button from "@/src/components/ui/Button";
+import SearchField from "@/src/components/ui/SearchField";
+import CardGridSkeleton from "@/src/components/skeletons/CardGridSkeleton";
+import { fetchJson } from "@/src/lib/fetchJson";
+import type { SearchPetCardItem } from "@/src/lib/types/pets";
 import { cn } from "@/src/lib/cn";
 
 import type { LongestPet, FosterStory } from "./page";
@@ -69,8 +74,106 @@ function rowOrGrid(expanded: boolean, cols = "lg:grid-cols-4") {
 
 const rowItem = "w-[44vw] max-w-52 shrink-0 snap-start lg:w-auto lg:max-w-none";
 
+const SEARCH_DELAY_MS = 250;
+
+type SearchState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "ready"; pets: SearchPetCardItem[] };
+
+/** Available pets by name or breed, through the same endpoint as Lookup. */
+function usePetSearch(query: string) {
+  const [state, setState] = useState<SearchState>({ status: "idle" });
+  const [attempt, setAttempt] = useState(0);
+  const q = query.trim();
+
+  useEffect(() => {
+    if (!q) return;
+
+    let alive = true;
+    const timer = setTimeout(() => {
+      setState({ status: "loading" });
+      fetchJson<{ data: SearchPetCardItem[] }>("/api/pets/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ q }),
+      })
+        .then((res) => alive && setState({ status: "ready", pets: res.data ?? [] }))
+        .catch(() => alive && setState({ status: "error" }));
+    }, SEARCH_DELAY_MS);
+
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [q, attempt]);
+
+  return { state: q ? state : ({ status: "idle" } as const), retry: () => setAttempt((n) => n + 1) };
+}
+
+function SearchResults({
+  query,
+  state,
+  onClear,
+  onRetry,
+}: {
+  query: string;
+  state: SearchState;
+  onClear: () => void;
+  onRetry: () => void;
+}) {
+  if (state.status === "error") {
+    return (
+      <EmptyState
+        icon={<WarningCircle aria-hidden="true" />}
+        title="Couldn't search right now"
+        description="Check your connection and try again."
+        action={<Button variant="secondary" onClick={onRetry}>Retry</Button>}
+      />
+    );
+  }
+
+  if (state.status !== "ready") return <CardGridSkeleton />;
+
+  if (state.pets.length === 0) {
+    return (
+      <EmptyState
+        icon={<MagnifyingGlass aria-hidden="true" />}
+        title={`No pets match "${query.trim()}"`}
+        description="Try another name or breed."
+        action={<Button variant="secondary" onClick={onClear}>Clear search</Button>}
+      />
+    );
+  }
+
+  return (
+    <section aria-label="Search results" className="flex flex-col gap-4">
+      <p role="status" className="text-sm text-muted">
+        {state.pets.length === 1 ? "1 pet" : `${state.pets.length} pets`}
+      </p>
+      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {state.pets.map((pet) => (
+          <li key={pet.id}>
+            <PetCard
+              href={`/site/profiles/pets/${pet.id}`}
+              imageUrl={pet.photo_url}
+              petName={pet.pet_name}
+              shelterLogo={pet.shelter?.logo_url ?? undefined}
+              shelterName={pet.shelter?.shelter_name ?? "Kalinga shelter"}
+              sex={pet.sex}
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export default function ExplorePage({ longest, foster }: ExplorePageProps) {
   const [expanded, setExpanded] = useState<"longest" | "foster" | null>(null);
+  const [query, setQuery] = useState("");
+  const search = usePetSearch(query);
 
   const longestCards = useMemo(
     () =>
@@ -135,76 +238,93 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
     <WebTemplate
       header="Explore"
       actions={<FilterModal variant="button" />}
+      top={
+        <SearchField
+          value={query}
+          onChange={setQuery}
+          label="Search pets"
+          placeholder="Search pets by name or breed"
+        />
+      }
       main={
-        <div className="flex flex-col gap-10">
-          {showLongest ? (
-            <Section
-              id="longest-residents"
-              title="Our longest residents"
-              expanded={expanded === "longest"}
-              canExpand={longestCards.length > PREVIEW_COUNT}
-              onToggle={() => setExpanded((m) => (m === "longest" ? null : "longest"))}
-            >
-              {longestCards.length === 0 ? (
-                <EmptyState icon={<PawPrint aria-hidden="true" />} title="No pets here yet" />
-              ) : (
-                <ul className={rowOrGrid(expanded === "longest")}>
-                  {(expanded === "longest" ? longestCards : longestCards.slice(0, PREVIEW_COUNT)).map(({ key, ...card }) => (
-                    <li key={key} className={expanded === "longest" ? "" : rowItem}>
-                      <PetCard {...card} />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Section>
-          ) : null}
+        query.trim() ? (
+          <SearchResults
+            query={query}
+            state={search.state}
+            onClear={() => setQuery("")}
+            onRetry={search.retry}
+          />
+        ) : (
+          <div className="flex flex-col gap-10">
+            {showLongest ? (
+              <Section
+                id="longest-residents"
+                title="Our longest residents"
+                expanded={expanded === "longest"}
+                canExpand={longestCards.length > PREVIEW_COUNT}
+                onToggle={() => setExpanded((m) => (m === "longest" ? null : "longest"))}
+              >
+                {longestCards.length === 0 ? (
+                  <EmptyState icon={<PawPrint aria-hidden="true" />} title="No pets here yet" />
+                ) : (
+                  <ul className={rowOrGrid(expanded === "longest")}>
+                    {(expanded === "longest" ? longestCards : longestCards.slice(0, PREVIEW_COUNT)).map(({ key, ...card }) => (
+                      <li key={key} className={expanded === "longest" ? "" : rowItem}>
+                        <PetCard {...card} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+            ) : null}
 
-          {showFoster ? (
-            <Section
-              id="foster-stories"
-              title="Foster stories"
-              expanded={expanded === "foster"}
-              canExpand={fosterCards.length > PREVIEW_COUNT}
-              onToggle={() => setExpanded((m) => (m === "foster" ? null : "foster"))}
-            >
-              {fosterCards.length === 0 ? (
-                <EmptyState icon={<BookOpen aria-hidden="true" />} title="No foster stories yet" />
-              ) : expanded === "foster" ? (
-                <ul className="grid gap-4 md:grid-cols-2">
-                  {fosterCards.map((card) => (
-                    <li key={card.key}>
-                      <FosterCard href={card.href} title={card.title} description={card.description}>
+            {showFoster ? (
+              <Section
+                id="foster-stories"
+                title="Foster stories"
+                expanded={expanded === "foster"}
+                canExpand={fosterCards.length > PREVIEW_COUNT}
+                onToggle={() => setExpanded((m) => (m === "foster" ? null : "foster"))}
+              >
+                {fosterCards.length === 0 ? (
+                  <EmptyState icon={<BookOpen aria-hidden="true" />} title="No foster stories yet" />
+                ) : expanded === "foster" ? (
+                  <ul className="grid gap-4 md:grid-cols-2">
+                    {fosterCards.map((card) => (
+                      <li key={card.key}>
+                        <FosterCard href={card.href} title={card.title} description={card.description}>
+                          <PetCard
+                            href={`/site/profiles/pets/${card.petId}`}
+                            imageUrl={card.imageUrl}
+                            petName={card.petName}
+                            sex={card.sex}
+                            resize
+                          />
+                        </FosterCard>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <ul className={rowOrGrid(false)}>
+                    {fosterCards.slice(0, PREVIEW_COUNT).map((card) => (
+                      <li key={card.key} className={rowItem}>
                         <PetCard
-                          href={`/site/profiles/pets/${card.petId}`}
+                          href={card.href}
+                          title={card.title}
                           imageUrl={card.imageUrl}
                           petName={card.petName}
                           sex={card.sex}
-                          resize
+                          shelterName={card.shelterName}
+                          shelterLogo={card.shelterLogo}
                         />
-                      </FosterCard>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <ul className={rowOrGrid(false)}>
-                  {fosterCards.slice(0, PREVIEW_COUNT).map((card) => (
-                    <li key={card.key} className={rowItem}>
-                      <PetCard
-                        href={card.href}
-                        title={card.title}
-                        imageUrl={card.imageUrl}
-                        petName={card.petName}
-                        sex={card.sex}
-                        shelterName={card.shelterName}
-                        shelterLogo={card.shelterLogo}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Section>
-          ) : null}
-        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+            ) : null}
+          </div>
+        )
       }
     />
   );

@@ -87,6 +87,7 @@ async function runListQuery(
 function applyFilters<T>(query: T, filters: PetFilters = {}): T {
   let nextQuery = query as T & {
     in: (column: string, values: string[]) => T;
+    or: (filters: string) => T;
   };
 
   const species = toArray(filters.species);
@@ -102,6 +103,13 @@ function applyFilters<T>(query: T, filters: PetFilters = {}): T {
   if (size.length) nextQuery = nextQuery.in("size", size) as typeof nextQuery;
   if (status.length)
     nextQuery = nextQuery.in("status", status) as typeof nextQuery;
+
+  // Strip characters that have meaning in PostgREST filter syntax or LIKE patterns
+  const q = (filters.q ?? "").replace(/[%_,().*\\"']/g, " ").trim();
+  if (q)
+    nextQuery = nextQuery.or(
+      `name.ilike.%${q}%,breed.ilike.%${q}%`,
+    ) as typeof nextQuery;
 
   return nextQuery;
 }

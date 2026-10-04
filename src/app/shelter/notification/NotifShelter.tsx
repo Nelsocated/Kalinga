@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { ClipboardText } from "@phosphor-icons/react";
+import SearchField, { matchesQuery } from "@/src/components/ui/SearchField";
+import Button from "@/src/components/ui/Button";
 import WebTemplate from "@/src/components/template/WebTemplate";
 import NotifShelterCard from "@/src/components/cards/NotifShelterCard";
 import EmptyState from "@/src/components/ui/EmptyState";
@@ -80,10 +82,16 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
 export default function NotifShelter({ items = [] }: Props) {
   const [species, setSpecies] = useState<SpeciesFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
+  const [query, setQuery] = useState("");
 
+  // Search first so the status counts reflect it
+  const searched = useMemo(
+    () => items.filter((item) => matchesQuery(query, item.petName, item.applicantName)),
+    [items, query],
+  );
   const bySpecies = useMemo(
-    () => (species === "all" ? items : items.filter((item) => item.species === species)),
-    [items, species],
+    () => (species === "all" ? searched : searched.filter((item) => item.species === species)),
+    [searched, species],
   );
   const filteredItems = useMemo(
     () => (status === "all" ? bySpecies : bySpecies.filter((item) => item.status === status)),
@@ -98,6 +106,14 @@ export default function NotifShelter({ items = [] }: Props) {
       main={
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-3">
+            {items.length ? (
+              <SearchField
+                value={query}
+                onChange={setQuery}
+                label="Search applications"
+                placeholder="Search by pet or applicant"
+              />
+            ) : null}
             <div className="flex flex-wrap gap-2" aria-label="Species">
               {SPECIES_FILTERS.map((f) => (
                 <Pill key={f.value} active={species === f.value} onClick={() => setSpecies(f.value)}>
@@ -120,6 +136,13 @@ export default function NotifShelter({ items = [] }: Props) {
               icon={<ClipboardText aria-hidden="true" />}
               title={items.length === 0 ? "No applications yet" : "No applications match"}
               description={items.length === 0 ? "When someone applies to adopt one of your pets, it shows up here." : undefined}
+              action={
+                query.trim() ? (
+                  <Button variant="secondary" onClick={() => setQuery("")}>
+                    Clear search
+                  </Button>
+                ) : undefined
+              }
             />
           ) : (
             <ul className="grid gap-4 lg:grid-cols-2">

@@ -53,6 +53,8 @@ export interface PetFilters {
   age?: Multi<Pets["age"]>;
   size?: Multi<Pets["size"]>;
   status?: Multi<Pets["status"]>;
+  /** Free text matched against name and breed. */
+  q?: string;
 }
 
 export type Dashboard = {

@@ -11,6 +11,7 @@ const SearchPetsSchema = z.object({
     .array(z.enum(["kitten/puppy", "young_adult", "adult", "senior"]))
     .optional(),
   size: z.array(z.enum(["small", "medium", "large"])).optional(),
+  q: z.string().trim().max(60).optional(),
 });
 
 export const POST = handle(async (req: Request) => {
@@ -24,6 +25,7 @@ export const POST = handle(async (req: Request) => {
     sex: parsed.data.sex,
     age: parsed.data.age,
     size: parsed.data.size,
+    q: parsed.data.q,
   };
 
   const pets = await getAvailablePets(filters);

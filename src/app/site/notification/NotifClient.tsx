@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bell } from "@phosphor-icons/react";
+import { Bell, MagnifyingGlass } from "@phosphor-icons/react";
 
 import WebTemplate from "@/src/components/template/WebTemplate";
 import NotifCard from "@/src/components/cards/NotifCard";
 import StatusModal from "@/src/components/modal/StatusModal";
 import EmptyState from "@/src/components/ui/EmptyState";
-import { LinkButton } from "@/src/components/ui/Button";
+import Button, { LinkButton } from "@/src/components/ui/Button";
+import SearchField, { matchesQuery } from "@/src/components/ui/SearchField";
 import { createClientSupabase } from "@/src/lib/supabase/client";
 
 import type { NotificationItem } from "./page";
@@ -21,6 +22,8 @@ export default function NotifClient({ notifications }: Props) {
   const router = useRouter();
   const supabase = useMemo(() => createClientSupabase(), []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const visible = notifications.filter((item) => matchesQuery(query, item.title, item.petName, item.shelter));
 
   const selected = notifications.find((item) => item.id === selectedId) ?? null;
 
@@ -41,6 +44,16 @@ export default function NotifClient({ notifications }: Props) {
   return (
     <WebTemplate
       header="Notifications"
+      top={
+        notifications.length ? (
+          <SearchField
+            value={query}
+            onChange={setQuery}
+            label="Search notifications"
+            placeholder="Search by pet, shelter or update"
+          />
+        ) : null
+      }
       main={
         notifications.length === 0 ? (
           <EmptyState
@@ -55,8 +68,19 @@ export default function NotifClient({ notifications }: Props) {
           />
         ) : (
           <>
+            {visible.length === 0 ? (
+              <EmptyState
+                icon={<MagnifyingGlass aria-hidden="true" />}
+                title={`No updates match "${query.trim()}"`}
+                action={
+                  <Button variant="secondary" onClick={() => setQuery("")}>
+                    Clear search
+                  </Button>
+                }
+              />
+            ) : null}
             <ul className="flex flex-col gap-3">
-              {notifications.map((item) => (
+              {visible.map((item) => (
                 <li key={item.id}>
                   <NotifCard item={item} onSelect={() => setSelectedId(item.id)} />
                 </li>
