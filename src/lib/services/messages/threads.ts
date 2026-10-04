@@ -182,12 +182,7 @@ export async function replyToThread(
 
   const { error: updateThreadError } = await supabase
     .from("message_threads")
-    .update({
-      updated_at: now,
-      last_message_at: now,
-      user_archived: false,
-      shelter_archived: false,
-    })
+    .update({ updated_at: now, last_message_at: now })
     .eq("id", threadId);
 
   if (updateThreadError) throw new Error(updateThreadError.message);
