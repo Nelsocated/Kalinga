@@ -194,7 +194,7 @@ export default function Feed({
             <ViewPort
               item={item}
               isActive={i === currentIndex}
-              preload={win.shouldPreload(i) ? "auto" : "none"}
+              preload={win.preloadFor(i)}
               onDoubleTap={onDoubleTap}
             />
           ) : null}

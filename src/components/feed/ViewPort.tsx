@@ -11,7 +11,7 @@ import { getViewSessionId } from "@/src/lib/session/getViewSessionId";
 type Props = {
   item: FeedItem;
   isActive: boolean;
-  preload: "auto" | "none";
+  preload: "auto" | "metadata" | "none";
   onDoubleTap?: () => void;
 };
 

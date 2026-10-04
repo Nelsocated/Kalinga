@@ -6,17 +6,24 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Pause, Play } from "@phosphor-icons/react";
 import Button from "@/src/components/ui/Button";
+import PosterVideo from "./PosterVideo";
 
 gsap.registerPlugin(useGSAP);
 
-export type StripVideo = { mediaId: string; url: string; petName: string; shelterName: string };
+export type StripVideo = {
+  mediaId: string;
+  url: string;
+  posterUrl: string | null;
+  petName: string;
+  shelterName: string;
+};
 
 const SECONDS_PER_TILE = 4.5;
 
 /**
  * Real feed videos drifting sideways in a seamless loop (the set is rendered twice).
  * Hover, keyboard focus or the Pause button stops it. With reduced motion it stays still
- * and scrolls by hand. Each video only plays while it is on screen and not paused.
+ * and scrolls by hand. Tiles show the pet's photo; a video only plays while hovered.
  */
 export default function FilmStrip({ videos }: { videos: StripVideo[] }) {
   const scope = useRef<HTMLDivElement>(null);
@@ -66,32 +73,11 @@ export default function FilmStrip({ videos }: { videos: StripVideo[] }) {
     { scope, dependencies: [videos.length] },
   );
 
-  // Play only what is visible; with reduced motion or when paused, nothing plays
   useEffect(() => {
     pausedRef.current = paused;
-    const els = Array.from(track.current?.querySelectorAll("video") ?? []);
-    if (!canMove || !els.length) return;
-
-    if (paused) {
-      tween.current?.pause();
-      els.forEach((el) => el.pause());
-      return;
-    }
-    if (!held.current) tween.current?.resume();
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const video = entry.target as HTMLVideoElement;
-          if (entry.isIntersecting) video.play().catch(() => {});
-          else video.pause();
-        }
-      },
-      { threshold: 0.25 },
-    );
-    els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [videos, paused, canMove]);
+    if (paused) tween.current?.pause();
+    else if (!held.current) tween.current?.resume();
+  }, [paused]);
 
   if (!videos.length) return null;
 
@@ -106,33 +92,9 @@ export default function FilmStrip({ videos }: { videos: StripVideo[] }) {
         className="overflow-x-auto overflow-y-hidden [scrollbar-width:none] motion-safe:overflow-x-hidden"
       >
         <ul ref={track} className="flex w-max gap-3 px-4 sm:gap-4 sm:px-6">
-          {loop.map((video, i) => {
-            const duplicate = i >= videos.length;
-            return (
-              <li key={`${video.mediaId}-${i}`} aria-hidden={duplicate || undefined} className="shrink-0">
-                <Link
-                  href={`/site/home/pet/${video.mediaId}`}
-                  tabIndex={duplicate ? -1 : undefined}
-                  aria-label={`Watch ${video.petName} from ${video.shelterName}`}
-                  className="group relative block aspect-9/16 w-40 overflow-hidden rounded-lg bg-ink transition-shadow duration-300 ease-out-expo hover:shadow-float sm:w-48 lg:w-52"
-                >
-                  <video
-                    src={`${video.url}#t=0.1`}
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    aria-hidden="true"
-                    className="h-full w-full object-cover transition-transform duration-500 ease-out-expo group-hover:scale-[1.04]"
-                  />
-                  <span className="absolute inset-x-0 bottom-0 flex flex-col bg-linear-to-t from-ink/85 to-transparent px-3 pt-12 pb-3">
-                    <span className="truncate text-lg font-semibold text-card">{video.petName}</span>
-                    <span className="truncate text-xs text-card/85">{video.shelterName}</span>
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
+          {loop.map((video, i) => (
+            <StripTile key={`${video.mediaId}-${i}`} video={video} duplicate={i >= videos.length} />
+          ))}
         </ul>
       </div>
 
@@ -145,10 +107,39 @@ export default function FilmStrip({ videos }: { videos: StripVideo[] }) {
             icon={paused ? <Play weight="fill" aria-hidden="true" /> : <Pause weight="fill" aria-hidden="true" />}
             className="border-ink/10"
           >
-            {paused ? "Play videos" : "Pause videos"}
+            {paused ? "Play strip" : "Pause strip"}
           </Button>
         </div>
       ) : null}
     </div>
+  );
+}
+
+function StripTile({ video, duplicate }: { video: StripVideo; duplicate: boolean }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <li aria-hidden={duplicate || undefined} className="shrink-0">
+      <Link
+        href={`/site/home/pet/${video.mediaId}`}
+        tabIndex={duplicate ? -1 : undefined}
+        aria-label={`Watch ${video.petName} from ${video.shelterName}`}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="group relative block aspect-9/16 w-40 overflow-hidden rounded-lg bg-ink transition-shadow duration-300 ease-out-expo hover:shadow-float sm:w-48 lg:w-52"
+      >
+        <PosterVideo
+          videoUrl={video.url}
+          posterUrl={video.posterUrl}
+          hovered={hovered}
+          sizes="(min-width: 1024px) 208px, (min-width: 640px) 192px, 160px"
+          className="absolute inset-0 transition-transform duration-500 ease-out-expo group-hover:scale-[1.04]"
+        />
+        <span className="absolute inset-x-0 bottom-0 flex flex-col bg-linear-to-t from-ink/85 to-transparent px-3 pt-12 pb-3">
+          <span className="truncate text-lg font-semibold text-card">{video.petName}</span>
+          <span className="truncate text-xs text-card/85">{video.shelterName}</span>
+        </span>
+      </Link>
+    </li>
   );
 }

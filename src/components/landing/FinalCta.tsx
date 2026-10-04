@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -9,6 +9,7 @@ import { Play } from "@phosphor-icons/react";
 import { LinkButton } from "@/src/components/ui/Button";
 import { cn } from "@/src/lib/cn";
 import type { StripVideo } from "./FilmStrip";
+import PosterVideo from "./PosterVideo";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -64,33 +65,41 @@ export default function FinalCta({ videos }: { videos: StripVideo[] }) {
       {hand.length ? (
         <ul className="flex justify-center py-6" aria-label="A few pets in the feed">
           {hand.map((video, i) => (
-            <li
-              key={video.mediaId}
-              data-card
-              className={cn("w-36 shrink-0 sm:w-44 lg:w-52", i === 1 && "relative z-10")}
-              style={hand.length === 3 ? { transform: FAN[i] } : undefined}
-            >
-              <Link
-                href={`/site/home/pet/${video.mediaId}`}
-                aria-label={`Watch ${video.petName} from ${video.shelterName}`}
-                className="group relative block aspect-9/16 overflow-hidden rounded-lg border-4 border-card bg-ink shadow-float transition-transform duration-300 ease-out-expo hover:-translate-y-2"
-              >
-                <video
-                  src={`${video.url}#t=0.1`}
-                  muted
-                  playsInline
-                  preload="metadata"
-                  aria-hidden="true"
-                  className="h-full w-full object-cover"
-                />
-                <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-ink/85 to-transparent px-3 pt-10 pb-3">
-                  <span className="block truncate font-semibold text-card">{video.petName}</span>
-                </span>
-              </Link>
-            </li>
+            <HandCard key={video.mediaId} video={video} index={i} fanned={hand.length === 3} />
           ))}
         </ul>
       ) : null}
     </section>
+  );
+}
+
+function HandCard({ video, index, fanned }: { video: StripVideo; index: number; fanned: boolean }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <li
+      data-card
+      className={cn("w-36 shrink-0 sm:w-44 lg:w-52", index === 1 && "relative z-10")}
+      style={fanned ? { transform: FAN[index] } : undefined}
+    >
+      <Link
+        href={`/site/home/pet/${video.mediaId}`}
+        aria-label={`Watch ${video.petName} from ${video.shelterName}`}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="group relative block aspect-9/16 overflow-hidden rounded-lg border-4 border-card bg-ink shadow-float transition-transform duration-300 ease-out-expo hover:-translate-y-2"
+      >
+        <PosterVideo
+          videoUrl={video.url}
+          posterUrl={video.posterUrl}
+          hovered={hovered}
+          sizes="(min-width: 1024px) 208px, (min-width: 640px) 176px, 144px"
+          className="absolute inset-0"
+        />
+        <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-ink/85 to-transparent px-3 pt-10 pb-3">
+          <span className="block truncate font-semibold text-card">{video.petName}</span>
+        </span>
+      </Link>
+    </li>
   );
 }
