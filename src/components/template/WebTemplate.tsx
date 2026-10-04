@@ -1,6 +1,5 @@
 "use client";
 
-import BackButton from "../ui/BackButton";
 import PageFrame from "./PageFrame";
 import { cn } from "@/src/lib/cn";
 
@@ -15,7 +14,7 @@ type Props = {
   scrollable?: boolean;
 };
 
-/** Page shell: a soft panel with the title row (back, title, actions), then content; optional side column on lg. */
+/** Page shell: a soft panel with the title row (title, actions), then content; optional side column on lg. */
 export default function WebTemplate({
   header,
   main,
@@ -26,15 +25,16 @@ export default function WebTemplate({
 }: Props) {
   return (
     <PageFrame>
-      <header className="flex items-center gap-3">
-        <BackButton />
-        {typeof header === "string" ? (
-          <h1 className="min-w-0 flex-1 truncate text-headline text-ink">{header}</h1>
-        ) : (
-          <div className="min-w-0 flex-1">{header}</div>
-        )}
-        {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
-      </header>
+      {header || actions ? (
+        <header className="flex items-center gap-3">
+          {typeof header === "string" ? (
+            <h1 className="min-w-0 flex-1 truncate text-headline text-ink">{header}</h1>
+          ) : (
+            <div className="min-w-0 flex-1">{header}</div>
+          )}
+          {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+        </header>
+      ) : null}
 
       {top ? <div className="flex flex-wrap items-center gap-3">{top}</div> : null}
 

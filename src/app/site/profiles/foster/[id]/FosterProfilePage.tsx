@@ -45,7 +45,6 @@ export default function FosterProfilePage({
 }: FosterProfileProps) {
   return (
     <WebTemplate
-      header="Foster story"
       side={
         <div className="flex flex-col gap-4 lg:sticky lg:top-8">
           <PhotoView key={photo_url} name={name} photo_url={photo_url} pet_media={pet_media} />
@@ -65,7 +64,7 @@ export default function FosterProfilePage({
       main={
         <div className="flex flex-col">
           <article className="flex flex-col gap-4 pb-6">
-            <h2 className="text-headline text-ink">{title || `${name}'s story`}</h2>
+            <h1 className="text-headline text-ink">{title || `${name}'s story`}</h1>
             <p className="max-w-[65ch] whitespace-pre-line text-ink-soft">
               {description || "The shelter hasn't written this story yet."}
             </p>

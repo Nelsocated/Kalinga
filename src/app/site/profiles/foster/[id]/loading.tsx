@@ -3,7 +3,7 @@ import Skeleton from "@/src/components/ui/Skeleton";
 
 export default function Loading() {
   return (
-    <LoadingPage>
+    <LoadingPage header={null}>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
         <Skeleton className="aspect-[4/5] w-full rounded-lg" />
         <div className="flex flex-col gap-3">

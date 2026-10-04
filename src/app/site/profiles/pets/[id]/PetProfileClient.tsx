@@ -85,7 +85,6 @@ export default function PetProfileClient({
 
   return (
     <WebTemplate
-      header="Pet Profile"
       side={
         <div className="flex flex-col gap-4 lg:sticky lg:top-8">
           <PhotoView

@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { SquaresFour } from "@phosphor-icons/react";
-import TopCard from "@/src/components/template/user/TopCard";
+import ProfileHero from "@/src/components/template/ProfileHero";
 import ProfileSection from "@/src/components/template/ProfileSection";
 import MoreSheet from "@/src/components/layout/MoreSheet";
 import WebTemplate from "@/src/components/template/WebTemplate";
@@ -38,24 +38,22 @@ type ShelterProfileClientProps = {
 export default function ShelterProfileClient({ shelter, tabs }: ShelterProfileClientProps) {
   return (
     <WebTemplate
-      header={
-        <TopCard
-          title={shelter.shelter_name}
-          subtitle={shelter.location ?? ""}
-          imageUrl={shelter.logo_url}
-          actions={
-            <div className="flex items-center gap-2">
-              <ShelterEditProfileModal />
-              <LinkButton href="/shelter/dashboard" variant="secondary" icon={<SquaresFour aria-hidden="true" />}>
-                Dashboard
-              </LinkButton>
-              <MoreSheet />
-            </div>
-          }
-        />
-      }
       main={
         <div className="flex flex-col">
+          <ProfileHero
+            name={shelter.shelter_name}
+            subtitle={shelter.location}
+            imageUrl={shelter.logo_url}
+            actions={
+              <>
+                <ShelterEditProfileModal />
+                <LinkButton href="/shelter/dashboard" variant="secondary" icon={<SquaresFour aria-hidden="true" />}>
+                  Dashboard
+                </LinkButton>
+              </>
+            }
+            utilities={<MoreSheet />}
+          />
           <div className="grid gap-x-10 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <ProfileSection title="About">
               <p className="max-w-[65ch] whitespace-pre-line">

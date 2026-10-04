@@ -30,6 +30,7 @@ export default function PetProfileHeader({
   /** Smaller name, for when the pet is secondary on the page. */
   compact?: boolean;
 }) {
+  const Heading = compact ? "h2" : "h1";
   const shelterRow = subtitle ? (
     <>
       <Avatar src={imageUrl} name={subtitle} size={40} />
@@ -43,10 +44,11 @@ export default function PetProfileHeader({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
-        <h2 className={`flex min-w-0 items-center gap-2 text-ink ${compact ? "text-xl font-semibold" : "text-display"}`}>
+        {/* The pet's name is the page heading, unless the pet is secondary (foster stories) */}
+        <Heading className={`flex min-w-0 items-center gap-2 text-ink ${compact ? "text-xl font-semibold" : "text-display"}`}>
           <span className="truncate">{title}</span>
           {sex}
-        </h2>
+        </Heading>
         <div className="flex shrink-0 items-center gap-2 pt-1">
           {actions}
           {likeButton}

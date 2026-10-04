@@ -4,7 +4,7 @@ import CardGridSkeleton from "@/src/components/skeletons/CardGridSkeleton";
 
 export default function Loading() {
   return (
-    <LoadingPage>
+    <LoadingPage header={null}>
       <ProfileHeaderSkeleton />
       <CardGridSkeleton count={4} />
     </LoadingPage>
