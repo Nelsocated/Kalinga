@@ -24,5 +24,12 @@ export async function getFeed(mediaId?: string | null): Promise<FeedItem[]> {
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []) as FeedItem[];
+  const items = (data ?? []) as FeedItem[];
+
+  // The RPC shuffles the feed without keeping the pinned video first,
+  // so a shared link would open on a random video
+  const pinned = mediaId ? items.findIndex((item) => item.media_id === mediaId) : -1;
+  if (pinned > 0) items.unshift(...items.splice(pinned, 1));
+
+  return items;
 }
