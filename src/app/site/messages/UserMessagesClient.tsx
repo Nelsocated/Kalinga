@@ -4,7 +4,6 @@ import { useCallback, useMemo } from "react";
 import MessagesLayout from "@/src/components/template/MessageTemplate";
 import type {
   PersonCard,
-  SentMessageItem,
   Message,
   ThreadWithMeta,
   ThreadResponse,
@@ -65,13 +64,6 @@ export default function UserMessagesClient({
     return result.data as ThreadResponse;
   }, []);
 
-  const fetchSentMessages = useCallback(async () => {
-    const res = await fetch("/api/messages/sent", { cache: "no-store" });
-    const result = await res.json();
-    if (!res.ok)
-      throw new Error(result.error || "Failed to load sent messages");
-    return (result.data ?? []) as SentMessageItem[];
-  }, []);
 
   const buildMessages = useCallback(
     (data: ThreadResponse): MessageWithSender[] => {
@@ -121,7 +113,6 @@ export default function UserMessagesClient({
       enrichThread={enrichThread}
       fetchThreads={fetchThreads}
       fetchThread={fetchThread}
-      fetchSentMessages={fetchSentMessages}
       buildMessages={buildMessages}
       composeRecipients={composeRecipients}
     />

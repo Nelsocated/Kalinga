@@ -9,6 +9,7 @@ import { createAdoptionRequest } from "@/src/lib/services/adoptionService";
 import {
   createMessageThread,
   getSenderIdentity,
+  markThreadRead,
   replyToThread,
 } from "@/src/lib/services/messages/threads";
 
@@ -119,5 +120,12 @@ export async function replyToThreadAction(threadId: string, body: string) {
       ReplySchema.parse({ body }).body,
     );
     return { id: message.id };
+  });
+}
+
+export async function markThreadReadAction(threadId: string) {
+  return runAction(async () => {
+    await markThreadRead(threadId, await requireAuth());
+    return { ok: true };
   });
 }

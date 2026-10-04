@@ -17,7 +17,6 @@ const CHECKS = [
   { method: "GET", path: "/api/likes/me", status: 401, shape: "error" },
   { method: "GET", path: "/api/messages/threads", status: 401, shape: "error" },
   { method: "GET", path: `/api/messages/threads/${Z}`, status: 401, shape: "error" },
-  { method: "GET", path: "/api/messages/sent", status: 401, shape: "error" },
   { method: "GET", path: "/api/shelters/me", status: 401, shape: "error" },
   { method: "GET", path: "/api/users", status: 401, shape: "error" },
   { method: "GET", path: `/api/users/${Z}/adoption/answer`, status: 401, shape: "error" },

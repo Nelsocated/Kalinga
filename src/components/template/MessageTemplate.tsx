@@ -1,19 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, NotePencil } from "@phosphor-icons/react";
+import { NotePencil } from "@phosphor-icons/react";
 import WebTemplate from "./WebTemplate";
-import MessagesTabs, { type MessagesView } from "../tabs/MessagesTabs";
 import ThreadList from "../lists/ThreadList";
 import ThreadView from "../views/ThreadView";
 import ComposeView from "../views/ComposeView";
-import SentMessagesList from "../lists/SentMessagesList";
-import Button from "../ui/Button";
-import Modal from "../ui/Modal";
+import Button, { LinkButton } from "../ui/Button";
+import SearchField from "../ui/SearchField";
+import { markThreadReadAction } from "@/src/app/actions/social";
 import { cn } from "@/src/lib/cn";
 import type {
   PersonCard,
-  SentMessageItem,
   Message,
   ThreadWithMeta,
   ThreadResponse,
@@ -29,13 +27,15 @@ type Props = {
   enrichThread: (thread: ThreadWithMeta) => ThreadWithMeta;
   fetchThreads: () => Promise<ThreadWithMeta[]>;
   fetchThread: (threadId: string) => Promise<ThreadResponse>;
-  fetchSentMessages: () => Promise<SentMessageItem[]>;
   buildMessages: (data: ThreadResponse) => MessageWithSender[];
   composeRecipients: ComposeRecipient[];
 };
 
+/** Background refreshes (after sending) keep what's on screen instead of flashing skeletons. */
+type LoadOptions = { silent?: boolean };
+
 /**
- * Inbox shared by users and shelters.
+ * One inbox of conversations, shared by users and shelters.
  * Phones: the list, then the open thread as its own screen. From md: side by side.
  */
 export default function MessagesLayout({
@@ -45,25 +45,20 @@ export default function MessagesLayout({
   enrichThread,
   fetchThreads,
   fetchThread,
-  fetchSentMessages,
   buildMessages,
   composeRecipients,
 }: Props) {
-  const [mode, setMode] = useState<MessagesView>("inbox");
   const [composeOpen, setComposeOpen] = useState(false);
-  const [replyOpen, setReplyOpen] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [query, setQuery] = useState("");
   const [threads, setThreads] = useState<ThreadWithMeta[]>(() => initialThreads.map(enrichThread));
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(initialThreads[0]?.id ?? null);
   const [selectedThread, setSelectedThread] = useState<ThreadWithMeta | null>(
     initialThreads[0] ? enrichThread(initialThreads[0]) : null,
   );
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
-  const [sentMessages, setSentMessages] = useState<SentMessageItem[]>([]);
-  const [openedMessage, setOpenedMessage] = useState<SentMessageItem | null>(null);
   const [loadingThreads, setLoadingThreads] = useState(false);
   const [loadingThread, setLoadingThread] = useState(false);
-  const [loadingSent, setLoadingSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const threadsRef = useRef<ThreadWithMeta[]>(threads);
@@ -71,25 +66,28 @@ export default function MessagesLayout({
     threadsRef.current = threads;
   }, [threads]);
 
-  const loadThreads = useCallback(async (): Promise<ThreadWithMeta[]> => {
-    try {
-      setLoadingThreads(true);
-      setError(null);
-      const next = (await fetchThreads()).map(enrichThread);
-      setThreads(next);
-      return next;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't load your messages.");
-      return [];
-    } finally {
-      setLoadingThreads(false);
-    }
-  }, [fetchThreads, enrichThread]);
+  const loadThreads = useCallback(
+    async ({ silent = false }: LoadOptions = {}): Promise<ThreadWithMeta[]> => {
+      try {
+        if (!silent) setLoadingThreads(true);
+        setError(null);
+        const next = (await fetchThreads()).map(enrichThread);
+        setThreads(next);
+        return next;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Couldn't load your messages.");
+        return [];
+      } finally {
+        setLoadingThreads(false);
+      }
+    },
+    [fetchThreads, enrichThread],
+  );
 
   const loadThread = useCallback(
-    async (threadId: string) => {
+    async (threadId: string, { silent = false }: LoadOptions = {}) => {
       try {
-        setLoadingThread(true);
+        if (!silent) setLoadingThread(true);
         setError(null);
         const data = await fetchThread(threadId);
         const existing = threadsRef.current.find((t) => t.id === threadId);
@@ -107,10 +105,14 @@ export default function MessagesLayout({
               : enrichThread({
                   ...t,
                   ...loaded,
+                  unread: false,
                   last_message_preview: loaded.last_message_preview?.trim() || t.last_message_preview || null,
                 }),
           ),
         );
+
+        // Opening a thread reads it; a failure only means the marker comes back on the next load
+        if (existing?.unread) void markThreadReadAction(threadId);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Couldn't open this conversation.");
       } finally {
@@ -120,51 +122,39 @@ export default function MessagesLayout({
     [fetchThread, enrichThread, buildMessages],
   );
 
-  const loadSentMessages = useCallback(async () => {
-    try {
-      setLoadingSent(true);
-      setError(null);
-      setSentMessages(await fetchSentMessages());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't load sent messages.");
-    } finally {
-      setLoadingSent(false);
-    }
-  }, [fetchSentMessages]);
-
   useEffect(() => {
-    if (mode === "inbox" && selectedThreadId) void loadThread(selectedThreadId);
-  }, [mode, selectedThreadId, loadThread]);
+    if (selectedThreadId) void loadThread(selectedThreadId);
+  }, [selectedThreadId, loadThread]);
 
-  useEffect(() => {
-    if (mode === "sent") void loadSentMessages();
-  }, [mode, loadSentMessages]);
-
-  async function handleRefreshAfterSend(threadId: string) {
-    setComposeOpen(false);
-    setReplyOpen(false);
-    setMode("inbox");
-    const next = await loadThreads();
-    const nextId = next.find((t) => t.id === threadId)?.id ?? next[0]?.id ?? null;
-    setSelectedThreadId(nextId);
-    if (nextId) {
-      await loadThread(nextId);
-      setShowDetail(true);
-    } else {
-      setSelectedThread(null);
-      setMessages([]);
-    }
+  /** After a reply: refresh the open thread and move it to the top of the list, quietly. */
+  async function handleReplySent() {
+    if (!selectedThreadId) return;
+    await Promise.all([loadThread(selectedThreadId, { silent: true }), loadThreads({ silent: true })]);
   }
 
-  const lockedRecipient = selectedThread?.other_party
-    ? {
-        id: selectedThread.other_party.id,
-        name: selectedThread.other_party.name,
-        image: selectedThread.other_party.image ?? null,
-        subtitle: selectedThread.other_party.subtitle ?? null,
-        type: senderSide === "user" ? ("shelter" as const) : ("user" as const),
-      }
-    : null;
+  /** After a new message: open its thread. */
+  async function handleCreated(threadId: string) {
+    setComposeOpen(false);
+    setQuery("");
+    const next = await loadThreads({ silent: true });
+    const nextId = next.find((t) => t.id === threadId)?.id ?? next[0]?.id ?? null;
+    // Same thread already open: the selection effect won't fire, so reload it here
+    if (nextId && nextId === selectedThreadId) await loadThread(nextId, { silent: true });
+    setSelectedThreadId(nextId);
+    if (nextId) setShowDetail(true);
+  }
+
+  const empty =
+    senderSide === "user"
+      ? {
+          description: "Message a shelter you've liked to ask about a pet.",
+          action: (
+            <LinkButton href="/site/shelters" variant="secondary">
+              Browse shelters
+            </LinkButton>
+          ),
+        }
+      : { description: "When an adopter writes to you, the conversation shows up here." };
 
   return (
     <>
@@ -187,23 +177,29 @@ export default function MessagesLayout({
             {/* minmax(0,1fr) on phones too, so a long word or link can't stretch the column past the screen */}
             <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:h-[calc(100dvh-11rem)] md:grid-cols-[320px_minmax(0,1fr)]">
               <div className={cn("flex min-h-0 min-w-0 flex-col gap-3", showDetail && "hidden md:flex")}>
-                <MessagesTabs mode={mode} setMode={setMode} />
+                {threads.length ? (
+                  <SearchField
+                    value={query}
+                    onChange={setQuery}
+                    label="Search conversations"
+                    placeholder="Search by name or message"
+                    className="sm:max-w-none"
+                  />
+                ) : null}
                 <div className="min-h-0 flex-1 md:overflow-y-auto">
-                  {mode === "inbox" ? (
-                    <ThreadList
-                      threads={threads}
-                      selectedThreadId={selectedThreadId}
-                      loading={loadingThreads}
-                      onSelectThread={(id) => {
-                        setSelectedThreadId(id);
-                        setShowDetail(true);
-                      }}
-                      withStatus={senderSide === "shelter"}
-                      emptyHint={senderSide === "user" ? "Message a shelter you've liked." : undefined}
-                    />
-                  ) : (
-                    <SentMessagesList items={sentMessages} loading={loadingSent} onOpenMessage={setOpenedMessage} />
-                  )}
+                  <ThreadList
+                    threads={threads}
+                    selectedThreadId={selectedThreadId}
+                    loading={loadingThreads}
+                    onSelectThread={(id) => {
+                      setSelectedThreadId(id);
+                      setShowDetail(true);
+                    }}
+                    query={query}
+                    onClearQuery={() => setQuery("")}
+                    withStatus={senderSide === "shelter"}
+                    empty={empty}
+                  />
                 </div>
               </div>
 
@@ -211,47 +207,24 @@ export default function MessagesLayout({
                 className={cn(
                   // Phones: the thread flows with the page (no inner scroll box to clip it); from md it scrolls inside the pane
                   "min-w-0 rounded-lg border border-line bg-card md:min-h-0 md:overflow-hidden",
-                  mode === "sent" && "hidden md:block",
                   !showDetail && "hidden md:block",
                 )}
               >
-                <div className="sticky top-0 z-10 rounded-t-lg border-b border-line bg-card px-2 py-2 md:hidden">
-                  <Button variant="ghost" size="sm" onClick={() => setShowDetail(false)} icon={<ArrowLeft aria-hidden="true" />}>
-                    All messages
-                  </Button>
-                </div>
                 <ThreadView
-                  selectedThreadId={mode === "inbox" ? selectedThreadId : null}
+                  selectedThreadId={selectedThreadId}
                   selectedThread={selectedThread}
                   messages={messages}
                   loadingThread={loadingThread}
-                  onOpenReplyModal={() => setReplyOpen(true)}
                   senderSide={senderSide}
                   visible={showDetail}
+                  onBack={() => setShowDetail(false)}
+                  onSent={handleReplySent}
                 />
               </div>
             </div>
           </div>
         }
       />
-
-      <Modal
-        open={!!openedMessage}
-        onClose={() => setOpenedMessage(null)}
-        title={openedMessage?.subject || "No subject"}
-      >
-        {openedMessage ? (
-          <div className="flex flex-col gap-4">
-            <p className="flex flex-wrap justify-between gap-2 text-sm text-muted">
-              <span>
-                To <span className="font-semibold text-ink">{openedMessage.receiver.name}</span>
-              </span>
-              <span>{new Date(openedMessage.created_at).toLocaleString()}</span>
-            </p>
-            <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-ink">{openedMessage.body}</p>
-          </div>
-        ) : null}
-      </Modal>
 
       <ComposeView
         isOpen={composeOpen}
@@ -260,21 +233,7 @@ export default function MessagesLayout({
         mode="new"
         recipients={composeRecipients}
         onClose={() => setComposeOpen(false)}
-        onCreated={handleRefreshAfterSend}
-      />
-
-      <ComposeView
-        key={selectedThreadId ?? "none"}
-        isOpen={replyOpen}
-        userId={userId}
-        senderSide={senderSide}
-        mode="reply"
-        recipients={lockedRecipient ? [lockedRecipient] : []}
-        lockedRecipient={lockedRecipient}
-        lockedSubject={selectedThread?.subject ?? ""}
-        lockedThreadId={selectedThreadId ?? undefined}
-        onClose={() => setReplyOpen(false)}
-        onCreated={handleRefreshAfterSend}
+        onCreated={handleCreated}
       />
     </>
   );

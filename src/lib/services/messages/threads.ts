@@ -195,6 +195,21 @@ export async function replyToThread(
   return message as Message;
 }
 
+/** Marks the other side's messages in a thread as read by the caller. */
+export async function markThreadRead(threadId: string, caller: AuthUser): Promise<void> {
+  const { side } = await getThreadForCaller(threadId, caller);
+  const column = side === "user" ? "read_by_user" : "read_by_shelter";
+  const supabase = await createServerSupabase();
+
+  const { error } = await supabase
+    .from("messages")
+    .update({ [column]: true })
+    .eq("thread_id", threadId)
+    .eq(column, false);
+
+  if (error) throw new Error(error.message);
+}
+
 export async function getThreadMessages(threadId: string): Promise<Message[]> {
   const supabase = await createServerSupabase();
 

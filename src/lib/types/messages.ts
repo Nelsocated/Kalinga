@@ -30,14 +30,6 @@ export type PersonCard = {
   subtitle?: string | null;
 };
 
-export type SentMessageItem = {
-  id: string;
-  subject: string | null;
-  body: string;
-  created_at: string;
-  receiver: PersonCard;
-};
-
 export type ShelterMailboxFilter =
   | "inbox"
   | "contacting_applicant"
@@ -59,6 +51,8 @@ export type ThreadWithMeta = MessageThread & {
   adoption_status: string | null;
   adoption_request_id?: string | null;
   last_message_preview: string | null;
+  /** The newest message came from the other side and the viewer hasn't opened it. */
+  unread?: boolean;
   other_party?: PersonCard | null; // optional — filled in by page, not service
 };
 

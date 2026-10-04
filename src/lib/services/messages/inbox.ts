@@ -15,28 +15,35 @@ function buildPreview(body: string, max = 120) {
 }
 
 
-async function getLatestPreviewMap(
+type LatestMessage = { preview: string | null; readByUser: boolean; readByShelter: boolean };
+
+/** The newest message of each thread: its preview, and whether each side has read it. */
+async function getLatestMessageMap(
   threadIds: string[],
-): Promise<Map<string, string | null>> {
+): Promise<Map<string, LatestMessage>> {
   if (threadIds.length === 0) return new Map();
 
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
     .from("messages")
-    .select("thread_id, body, created_at")
+    .select("thread_id, body, created_at, read_by_user, read_by_shelter")
     .in("thread_id", threadIds)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
 
-  const map = new Map<string, string | null>();
+  const map = new Map<string, LatestMessage>();
 
   for (const row of data ?? []) {
     const threadId = row.thread_id as string;
 
     if (!map.has(threadId)) {
-      map.set(threadId, buildPreview((row.body as string) ?? ""));
+      map.set(threadId, {
+        preview: buildPreview((row.body as string) ?? ""),
+        readByUser: Boolean(row.read_by_user),
+        readByShelter: Boolean(row.read_by_shelter),
+      });
     }
   }
 
@@ -62,8 +69,8 @@ export async function getUserInboxThreads(
     .map((t) => t.adoption_request_id)
     .filter((id): id is string => Boolean(id));
 
-  const [previewMap, adoptionMetaMap] = await Promise.all([
-    getLatestPreviewMap(threads.map((t) => t.id)),
+  const [latestMap, adoptionMetaMap] = await Promise.all([
+    getLatestMessageMap(threads.map((t) => t.id)),
     getAdoptionMetaMap(adoptionRequestIds),
   ]);
 
@@ -72,8 +79,8 @@ export async function getUserInboxThreads(
     adoption_status: thread.adoption_request_id
       ? (adoptionMetaMap.get(thread.adoption_request_id)?.status ?? null)
       : null,
-    last_message_preview: previewMap.get(thread.id) ?? null,
-    unread_count: 0,
+    last_message_preview: latestMap.get(thread.id)?.preview ?? null,
+    unread: latestMap.has(thread.id) && !latestMap.get(thread.id)!.readByUser,
     other_party: null,
   }));
 }
@@ -116,7 +123,7 @@ export async function getShelterInboxThreads(
     return true;
   });
 
-  const previewMap = await getLatestPreviewMap(
+  const latestMap = await getLatestMessageMap(
     filteredThreads.map((t) => t.id),
   );
 
@@ -129,11 +136,9 @@ export async function getShelterInboxThreads(
       ...thread,
       pet_id: adoptionMeta?.pet_id ?? null,
       adoption_status: adoptionMeta?.status ?? null,
-      last_message_preview: previewMap.get(thread.id) ?? null,
-      unread_count: 0,
+      last_message_preview: latestMap.get(thread.id)?.preview ?? null,
+      unread: latestMap.has(thread.id) && !latestMap.get(thread.id)!.readByShelter,
       other_party: null,
     };
   });
 }
-
-/** Messages the caller sent, with the other side of each thread as receiver. */

@@ -8,7 +8,7 @@ import Textarea from "../ui/Textarea";
 import Select from "../ui/Select";
 import Modal from "../ui/Modal";
 import { unwrap } from "@/src/lib/actionResult";
-import { composeMessageAction, replyToThreadAction } from "@/src/app/actions/social";
+import { composeMessageAction } from "@/src/app/actions/social";
 
 type RecipientOption = {
   id: string;
@@ -23,11 +23,11 @@ type Props = {
   isModal?: boolean;
   isOpen?: boolean;
   recipients: RecipientOption[];
-  mode: "new" | "reply";
+  /** Kept for existing callers; replies happen in the thread's own reply box. */
+  mode?: "new";
   adoptionRequestId?: string;
   lockedRecipient?: RecipientOption | null;
   lockedSubject?: string;
-  lockedThreadId?: string;
   headerTitle?: string;
   onClose?: () => void;
   onCreated?: (threadId: string) => void;
@@ -37,14 +37,12 @@ type Props = {
   senderShelterId?: string;
 };
 
-/** New message or reply, in a dialog. */
+/** A new message (a new conversation), in a dialog. */
 export default function ComposeView({
   isOpen = true,
   recipients,
-  mode,
   lockedRecipient,
   lockedSubject = "",
-  lockedThreadId,
   headerTitle,
   onClose,
   onCreated,
@@ -75,29 +73,21 @@ export default function ComposeView({
 
     setSending(true);
     try {
-      if (mode === "reply") {
-        if (!lockedThreadId) throw new Error("This conversation is no longer available.");
-        unwrap(await replyToThreadAction(lockedThreadId, body));
-        onCreated?.(lockedThreadId);
-      } else {
-        const { threadId } = unwrap(
-          await composeMessageAction({
-            ...(senderSide === "user" ? { shelterId: recipient.id } : { userId: recipient.id }),
-            subject: subject.trim(),
-            body: body.trim(),
-            ...(senderSide === "shelter" && adoptionRequestId
-              ? { threadType: "adoption" as const, adoptionRequestId }
-              : {}),
-          }),
-        );
-        onCreated?.(threadId);
-      }
+      const { threadId } = unwrap(
+        await composeMessageAction({
+          ...(senderSide === "user" ? { shelterId: recipient.id } : { userId: recipient.id }),
+          subject: subject.trim(),
+          body: body.trim(),
+          ...(senderSide === "shelter" && adoptionRequestId
+            ? { threadType: "adoption" as const, adoptionRequestId }
+            : {}),
+        }),
+      );
+      onCreated?.(threadId);
 
       setBody("");
-      if (mode === "new") {
-        setSubject(lockedSubject);
-        setRecipientId(lockedRecipient?.id ?? "");
-      }
+      setSubject(lockedSubject);
+      setRecipientId(lockedRecipient?.id ?? "");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't send your message. Try again.");
     } finally {
@@ -109,7 +99,7 @@ export default function ComposeView({
     <Modal
       open={isOpen}
       onClose={close}
-      title={headerTitle ?? (mode === "reply" ? "Reply" : "New message")}
+      title={headerTitle ?? "New message"}
       footer={
         <>
           <Button variant="ghost" onClick={close}>
@@ -156,7 +146,6 @@ export default function ComposeView({
         <Input
           label="Subject"
           value={subject}
-          readOnly={mode === "reply"}
           onChange={(e) => setSubject(e.target.value)}
           required
         />
