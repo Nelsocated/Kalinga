@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { AuthUser } from "@/src/lib/utils/clientAuth";
 import FilterModal from "../modal/FilterModal";
-import MoreModal from "../modal/MoreModal";
 import { NAV_ITEMS, isActive, sidebarItemClass } from "./navItems";
+import SidebarMore from "./SidebarMore";
 import { useNavUser } from "./useNavUser";
 
 /** Sidebar for tablets and desktops; phones get BottomTabBar instead. */
@@ -14,7 +14,7 @@ export default function Navbar({ user: serverUser }: { user: AuthUser | null }) 
   const user = useNavUser(serverUser);
   const pathname = usePathname();
   return (
-    <aside className="sticky top-0 hidden h-dvh w-20 shrink-0 flex-col gap-6 px-3 py-6 md:flex lg:w-60 lg:px-5">
+    <aside className="sticky top-0 z-20 hidden h-dvh w-20 shrink-0 flex-col gap-6 px-3 py-6 md:flex lg:w-60 lg:px-5">
       <Link
         href="/site/home"
         aria-label="Kalinga home"
@@ -45,7 +45,7 @@ export default function Navbar({ user: serverUser }: { user: AuthUser | null }) 
 
       <div className="mt-auto flex flex-col gap-1">
         <FilterModal />
-        <MoreModal />
+        <SidebarMore user={user} />
       </div>
     </aside>
   );

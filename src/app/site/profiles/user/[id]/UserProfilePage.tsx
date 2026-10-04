@@ -5,6 +5,7 @@ import { Bell, Gear } from "@phosphor-icons/react";
 import UserEditProfileModal from "@/src/components/modal/EditProfile/UserEditProfile";
 import TopCard from "@/src/components/template/user/TopCard";
 import ProfileSection from "@/src/components/template/ProfileSection";
+import MoreSheet from "@/src/components/layout/MoreSheet";
 import WebTemplate from "@/src/components/template/WebTemplate";
 import { buttonStyles } from "@/src/components/ui/Button";
 
@@ -49,6 +50,7 @@ export default function UserProfilePage({
                 <Link href="/site/settings" aria-label="Settings" className={iconLink}>
                   <Gear aria-hidden="true" />
                 </Link>
+                <MoreSheet />
               </div>
             ) : null
           }

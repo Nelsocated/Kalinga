@@ -3,6 +3,13 @@ import Link from "next/link";
 
 const TAGLINE = "Give Care. Give Love. A Home for Every Paw";
 
+const FOOTER_LINKS = [
+  { href: "/help", label: "Help" },
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/about", label: "About" },
+];
+
 /**
  * Split screen from lg: a sunshine brand field on the left, the form on the right.
  * Below lg the logo and tagline stack above the form on the ground color.
@@ -29,9 +36,18 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <p className="max-w-[22ch] text-headline text-ink">{TAGLINE}</p>
         </div>
         {children}
-        <Link href="/about" className="text-sm font-medium text-ink-soft underline-offset-4 hover:underline lg:hidden">
-          About Kalinga
-        </Link>
+        {/* Signed-out phones have no More menu, so the policies live here */}
+        <nav aria-label="Kalinga" className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+          {FOOTER_LINKS.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="text-sm font-medium text-ink-soft underline-offset-4 hover:text-ink hover:underline"
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
       </main>
     </div>
   );

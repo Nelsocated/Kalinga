@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ClipboardText } from "@phosphor-icons/react";
 import type { ShelterApplicationItem, ShelterApplicationStatus } from "@/src/lib/services/adminService";
 import ShelterApplicationCard from "@/src/components/cards/ShelterApplicationCard";
+import MoreSheet from "@/src/components/layout/MoreSheet";
 import WebTemplate from "@/src/components/template/WebTemplate";
 import EmptyState from "@/src/components/ui/EmptyState";
 import { cn } from "@/src/lib/cn";
@@ -37,6 +38,7 @@ export default function AdminDashboardClient({ initialApplications, initialError
   return (
     <WebTemplate
       header="Shelter applications"
+      actions={<MoreSheet />}
       main={
         <div className="flex flex-col gap-5">
           <div className="flex flex-wrap gap-2" aria-label="Filter by status">

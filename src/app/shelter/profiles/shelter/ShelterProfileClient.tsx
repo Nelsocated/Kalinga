@@ -4,6 +4,7 @@ import type React from "react";
 import { SquaresFour } from "@phosphor-icons/react";
 import TopCard from "@/src/components/template/user/TopCard";
 import ProfileSection from "@/src/components/template/ProfileSection";
+import MoreSheet from "@/src/components/layout/MoreSheet";
 import WebTemplate from "@/src/components/template/WebTemplate";
 import ContactRows from "@/src/components/template/ContactRows";
 import ShelterEditProfileModal from "@/src/components/modal/EditProfile/ShelterEditProfile";
@@ -48,6 +49,7 @@ export default function ShelterProfileClient({ shelter, tabs }: ShelterProfileCl
               <LinkButton href="/shelter/dashboard" variant="secondary" icon={<SquaresFour aria-hidden="true" />}>
                 Dashboard
               </LinkButton>
+              <MoreSheet />
             </div>
           }
         />
