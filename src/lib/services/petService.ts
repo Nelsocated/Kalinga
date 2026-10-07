@@ -248,3 +248,15 @@ export async function assertShelterOwnsPet(
     throw new ApiError(403, "This pet belongs to another shelter");
   }
 }
+
+/** Changes a pet's adoption status. The caller must check the shelter owns the pet. */
+export async function setPetStatus(
+  petId: string,
+  status: Pets["status"],
+): Promise<void> {
+  const supabase = await createServerSupabase();
+
+  const { error } = await supabase.from("pets").update({ status }).eq("id", petId);
+
+  if (error) throw new Error(error.message);
+}

@@ -1,34 +1,12 @@
-import { redirect } from "next/navigation";
 import WriteFosterClient from "./WriteFosterClient";
-import { getUserId } from "@/src/lib/utils/auth";
-import {
-  getShelterPets,
-  getShelterIdByOwnerId,
-} from "@/src/lib/services/shelterService";
-import type { PetCardProps } from "@/src/lib/types/shelters";
+import { loadShelterPets } from "../loadShelterPets";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
-  const ownerId = await getUserId();
+type PageProps = { searchParams: Promise<{ pet?: string | string[] }> };
 
-  if (!ownerId) redirect("/login");
+export default async function Page({ searchParams }: PageProps) {
+  const { pet } = await searchParams;
 
-  let pets: PetCardProps[] = [];
-  let initialError: string | null = null;
-
-  try {
-    const shelterId = await getShelterIdByOwnerId(ownerId);
-
-    if (!shelterId) {
-      initialError = "Shelter not found.";
-    } else {
-      pets = await getShelterPets(shelterId);
-    }
-  } catch (error) {
-    initialError =
-      error instanceof Error ? error.message : "Failed to load pets.";
-  }
-
-  return <WriteFosterClient pets={pets} initialError={initialError} />;
+  return <WriteFosterClient {...await loadShelterPets(pet)} />;
 }
