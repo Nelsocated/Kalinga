@@ -23,6 +23,8 @@ export type ShelterProfileUI = {
   about?: string | null;
   contact?: React.ReactNode | null;
   created_at?: string | null;
+  /** False when the shelter turned Donate off or hasn't set it up. */
+  acceptsDonations: boolean;
   pets: ShelterPetUI[];
 };
 
@@ -42,7 +44,9 @@ export default function ShelterProfileClient({ shelter, tabs }: ShelterProfileCl
             imageUrl={shelter.logo_url}
             actions={
               <>
-                <DonationModal shelterId={shelter.id} buttonClassName="h-12" />
+                {shelter.acceptsDonations ? (
+                  <DonationModal shelterId={shelter.id} buttonClassName="h-12" />
+                ) : null}
                 <ShareButton id={shelter.id} type="shelter" variant="outlined" />
                 <LikeButton targetId={shelter.id} targetType="shelter" variant="outlined" />
               </>

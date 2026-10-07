@@ -24,6 +24,7 @@ const CHECKS = [
   { method: "POST", path: "/api/pets/photos", status: 401, shape: "error" },
   { method: "POST", path: "/api/users/avatar", status: 401, shape: "error" },
   { method: "POST", path: "/api/shelters/me/avatar", status: 401, shape: "error" },
+  { method: "POST", path: "/api/shelters/me/donation-qr", status: 401, shape: "error" },
   // Removed in Task 5 (now Server Actions)
   { method: "POST", path: "/api/auth/login", body: {}, status: 404 },
   { method: "POST", path: "/api/auth/logout", status: 404 },

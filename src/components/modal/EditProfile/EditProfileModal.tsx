@@ -29,6 +29,10 @@ type Props = {
   saveProfile: (payload: SaveProfileValues) => Promise<void>;
   uploadAvatar?: (file: File) => Promise<string>;
   onSaved?: () => void;
+  /** Extra sections rendered after the fields, inside the same form. */
+  children?: React.ReactNode;
+  /** Blocks saving while something in `children` is still working, e.g. an upload. */
+  busy?: boolean;
 };
 
 // Long-form fields get a textarea
@@ -43,6 +47,8 @@ export default function EditProfileModal({
   saveProfile,
   uploadAvatar,
   onSaved,
+  children,
+  busy = false,
 }: Props) {
   const formId = useId();
   const fileId = useId();
@@ -129,7 +135,7 @@ export default function EditProfileModal({
             <Button variant="ghost" onClick={closeModal}>
               Cancel
             </Button>
-            <Button type="submit" form={formId} variant="primary" loading={saving} disabled={loading || uploading}>
+            <Button type="submit" form={formId} variant="primary" loading={saving} disabled={loading || uploading || busy}>
               Save changes
             </Button>
           </>
@@ -185,6 +191,8 @@ export default function EditProfileModal({
                 />
               ),
             )}
+
+            {children}
 
             {errorMsg ? (
               <p role="alert" className="rounded-md bg-reject/10 px-3 py-2 text-sm text-reject-text">

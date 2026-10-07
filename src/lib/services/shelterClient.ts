@@ -1,6 +1,11 @@
 import { fetchJson } from "@/src/lib/fetchJson";
 import { unwrap } from "@/src/lib/actionResult";
-import { updateMyShelterAction } from "@/src/app/actions/profile";
+import {
+  getMyDonationSettingsAction,
+  saveMyDonationSettingsAction,
+  updateMyShelterAction,
+} from "@/src/app/actions/profile";
+import type { DonationSettings } from "@/src/lib/types/donation";
 import type {
   ShelterProfile,
   ShelterUpdatePayload,
@@ -27,6 +32,32 @@ export async function uploadMyShelterAvatar(file: File): Promise<string> {
 
   const json = await fetchJson<{ data: { publicUrl: string } }>(
     "/api/shelters/me/avatar",
+    {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    },
+  );
+
+  return json.data.publicUrl;
+}
+
+export async function fetchMyDonationSettings(): Promise<DonationSettings> {
+  return unwrap(await getMyDonationSettingsAction());
+}
+
+export async function saveMyDonationSettings(
+  settings: DonationSettings,
+): Promise<DonationSettings> {
+  return unwrap(await saveMyDonationSettingsAction(settings));
+}
+
+export async function uploadMyDonationQr(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const json = await fetchJson<{ data: { publicUrl: string } }>(
+    "/api/shelters/me/donation-qr",
     {
       method: "POST",
       credentials: "include",

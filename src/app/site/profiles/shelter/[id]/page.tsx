@@ -6,6 +6,7 @@ import {
   fetchShelterById,
   getShelterPostedPets,
 } from "@/src/lib/services/shelterService";
+import { hasActiveDonations } from "@/src/lib/services/donationService";
 
 type PageProps = {
   params: Promise<{
@@ -16,9 +17,10 @@ type PageProps = {
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
 
-  const [shelter, pets] = await Promise.all([
+  const [shelter, pets, acceptsDonations] = await Promise.all([
     fetchShelterById(id),
     getShelterPostedPets(id),
+    hasActiveDonations(id),
   ]);
 
   if (!shelter) {
@@ -35,6 +37,7 @@ export default async function Page({ params }: PageProps) {
       <ContactRows email={shelter.contact_email} phone={shelter.contact_phone} />
     ),
     created_at: shelter.created_at ?? null,
+    acceptsDonations,
     pets: pets.map((pet) => ({
       id: pet.id,
       name: pet.petName ?? "Unknown Pet",
