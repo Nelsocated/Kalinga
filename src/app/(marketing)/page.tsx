@@ -3,14 +3,15 @@ import HowItWorks from "@/src/components/landing/HowItWorks";
 import FeaturedPets from "@/src/components/landing/FeaturedPets";
 import ForShelters from "@/src/components/landing/ForShelters";
 import FinalCta from "@/src/components/landing/FinalCta";
-import type { StripVideo } from "@/src/components/landing/FilmStrip";
+import type { StripVideo } from "@/src/components/landing/FinalCta";
 import { getFeed } from "@/src/lib/services/feedService";
 import { getLongestStayPets, getPetsByIds } from "@/src/lib/services/petService";
 
 // Refresh the live videos and pets every few minutes
 export const revalidate = 300;
 
-const MAX_STRIP_VIDEOS = 8;
+// FinalCta's fanned hand shows three
+const MAX_STRIP_VIDEOS = 3;
 
 export default async function LandingPage() {
   const [feed, pets] = await Promise.all([
@@ -34,7 +35,7 @@ export default async function LandingPage() {
 
   return (
     <>
-      <Hero videos={videos} />
+      <Hero />
       <HowItWorks />
       <FeaturedPets pets={pets} />
       <ForShelters />

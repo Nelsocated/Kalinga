@@ -8,10 +8,17 @@ import { useGSAP } from "@gsap/react";
 import { Play } from "@phosphor-icons/react";
 import { LinkButton } from "@/src/components/ui/Button";
 import { cn } from "@/src/lib/cn";
-import type { StripVideo } from "./FilmStrip";
 import PosterVideo from "./PosterVideo";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+export type StripVideo = {
+  mediaId: string;
+  url: string;
+  posterUrl: string | null;
+  petName: string;
+  shelterName: string;
+};
 
 // Resting fan for three tiles: left, center (front), right. Inline transforms so GSAP can read them.
 const FAN = [

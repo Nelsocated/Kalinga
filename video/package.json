@@ -1,0 +1,26 @@
+{
+  "name": "kalinga-tour-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"src/lib/*.test.ts\"",
+    "studio": "remotion studio src/index.ts",
+    "capture": "node capture/capture.ts",
+    "render:mp4": "remotion render src/index.ts Tour out/tour.mp4 --codec=h264 --crf=30 --pixel-format=yuv420p",
+    "render:poster": "remotion still src/index.ts Tour out/tour-poster.jpg --frame=240 --image-format=jpeg --jpeg-quality=80",
+    "render": "npm run render:mp4 && npm run render:poster && node scripts/publish.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "@remotion/google-fonts": "4.0.534",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "playwright": "^1.64.0",
+    "typescript": "^7.0.2"
+  }
+}
