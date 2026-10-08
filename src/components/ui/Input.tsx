@@ -113,7 +113,7 @@ export default function Input({
         {icon ? (
           <span
             className={cn(
-              "pointer-events-none absolute top-1/2 -translate-y-1/2 text-lg text-muted",
+              "pointer-events-none absolute top-1/2 -translate-y-1/2 text-xl text-muted",
               iconPosition === "left" ? "left-3.5" : "right-3.5",
             )}
           >

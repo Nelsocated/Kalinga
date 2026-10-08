@@ -18,7 +18,7 @@ function SettingsSection({
 }) {
   return (
     <section className="py-6 first:pt-2 last:pb-0">
-      <h2 className={danger ? "text-lg font-semibold text-reject-text" : "text-lg font-semibold text-ink"}>{title}</h2>
+      <h2 className={danger ? "text-xl font-semibold text-reject-text" : "text-xl font-semibold text-ink"}>{title}</h2>
       {description ? <p className="mt-1 text-sm text-muted">{description}</p> : null}
       <div className="mt-5">{children}</div>
     </section>

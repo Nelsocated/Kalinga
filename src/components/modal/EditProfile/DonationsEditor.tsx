@@ -66,7 +66,7 @@ export default function DonationsEditor({ value, onChange, uploadQr, onBusyChang
     <section aria-labelledby={headingId} className="mt-2 flex flex-col gap-6 border-t border-line pt-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1">
-          <h3 id={headingId} className="text-lg font-semibold text-ink">
+          <h3 id={headingId} className="text-xl font-semibold text-ink">
             Donations
           </h3>
           <p id={switchHintId} className="text-sm text-ink-soft">

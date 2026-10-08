@@ -63,27 +63,6 @@
   --shadow-float: 0 18px 40px -16px rgb(4 38 102 / 0.28);
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-
-  /*
-   * Legacy aliases, kept while screens move to the tokens above.
-   * Remove each one once nothing uses it.
-   */
-  --color-primary: #f3be0f;
-  --color-secondary: #042666;
-  --color-outerbg: #fff9ed;
-  --color-innerbg: #fffdf7;
-  --color-chip: #fef3b3;
-  --color-border: #efe3c2;
-  --color-textwhite: #fffaeb;
-
-  --text-header: 60px;
-  --text-name: 50px;
-  --text-subheader: 34px;
-  --text-title: 30px;
-  --text-subtitle: 26px;
-  --text-lg: 20px;
-  --text-description: 15px;
-  --text-small: 12px;
 }
 
 @layer base {

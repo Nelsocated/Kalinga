@@ -54,7 +54,7 @@ export default function ShelterCard({
         {/* The stretched link makes the whole row clickable; the like button sits above it */}
         <Link
           href={href}
-          className="truncate text-lg font-semibold text-ink after:absolute after:inset-0 after:rounded-lg"
+          className="truncate text-xl font-semibold text-ink after:absolute after:inset-0 after:rounded-lg"
         >
           {name}
         </Link>

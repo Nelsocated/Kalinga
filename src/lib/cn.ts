@@ -2,23 +2,13 @@ import { clsx, type ClassValue } from "clsx";
 import { extendTailwindMerge } from "tailwind-merge";
 
 // Teach tailwind-merge the project's custom text sizes so they don't get
-// mistaken for text colors (e.g. text-description vs text-ink).
+// mistaken for text colors (e.g. text-headline vs text-ink).
 const twMerge = extendTailwindMerge({
   extend: {
     classGroups: {
       "font-size": [
         {
-          text: [
-            "display",
-            "headline",
-            "header",
-            "name",
-            "subheader",
-            "title",
-            "subtitle",
-            "description",
-            "small",
-          ],
+          text: ["hero", "display", "headline"],
         },
       ],
     },

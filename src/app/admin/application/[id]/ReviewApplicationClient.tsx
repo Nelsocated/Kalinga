@@ -80,7 +80,7 @@ export default function ReviewApplicationClient({ initialData }: Props) {
         main={
           <div className="flex max-w-3xl flex-col gap-8">
             <section aria-labelledby="details-heading" className="flex flex-col gap-3">
-              <h2 id="details-heading" className="text-lg font-semibold text-ink">
+              <h2 id="details-heading" className="text-xl font-semibold text-ink">
                 Details
               </h2>
               <dl className="grid gap-x-8 gap-y-3 rounded-lg border border-line bg-card p-4 sm:grid-cols-[auto_1fr]">
@@ -94,7 +94,7 @@ export default function ReviewApplicationClient({ initialData }: Props) {
             </section>
 
             <section aria-labelledby="docs-heading" className="flex flex-col gap-3">
-              <h2 id="docs-heading" className="text-lg font-semibold text-ink">
+              <h2 id="docs-heading" className="text-xl font-semibold text-ink">
                 Documents
               </h2>
               <ul className="grid grid-cols-2 gap-3">
@@ -125,7 +125,7 @@ export default function ReviewApplicationClient({ initialData }: Props) {
             </section>
 
             <section aria-labelledby="decision-heading" className="flex flex-col gap-3">
-              <h2 id="decision-heading" className="text-lg font-semibold text-ink">
+              <h2 id="decision-heading" className="text-xl font-semibold text-ink">
                 Decision
               </h2>
               {errorMsg ? (

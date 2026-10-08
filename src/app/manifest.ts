@@ -7,6 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Give Care. Give Love. A Home for Every Paw",
     start_url: "/site/home",
     display: "standalone",
+    // Ground and Sunshine tokens; the manifest needs literal colors.
     background_color: "#fff9ed",
     theme_color: "#f3be0f",
     icons: [

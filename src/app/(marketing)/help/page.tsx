@@ -17,7 +17,7 @@ function FaqList({ items }: { items: Faq[] }) {
     <div className="divide-y divide-line border-y border-line">
       {items.map((item) => (
         <details key={item.q} className="group">
-          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-lg font-semibold text-ink [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-xl font-semibold text-ink [&::-webkit-details-marker]:hidden">
             {item.q}
             <CaretDown
               size={20}

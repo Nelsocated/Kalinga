@@ -136,7 +136,7 @@ function StripTile({ video, duplicate }: { video: StripVideo; duplicate: boolean
           className="absolute inset-0 transition-transform duration-500 ease-out-expo group-hover:scale-[1.04]"
         />
         <span className="absolute inset-x-0 bottom-0 flex flex-col bg-linear-to-t from-ink/85 to-transparent px-3 pt-12 pb-3">
-          <span className="truncate text-lg font-semibold text-card">{video.petName}</span>
+          <span className="truncate text-xl font-semibold text-card">{video.petName}</span>
           <span className="truncate text-xs text-card/85">{video.shelterName}</span>
         </span>
       </Link>

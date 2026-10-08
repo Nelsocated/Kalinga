@@ -9,7 +9,7 @@ export default function MarketingNav() {
       <nav aria-label="Main" className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5 rounded-full" aria-label="Kalinga home">
           <Image src="/kalinga_logo(ver2).svg" alt="" width={36} height={36} priority />
-          <span className="text-lg font-bold text-sunshine">Kalinga</span>
+          <span className="text-xl font-bold text-sunshine">Kalinga</span>
         </Link>
         <div className="flex items-center gap-1 sm:gap-2">
           <Link href="/about" className="hidden rounded-full px-3 py-2 text-sm font-medium text-ink hover:bg-sunshine-wash sm:block">

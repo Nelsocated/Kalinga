@@ -30,7 +30,7 @@ export default function EmptyState({
         {icon}
       </span>
       <div className="flex max-w-sm flex-col gap-1">
-        <p className="text-lg font-semibold text-ink">{title}</p>
+        <p className="text-xl font-semibold text-ink">{title}</p>
         {description ? (
           <p className="text-sm text-muted">{description}</p>
         ) : null}

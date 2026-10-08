@@ -44,6 +44,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  // Sunshine token; browser chrome needs a literal color.
   themeColor: "#f3be0f",
 };
 

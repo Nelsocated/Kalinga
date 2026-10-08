@@ -19,7 +19,7 @@ export default function FosterCard({ href, title, description, children }: Foste
       <div className="w-full shrink-0 sm:w-40">{children}</div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-2 py-1">
-        <h3 className="line-clamp-2 text-lg font-semibold text-ink">{title}</h3>
+        <h3 className="line-clamp-2 text-xl font-semibold text-ink">{title}</h3>
         <p className="line-clamp-4 text-sm text-ink-soft">{description}</p>
         <Link
           href={href}

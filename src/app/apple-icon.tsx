@@ -19,6 +19,7 @@ export default async function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          // Ground token; ImageResponse renders outside the page, so CSS variables aren't available.
           background: "#fff9ed",
         }}
       >
