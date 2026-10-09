@@ -91,21 +91,15 @@ export async function getLikedStuffByUser(
 ): Promise<LikedMiniItem[]> {
   const { petIds, shelterIds, videoIds } = await getLikedIdsByUser(userId);
 
-  // Fetch pets/videos first so we can derive shelter IDs from liked pets
-  const [pets, videos] = await Promise.all([
+  // Liked pets bring their shelter with them, so all three load side by side
+  const [pets, videos, shelters] = await Promise.all([
     getPetsByIds(petIds),
     getVideosByIds(videoIds),
+    getSheltersByIds(shelterIds),
   ]);
 
-  const petShelterIds = pets.map((pet) => pet.shelter_id).filter(Boolean);
-
-  const shelters = await getSheltersByIds([...shelterIds, ...petShelterIds]);
-
-  const shelterMap = new Map(shelters.map((s) => [s.id, s]));
-  const likedShelterSet = new Set(shelterIds);
-
   const petItems: LikedMiniItem[] = pets.map((pet) => {
-    const shelter = shelterMap.get(pet.shelter_id);
+    const shelter = pet.shelter;
 
     return {
       id: pet.id,
@@ -121,9 +115,7 @@ export async function getLikedStuffByUser(
     };
   });
 
-  const shelterItems: LikedMiniItem[] = shelters
-    .filter((shelter) => likedShelterSet.has(shelter.id))
-    .map((shelter) => ({
+  const shelterItems: LikedMiniItem[] = shelters.map((shelter) => ({
       id: shelter.id,
       kind: "shelter",
       href: `/site/profiles/shelter/${shelter.id}`,

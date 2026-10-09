@@ -2,6 +2,7 @@ import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
 import { createAdminClient } from "@/src/lib/supabase/admin";
 import { ApiError } from "@/src/lib/api";
+import { CACHE_TAGS, invalidate } from "@/src/lib/cache";
 import { SHELTER_DOCUMENT_BUCKET } from "./authService";
 
 export type ShelterApplicationStatus = "under_review" | "approved" | "rejected";
@@ -183,6 +184,8 @@ export async function updateShelterApplicationStatus(input: {
 
     if (!row) throw new Error("Approval failed.");
 
+    invalidate(CACHE_TAGS.shelters);
+
     return withSignedDocuments(
       normalizeShelterApplication(row as Record<string, unknown>),
     );
@@ -206,6 +209,7 @@ export async function updateShelterApplicationStatus(input: {
   if (error) throw new Error(error.message);
   if (!data) throw new ApiError(404, "Shelter application not found.");
 
+  invalidate(CACHE_TAGS.shelters);
   return withSignedDocuments(
     normalizeShelterApplication(data as Record<string, unknown>),
   );

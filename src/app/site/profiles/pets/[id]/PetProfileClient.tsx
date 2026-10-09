@@ -74,8 +74,9 @@ export default function PetProfileClient({
 
   useEffect(() => {
     async function getUser() {
-      const { data } = await supabase.auth.getUser();
-      setUserId(data.user?.id ?? null);
+      // Only decides whether to show owner controls; the server checks ownership on every write
+      const { data } = await supabase.auth.getSession();
+      setUserId(data.session?.user.id ?? null);
     }
 
     getUser();

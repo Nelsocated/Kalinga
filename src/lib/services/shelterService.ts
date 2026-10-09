@@ -1,5 +1,8 @@
 import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createPublicSupabase } from "@/src/lib/supabase/public";
+import { CACHE_TAGS, PUBLIC_LIST_SECONDS, invalidate } from "@/src/lib/cache";
 import { ApiError } from "@/src/lib/api";
 import type {
   ShelterListItem,
@@ -15,7 +18,6 @@ import type {
 import { getPetsByShelter } from "./petService";
 import { getPetVideosByShelterId } from "./petMediaService";
 
-const SHELTER_LIST_SELECT = "id, shelter_name, logo_url, location";
 // Application documents (cert_url, id_url, lease_url) are admin-only
 const SHELTER_PUBLIC_SELECT = `
   id,
@@ -45,58 +47,44 @@ export async function fetchShelterById(id: string): Promise<ShelterProfile | nul
   return data;
 }
 
-/** Adds available/adopted pet counts to each shelter row. */
-async function withPetStats(
-  shelterRows: ShelterRow[],
-): Promise<ShelterListItem[]> {
-  const shelterIds = shelterRows.map((s) => s.id);
-  const stats = new Map(
-    shelterIds.map((id) => [
-      id,
-      { total_available_pets: 0, total_adopted_pets: 0 },
-    ]),
-  );
+// The database counts each shelter's available and adopted pets, so no pet rows are sent
+const SHELTER_LIST_STATS_SELECT =
+  "id, shelter_name, logo_url, location, available:pets(count), adopted:pets(count)";
 
-  if (shelterIds.length > 0) {
-    const supabase = await createServerSupabase();
+type ShelterStatsRow = ShelterRow & {
+  available: { count: number }[];
+  adopted: { count: number }[];
+};
 
-    const { data: pets, error } = await supabase
-      .from("pets")
-      .select("shelter_id, status")
-      .in("shelter_id", shelterIds);
+function toListItem({ available, adopted, ...shelter }: ShelterStatsRow): ShelterListItem {
+  return {
+    ...shelter,
+    total_available_pets: available[0]?.count ?? 0,
+    total_adopted_pets: adopted[0]?.count ?? 0,
+  };
+}
+
+/** Every shelter with its counts. Cached for all visitors; the order is shuffled per visit. */
+const loadSheltersWithStats = unstable_cache(
+  async (): Promise<ShelterListItem[]> => {
+    const supabase = createPublicSupabase();
+
+    const { data, error } = await supabase
+      .from("shelter")
+      .select(SHELTER_LIST_STATS_SELECT)
+      .eq("available.status", "available")
+      .eq("adopted.status", "adopted");
 
     if (error) throw new Error(error.message);
 
-    for (const pet of pets ?? []) {
-      const current = pet.shelter_id ? stats.get(pet.shelter_id) : undefined;
-      if (!current) continue;
-
-      const status = (pet.status ?? "").trim().toLowerCase();
-
-      if (status === "available") current.total_available_pets += 1;
-      if (status === "adopted") current.total_adopted_pets += 1;
-    }
-  }
-
-  return shelterRows.map((shelter) => ({
-    ...shelter,
-    ...stats.get(shelter.id)!,
-  }));
-}
+    return ((data ?? []) as ShelterStatsRow[]).map(toListItem);
+  },
+  ["shelters-with-stats"],
+  { revalidate: PUBLIC_LIST_SECONDS, tags: [CACHE_TAGS.shelters, CACHE_TAGS.pets] },
+);
 
 export async function getSheltersWithStats(): Promise<ShelterListItem[]> {
-  const supabase = await createServerSupabase();
-
-  const { data, error } = await supabase
-    .from("shelter")
-    .select(SHELTER_LIST_SELECT);
-
-  if (error) throw new Error(error.message);
-
-  const shelterRows = (data ?? []);
-  shelterRows.sort(() => Math.random() - 0.5);
-
-  return withPetStats(shelterRows);
+  return shuffle(await loadSheltersWithStats());
 }
 
 export async function getSheltersByIds(
@@ -109,12 +97,24 @@ export async function getSheltersByIds(
 
   const { data, error } = await supabase
     .from("shelter")
-    .select(SHELTER_LIST_SELECT)
-    .in("id", uniqueIds);
+    .select(SHELTER_LIST_STATS_SELECT)
+    .in("id", uniqueIds)
+    .eq("available.status", "available")
+    .eq("adopted.status", "adopted");
 
   if (error) throw new Error(error.message);
 
-  return withPetStats((data ?? []));
+  return ((data ?? []) as ShelterStatsRow[]).map(toListItem);
+}
+
+/** Fisher-Yates: every order is equally likely (sorting by a random key is biased). */
+function shuffle<T>(items: T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
 }
 
 /** Name, location and logo only; no pet stats. */
@@ -297,6 +297,8 @@ export async function updateMyShelterProfile(
 
   if (error) throw new Error(error.message);
   if (!data) throw new ApiError(404, "Shelter profile not found");
+
+  invalidate(CACHE_TAGS.shelters);
 
   return data;
 }

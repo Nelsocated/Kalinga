@@ -28,8 +28,8 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  // getUser() validates the token and refreshes it when it has expired
-  await supabase.auth.getUser();
+  // Refreshes an expired token; checking a fresh one is local (signing keys), not a call to Supabase Auth
+  await supabase.auth.getClaims();
 
   return response;
 }

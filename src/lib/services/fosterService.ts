@@ -1,11 +1,9 @@
 import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
-import type {
-  Fosters,
-  CreateFosterInput,
-  FosterItem,
-  FosterRow,
-} from "@/src/lib/types/foster";
+import { unstable_cache } from "next/cache";
+import { createPublicSupabase } from "@/src/lib/supabase/public";
+import { CACHE_TAGS, PUBLIC_LIST_SECONDS, invalidate } from "@/src/lib/cache";
+import type { CreateFosterInput, FosterItem } from "@/src/lib/types/foster";
 
 const FOSTER_SELECT = `
   id,
@@ -15,29 +13,29 @@ const FOSTER_SELECT = `
   created_at
 `;
 
-function normalizeFoster(row: FosterRow): Fosters {
-  return {
-    id: row.id,
-    pet_id: row.pet_id,
-    title: row.title ?? "",
-    description: row.description ?? "",
-    created_at: row.created_at ?? undefined,
-  };
-}
+/** The newest stories, each with its pet and the pet's shelter, in one query. Cached like the pet lists. */
+export const getFosterStories = unstable_cache(
+  async (limit = 20) => {
+    const supabase = createPublicSupabase();
 
-export async function getAll(limit = 20): Promise<Fosters[]> {
-  const supabase = await createServerSupabase();
+    const { data, error } = await supabase
+      .from("foster")
+      .select(
+        "id, pet_id, title, description, pets ( name, sex, photo_url, shelter ( shelter_name, logo_url, location ) )",
+      )
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
-  const { data, error } = await supabase
-    .from("foster")
-    .select(FOSTER_SELECT)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    if (error) throw new Error(error.message);
 
-  if (error) throw new Error(error.message);
-
-  return (data ?? []).map(normalizeFoster);
-}
+    return data ?? [];
+  },
+  ["foster-stories"],
+  {
+    revalidate: PUBLIC_LIST_SECONDS,
+    tags: [CACHE_TAGS.fosters, CACHE_TAGS.pets, CACHE_TAGS.shelters],
+  },
+);
 
 export async function createFoster(
   input: CreateFosterInput,
@@ -68,5 +66,6 @@ export async function createFoster(
     }
   }
 
+  invalidate(CACHE_TAGS.fosters, CACHE_TAGS.pets);
   return data;
 }

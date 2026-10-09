@@ -18,6 +18,16 @@ export interface Pets {
   created_at: string;
 }
 
+/** A pet's shelter as list cards show it. */
+export type PetShelterSummary = {
+  id: string;
+  shelter_name: string;
+  logo_url: string | null;
+  location: string;
+};
+
+export type PetWithShelter = Pets & { shelter: PetShelterSummary | null };
+
 export type SearchPetCardItem = Pets & {
   shelter: {
     id: string;

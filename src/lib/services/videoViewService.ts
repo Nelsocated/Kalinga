@@ -2,6 +2,7 @@ import "server-only";
 
 import { createServerSupabase } from "@/src/lib/supabase/server";
 import { ApiError } from "@/src/lib/api";
+import { getUserId } from "@/src/lib/utils/auth";
 import type {
   RecordVideoViewInput,
   VideoView,
@@ -23,17 +24,14 @@ export async function recordView(
   input: RecordVideoViewInput,
 ): Promise<{ inserted: boolean; view?: VideoView }> {
   const supabase = await createServerSupabase();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const userId = await getUserId();
 
   const mediaId = input.mediaId?.trim();
   const sessionId = input.sessionId?.trim() || null;
 
   if (!mediaId) throw new ApiError(400, "mediaId is required");
 
-  if (!user && !sessionId) {
+  if (!userId && !sessionId) {
     throw new ApiError(400, "sessionId is required for guest viewers");
   }
 
@@ -48,8 +46,8 @@ export async function recordView(
     .gte("viewed_at", cutoffIso)
     .limit(1);
 
-  existingQuery = user
-    ? existingQuery.eq("user_id", user.id)
+  existingQuery = userId
+    ? existingQuery.eq("user_id", userId)
     : existingQuery.is("user_id", null).eq("session_id", sessionId!);
 
   const { data: existingRow, error: existingError } =
@@ -62,8 +60,8 @@ export async function recordView(
     .from("video_views")
     .insert({
       media_id: mediaId,
-      user_id: user?.id ?? null,
-      session_id: user ? null : sessionId,
+      user_id: userId,
+      session_id: userId ? null : sessionId,
     })
     .select("*")
     .single();

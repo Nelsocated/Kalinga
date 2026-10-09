@@ -1,10 +1,6 @@
 import ExplorePageView from "./ExplorePage";
-import {
-  getLongestStayPets,
-  getPetsByIds,
-} from "@/src/lib/services/petService";
-import { getSheltersByIds } from "@/src/lib/services/shelterService";
-import { getAll } from "@/src/lib/services/fosterService";
+import { getLongestStayPets } from "@/src/lib/services/petService";
+import { getFosterStories } from "@/src/lib/services/fosterService";
 
 export const dynamic = "force-dynamic";
 
@@ -35,94 +31,41 @@ export type FosterStory = {
   shelter_location: string | null;
 };
 
+// Both sections bring their shelter (and the story's pet) in the same query, and run side by side
 export default async function Page() {
-  const longestBase = await getLongestStayPets(10);
-  const fosterBase = await getAll(20);
+  const [longestBase, stories] = await Promise.all([
+    getLongestStayPets(10),
+    getFosterStories(20),
+  ]);
 
-  const longestShelterIds = [
-    ...new Set(
-      longestBase
-        .map((pet) => pet.shelter_id)
-        .filter((id): id is string => Boolean(id)),
-    ),
-  ];
+  const longest: LongestPet[] = longestBase.map((pet) => ({
+    id: pet.id,
+    shelter_id: pet.shelter_id,
+    years_inShelter: pet.years_inShelter ?? null,
+    name: pet.pet_name || null,
+    sex: toGender(pet.sex),
+    photo_url: pet.photo_url || null,
+    shelter_name: pet.shelter?.shelter_name ?? null,
+    shelter_logo_url: pet.shelter?.logo_url ?? null,
+    shelter_location: pet.shelter?.location ?? null,
+  }));
 
-  const longestShelters = await getSheltersByIds(longestShelterIds);
-
-  const longestShelterMap = new Map(
-    longestShelters.map((shelter) => [shelter.id, shelter]),
-  );
-
-  const longest: LongestPet[] = longestBase.map((pet) => {
-    const shelter = pet.shelter_id
-      ? longestShelterMap.get(String(pet.shelter_id))
-      : null;
-
-    return {
-      id: String(pet.id),
-      shelter_id: String(pet.shelter_id),
-      years_inShelter: pet.years_inShelter ?? null,
-      name: pet.pet_name ?? null,
-      sex:
-        pet.sex === "male" || pet.sex === "female" || pet.sex === "unknown"
-          ? pet.sex
-          : "unknown",
-      photo_url: pet.photo_url ?? null,
-      shelter_name: shelter?.shelter_name ?? null,
-      shelter_logo_url: shelter?.logo_url ?? null,
-      shelter_location: shelter?.location ?? null,
-    };
-  });
-
-  const fosterPetIds = [
-    ...new Set(
-      fosterBase
-        .map((item) => item.pet_id)
-        .filter((id): id is string => Boolean(id)),
-    ),
-  ];
-
-  const fosterPets =
-    fosterPetIds.length > 0 ? await getPetsByIds(fosterPetIds) : [];
-
-  const petMap = new Map(fosterPets.map((pet) => [String(pet.id), pet]));
-
-  const fosterShelterIds = [
-    ...new Set(
-      fosterPets
-        .map((pet) => pet.shelter_id)
-        .filter((id): id is string => Boolean(id)),
-    ),
-  ];
-
-  const fosterShelters = await getSheltersByIds(fosterShelterIds);
-
-  const fosterShelterMap = new Map(
-    fosterShelters.map((shelter) => [shelter.id, shelter]),
-  );
-
-  const foster: FosterStory[] = fosterBase.map((story) => {
-    const pet = petMap.get(String(story.pet_id));
-    const shelter = pet?.shelter_id
-      ? fosterShelterMap.get(String(pet.shelter_id))
-      : null;
-
-    return {
-      id: String(story.id),
-      pet_id: String(story.pet_id),
-      title: story.title ?? null,
-      description: story.description ?? null,
-      pet_name: pet?.pet_name ?? null,
-      pet_sex:
-        pet?.sex === "male" || pet?.sex === "female" || pet?.sex === "unknown"
-          ? pet.sex
-          : "unknown",
-      pet_photo_url: pet?.photo_url ?? null,
-      shelter_name: shelter?.shelter_name ?? null,
-      shelter_logo_url: shelter?.logo_url ?? null,
-      shelter_location: shelter?.location ?? null,
-    };
-  });
+  const foster: FosterStory[] = stories.map((story) => ({
+    id: story.id,
+    pet_id: story.pet_id,
+    title: story.title,
+    description: story.description,
+    pet_name: story.pets?.name ?? null,
+    pet_sex: toGender(story.pets?.sex),
+    pet_photo_url: story.pets?.photo_url ?? null,
+    shelter_name: story.pets?.shelter?.shelter_name ?? null,
+    shelter_logo_url: story.pets?.shelter?.logo_url ?? null,
+    shelter_location: story.pets?.shelter?.location ?? null,
+  }));
 
   return <ExplorePageView longest={longest} foster={foster} />;
+}
+
+function toGender(sex: string | null | undefined): PetGender {
+  return sex === "male" || sex === "female" ? sex : "unknown";
 }

@@ -4,10 +4,7 @@ import DashboardPage, {
   type DashboardStats,
 } from "./DashboardClient";
 
-import {
-  fetchShelterById,
-  getShelterIdByOwnerId,
-} from "@/src/lib/services/shelterService";
+import { getShelterIdByOwnerId } from "@/src/lib/services/shelterService";
 import { getVideosByPetIds } from "@/src/lib/services/petMediaService";
 import { getPetLikeCounts } from "@/src/lib/services/likeService";
 import { getStatsByMediaIds } from "@/src/lib/services/videoViewService";
@@ -46,20 +43,7 @@ async function getDashboardData(): Promise<{
     };
   }
 
-  const shelter = await fetchShelterById(shelterId);
-
-  if (!shelter) {
-    return {
-      stats: {
-        totalViews: 0,
-        totalLikes: 0,
-        totalAdoptionsCompleted: 0,
-      },
-      items: [],
-    };
-  }
-
-  const pets: Dashboard[] = await getPetsByShelterDashboard(shelter.id);
+  const pets: Dashboard[] = await getPetsByShelterDashboard(shelterId);
 
   if (!pets.length) {
     return {
@@ -86,8 +70,12 @@ async function getDashboardData(): Promise<{
     pets.map((pet) => [pet.id, pet.species]),
   );
 
-  const media = await getVideosByPetIds(petIds);
-  const totalAdoptionsCompleted = await getAdoptedCountByPetIds(petIds);
+  // Independent lookups, so they run side by side
+  const [media, totalAdoptionsCompleted, likeCounts] = await Promise.all([
+    getVideosByPetIds(petIds),
+    getAdoptedCountByPetIds(petIds),
+    getPetLikeCounts(petIds),
+  ]);
 
   if (!media.length) {
     return {
@@ -102,7 +90,6 @@ async function getDashboardData(): Promise<{
 
   const mediaIds = media.map((row) => row.id);
 
-  const likeCounts = await getPetLikeCounts(petIds);
   const petLikeCountMap = new Map<string, number>(
     likeCounts.map((row) => [row.petId, row.count]),
   );

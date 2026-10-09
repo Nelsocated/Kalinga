@@ -1,5 +1,8 @@
 import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createPublicSupabase } from "@/src/lib/supabase/public";
+import { CACHE_TAGS, PUBLIC_LIST_SECONDS, invalidate } from "@/src/lib/cache";
 import { ApiError } from "@/src/lib/api";
 import type {
   Pets,
@@ -8,6 +11,8 @@ import type {
   Multi,
   Dashboard,
   CreatePetInput,
+  PetShelterSummary,
+  PetWithShelter,
 } from "@/src/lib/types/pets";
 
 const PET_SELECT = `
@@ -27,6 +32,11 @@ const PET_SELECT = `
   year_inShelter,
   created_at
 `;
+
+// The pet's shelter comes in the same query, so lists don't need a second lookup
+const PET_WITH_SHELTER_SELECT = `${PET_SELECT}, shelter ( id, shelter_name, logo_url, location )`;
+
+type PetWithShelterRow = PetRow & { shelter: PetShelterSummary | null };
 
 const toArray = <T extends string>(value?: Multi<T>): T[] =>
   Array.isArray(value) ? value.filter(Boolean) : value ? [value] : [];
@@ -68,7 +78,9 @@ function normalizePet(row: PetRow): Pets {
     photo_url: row.photo_url ?? "",
     // year_inShelter stores the year the pet arrived; the UI shows years since
     years_inShelter:
-      row.year_inShelter == null ? 0 : Math.max(0, currentYear - row.year_inShelter),
+      row.year_inShelter == null
+        ? 0
+        : Math.max(0, currentYear - row.year_inShelter),
     created_at: row.created_at,
   };
 }
@@ -111,20 +123,31 @@ function applyFilters<T>(query: T, filters: PetFilters = {}): T {
   return nextQuery;
 }
 
-async function getPets(filters: PetFilters = {}): Promise<Pets[]> {
+async function runShelterListQuery(
+  query: PromiseLike<{ data: unknown; error: { message: string } | null }>,
+): Promise<PetWithShelter[]> {
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as PetWithShelterRow[]).map((row) => ({
+    ...normalizePet(row),
+    shelter: row.shelter ?? null,
+  }));
+}
+
+async function getPets(filters: PetFilters = {}): Promise<PetWithShelter[]> {
   const supabase = await createServerSupabase();
 
   const query = supabase
     .from("pets")
-    .select(PET_SELECT)
+    .select(PET_WITH_SHELTER_SELECT)
     .order("created_at", { ascending: false });
 
-  return runListQuery(applyFilters(query, filters));
+  return runShelterListQuery(applyFilters(query, filters));
 }
 
 export async function getAvailablePets(
   filters: Omit<PetFilters, "status"> = {},
-): Promise<Pets[]> {
+): Promise<PetWithShelter[]> {
   return getPets({ ...filters, status: "available" });
 }
 
@@ -142,14 +165,14 @@ export async function getPetById(id: string): Promise<Pets | null> {
   return data ? normalizePet(data) : null;
 }
 
-export async function getPetsByIds(ids: string[]): Promise<Pets[]> {
+export async function getPetsByIds(ids: string[]): Promise<PetWithShelter[]> {
   const uniqueIds = [...new Set(ids)].filter(Boolean);
   if (uniqueIds.length === 0) return [];
 
   const supabase = await createServerSupabase();
 
-  return runListQuery(
-    supabase.from("pets").select(PET_SELECT).in("id", uniqueIds),
+  return runShelterListQuery(
+    supabase.from("pets").select(PET_WITH_SHELTER_SELECT).in("id", uniqueIds),
   );
 }
 
@@ -165,20 +188,28 @@ export async function getPetsByShelter(shelterId: string): Promise<Pets[]> {
   );
 }
 
-export async function getLongestStayPets(limit = 10): Promise<Pets[]> {
-  const supabase = await createServerSupabase();
-  const cutoffYear = new Date().getFullYear() - 3; // 3+ years in shelter
+/** The same for every visitor, so it's cached; adding a pet or changing its status clears it. */
+export const getLongestStayPets = unstable_cache(
+  async (limit = 10): Promise<PetWithShelter[]> => {
+    const supabase = createPublicSupabase();
+    const cutoffYear = new Date().getFullYear() - 3; // 3+ years in shelter
 
-  return runListQuery(
-    supabase
-      .from("pets")
-      .select(PET_SELECT)
-      .not("year_inShelter", "is", null)
-      .lte("year_inShelter", cutoffYear)
-      .order("year_inShelter", { ascending: true })
-      .limit(limit),
-  );
-}
+    return runShelterListQuery(
+      supabase
+        .from("pets")
+        .select(PET_WITH_SHELTER_SELECT)
+        .not("year_inShelter", "is", null)
+        .lte("year_inShelter", cutoffYear)
+        .order("year_inShelter", { ascending: true })
+        .limit(limit),
+    );
+  },
+  ["longest-stay-pets"],
+  {
+    revalidate: PUBLIC_LIST_SECONDS,
+    tags: [CACHE_TAGS.pets, CACHE_TAGS.shelters],
+  },
+);
 
 export async function getPetsByShelterDashboard(
   shelterId: string,
@@ -223,6 +254,7 @@ export async function createPet(
 
   if (error) throw new Error(error.message);
 
+  invalidate(CACHE_TAGS.pets);
   return data;
 }
 
@@ -253,7 +285,11 @@ export async function setPetStatus(
 ): Promise<void> {
   const supabase = await createServerSupabase();
 
-  const { error } = await supabase.from("pets").update({ status }).eq("id", petId);
+  const { error } = await supabase
+    .from("pets")
+    .update({ status })
+    .eq("id", petId);
 
   if (error) throw new Error(error.message);
+  invalidate(CACHE_TAGS.pets);
 }

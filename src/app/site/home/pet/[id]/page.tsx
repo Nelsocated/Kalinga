@@ -1,6 +1,5 @@
-// app/site/home/pet/page.tsx
 import HomeClient from "../../HomeClient";
-import { requireShelter, requireAdmin } from "@/src/lib/utils/auth";
+import { getAuthUser } from "@/src/lib/utils/auth";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -8,22 +7,9 @@ type Props = {
 
 export default async function SharedVideoPage({ params }: Props) {
   const { id } = await params;
-  let isShelter = false;
-  let isAdmin = false;
-
-  try {
-    await requireShelter();
-    isShelter = true;
-  } catch {
-    isShelter = false;
-  }
-
-  try {
-    await requireAdmin();
-    isAdmin = true;
-  } catch {
-    isAdmin = false;
-  }
+  const user = await getAuthUser();
+  const isShelter = user?.role === "shelter";
+  const isAdmin = user?.role === "admin";
 
   return (
     <HomeClient

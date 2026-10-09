@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { ApiError, handle, ok } from "@/src/lib/api";
 import { getAvailablePets } from "@/src/lib/services/petService";
-import { getSheltersByIds } from "@/src/lib/services/shelterService";
 import type { PetFilters, SearchPetCardItem } from "@/src/lib/types/pets";
 
 const SearchPetsSchema = z.object({
@@ -28,25 +27,7 @@ export const POST = handle(async (req: Request) => {
     q: parsed.data.q,
   };
 
-  const pets = await getAvailablePets(filters);
-  const shelterIds = [...new Set(pets.map((pet) => pet.shelter_id))];
-  const shelters = await getSheltersByIds(shelterIds);
-
-  const shelterMap = new Map(
-    shelters.map((shelter) => [
-      shelter.id,
-      {
-        id: shelter.id,
-        shelter_name: shelter.shelter_name,
-        logo_url: shelter.logo_url,
-      },
-    ]),
-  );
-
-  const data: SearchPetCardItem[] = pets.map((pet) => ({
-    ...pet,
-    shelter: shelterMap.get(pet.shelter_id) ?? null,
-  }));
+  const data: SearchPetCardItem[] = await getAvailablePets(filters);
 
   return ok(data);
 });
