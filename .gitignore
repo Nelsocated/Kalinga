@@ -56,3 +56,6 @@ next-env.d.ts
 
 # Local planning docs (specs and plans stay on this machine)
 /docs/
+
+# Supabase CLI cache (linked project, CLI version)
+/supabase/.temp/
