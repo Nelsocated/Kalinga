@@ -17,9 +17,9 @@ export type FosterRow = {
 export type FosterItem = {
   id: string;
   pet_id: string;
-  title: string;
-  description: string;
-  created_at: string;
+  title: string | null;
+  description: string | null;
+  created_at: string | null;
 };
 
 export type CreateFosterInput = {

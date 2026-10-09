@@ -187,6 +187,8 @@ export async function getAdoptionAnswerForViewer(
   if (!data) throw new ApiError(404, "Answer not found.");
 
   if (data.user_id !== viewerId) {
+    if (!data.shelter_id) throw new ApiError(404, "Answer not found.");
+
     const { data: shelter, error: shelterError } = await supabase
       .from("shelter")
       .select("id")

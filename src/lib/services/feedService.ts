@@ -19,7 +19,7 @@ export async function getFeed(mediaId?: string | null): Promise<FeedItem[]> {
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase.rpc("get_feed", {
-    pinned_media_id: mediaId ?? null,
+    pinned_media_id: mediaId ?? undefined,
   });
 
   if (error) throw new Error(error.message);

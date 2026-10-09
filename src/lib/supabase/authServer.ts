@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
 function requireEnv(name: string) {
   const value = process.env[name];
@@ -15,7 +16,7 @@ const supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
 const supabaseAnonKey = requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
 export function createAuthServerClient() {
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

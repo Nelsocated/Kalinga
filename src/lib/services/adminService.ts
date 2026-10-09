@@ -173,7 +173,7 @@ export async function updateShelterApplicationStatus(input: {
   if (input.status === "approved") {
     const { data, error } = await supabase.rpc("approve_shelter_application", {
       p_shelter_id: input.id,
-      p_review_note: input.reviewNote,
+      p_review_note: input.reviewNote ?? undefined,
       p_reviewed_by: input.reviewedBy,
     });
 

@@ -61,7 +61,7 @@ export type Dashboard = {
   id: string;
   name: string | null;
   photo_url: string | null;
-  species: string;
+  species: string | null;
 };
 
 export type CreatePetInput = {

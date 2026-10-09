@@ -49,24 +49,12 @@ export async function getUsersByIds(ids: string[]): Promise<Users[]> {
   return (data ?? []) as Users[];
 }
 
-/** Returns the caller's profile row, creating it if it's missing. */
+/** Returns the caller's profile row. Signup always creates it. */
 export async function getMyUser(userId: string): Promise<Users> {
-  const existing = await getUserById(userId);
-  if (existing) return existing;
+  const user = await getUserById(userId);
+  if (!user) throw new ApiError(404, "Profile not found.");
 
-  const supabase = await createServerSupabase();
-
-  const { error: insertError } = await supabase
-    .from(PROFILES_TABLE)
-    .insert({ id: userId });
-
-  if (insertError) throw new Error(insertError.message);
-
-  const created = await getUserById(userId);
-
-  if (!created) throw new Error("Failed to create user row.");
-
-  return created;
+  return user;
 }
 
 /** `payload` must already be limited to the editable profile fields. */

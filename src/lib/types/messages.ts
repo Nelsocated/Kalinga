@@ -1,16 +1,8 @@
+import type { Tables } from "@/src/lib/supabase/database.types";
+
 type MessageThreadType = "general" | "adoption";
 
-export type MessageThread = {
-  id: string;
-  user_id: string;
-  shelter_id: string;
-  adoption_request_id: string | null;
-  thread_type: MessageThreadType;
-  subject: string;
-  created_at: string;
-  updated_at: string;
-  last_message_at: string;
-};
+export type MessageThread = Tables<"message_threads">;
 
 export type Message = {
   id: string;
