@@ -30,20 +30,18 @@ async function readSessionUser(): Promise<AuthUser | null> {
  */
 export function useNavUser(serverUser: AuthUser | null) {
   const pathname = usePathname();
-  const [user, setUser] = useState(serverUser);
-
-  useEffect(() => setUser(serverUser), [serverUser]);
+  const [sessionUser, setSessionUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     if (serverUser) return;
     let cancelled = false;
     readSessionUser().then((u) => {
-      if (!cancelled && u) setUser(u);
+      if (!cancelled) setSessionUser(u);
     });
     return () => {
       cancelled = true;
     };
   }, [serverUser, pathname]);
 
-  return user;
+  return serverUser ?? sessionUser;
 }
