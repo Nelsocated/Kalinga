@@ -2,7 +2,6 @@ import "server-only";
 
 import { createServerSupabase } from "@/src/lib/supabase/server";
 import type {
-  MessageThread,
   ThreadWithMeta,
   ShelterMailboxFilter,
 } from "@/src/lib/types/messages";
@@ -64,7 +63,7 @@ export async function getUserInboxThreads(
 
   if (error) throw new Error(error.message);
 
-  const threads = (data ?? []) as MessageThread[];
+  const threads = (data ?? []);
   const adoptionRequestIds = threads
     .map((t) => t.adoption_request_id)
     .filter((id): id is string => Boolean(id));
@@ -100,7 +99,7 @@ export async function getShelterInboxThreads(
 
   if (error) throw new Error(error.message);
 
-  const threads = (data ?? []) as MessageThread[];
+  const threads = (data ?? []);
 
   const adoptionRequestIds = threads
     .map((t) => t.adoption_request_id)

@@ -29,7 +29,7 @@ export default async function Page({ params }: PageProps) {
 
   const mappedShelter = {
     id: shelter.id,
-    shelter_name: shelter.shelter_name,
+    shelter_name: shelter.shelter_name ?? "Shelter",
     logo_url: shelter.logo_url ?? null,
     location: shelter.location ?? null,
     about: shelter.about ?? null,

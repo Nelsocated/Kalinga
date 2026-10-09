@@ -123,8 +123,8 @@ export async function createMessageThread(
   if (messageError) throw new Error(messageError.message);
 
   return {
-    thread: thread as MessageThread,
-    message: message as Message,
+    thread: thread,
+    message: message,
   };
 }
 
@@ -187,7 +187,7 @@ export async function replyToThread(
 
   if (updateThreadError) throw new Error(updateThreadError.message);
 
-  return message as Message;
+  return message;
 }
 
 /** Marks the other side's messages in a thread as read by the caller. */
@@ -216,5 +216,5 @@ export async function getThreadMessages(threadId: string): Promise<Message[]> {
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []) as Message[];
+  return data ?? [];
 }

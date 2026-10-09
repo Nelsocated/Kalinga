@@ -1,10 +1,6 @@
-export interface Likes {
-  id: string;
-  user_id: string;
-  target_type: "pet" | "shelter" | "video";
-  target_id: string;
-  created_at: string;
-}
+import type { Tables } from "@/src/lib/supabase/database.types";
+
+export type Likes = Tables<"likes">;
 
 export interface LikedMiniItem {
   id: string;

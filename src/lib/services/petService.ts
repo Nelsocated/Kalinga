@@ -51,17 +51,13 @@ const isSize = (value: unknown): value is Pets["size"] =>
 
 function normalizePet(row: PetRow): Pets {
   const currentYear = new Date().getFullYear();
-  const rawYear = Number(
-    row.year_inShelter ?? row.yearInShelter ?? row.year_in_shelter,
-  );
-  const safeYear = Number.isFinite(rawYear) ? rawYear : currentYear;
 
   return {
-    id: String(row.id ?? ""),
-    shelter_id: String(row.shelter_id ?? ""),
-    pet_name: String(row.name ?? row.pet_name ?? ""),
-    description: String(row.description ?? ""),
-    breed: String(row.breed ?? ""),
+    id: row.id,
+    shelter_id: row.shelter_id ?? "",
+    pet_name: row.name ?? "",
+    description: row.description ?? "",
+    breed: row.breed ?? "",
     age: isAge(row.age) ? row.age : "adult",
     status: isStatus(row.status) ? row.status : "available",
     sex: isSex(row.sex) ? row.sex : "male",
@@ -69,10 +65,11 @@ function normalizePet(row: PetRow): Pets {
     size: isSize(row.size) ? row.size : "medium",
     vaccinated: Boolean(row.vaccinated),
     spayed_neutered: Boolean(row.spayed_neutered),
-    photo_url: String(row.photo_url ?? ""),
+    photo_url: row.photo_url ?? "",
     // year_inShelter stores the year the pet arrived; the UI shows years since
-    years_inShelter: Math.max(0, currentYear - safeYear),
-    created_at: String(row.created_at ?? new Date().toISOString()),
+    years_inShelter:
+      row.year_inShelter == null ? 0 : Math.max(0, currentYear - row.year_inShelter),
+    created_at: row.created_at,
   };
 }
 
@@ -114,7 +111,7 @@ function applyFilters<T>(query: T, filters: PetFilters = {}): T {
   return nextQuery;
 }
 
-export async function getPets(filters: PetFilters = {}): Promise<Pets[]> {
+async function getPets(filters: PetFilters = {}): Promise<Pets[]> {
   const supabase = await createServerSupabase();
 
   const query = supabase
@@ -142,7 +139,7 @@ export async function getPetById(id: string): Promise<Pets | null> {
 
   if (error) throw new Error(error.message);
 
-  return data ? normalizePet(data as PetRow) : null;
+  return data ? normalizePet(data) : null;
 }
 
 export async function getPetsByIds(ids: string[]): Promise<Pets[]> {

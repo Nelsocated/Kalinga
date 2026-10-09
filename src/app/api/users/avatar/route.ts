@@ -12,5 +12,5 @@ export const POST = handle(async (req: Request) => {
 
   if (!(file instanceof File)) throw new ApiError(400, "Missing image file");
 
-  return ok({ photo_url: await uploadMyAvatar(userId, file) }, 201);
+  return ok({ url: await uploadMyAvatar(userId, file) }, 201);
 });

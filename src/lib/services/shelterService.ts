@@ -2,20 +2,16 @@ import "server-only";
 import { createServerSupabase } from "@/src/lib/supabase/server";
 import { ApiError } from "@/src/lib/api";
 import type {
-  Shelters,
   ShelterListItem,
   ShelterPetMini,
   ShelterVideoMini,
   ShelterRow,
-  PetStatusRow,
   ShelterUpdatePayload,
   ShelterProfile,
   PetCardProps,
-} from "@/src/lib/types/shelters";
-import type {
   ShelterProfileUI,
   ShelterPetUI,
-} from "@/src/app/shelter/profiles/shelter/ShelterProfileClient";
+} from "@/src/lib/types/shelters";
 import { getPetsByShelter } from "./petService";
 import { getPetVideosByShelterId } from "./petMediaService";
 
@@ -35,7 +31,7 @@ const SHELTER_PUBLIC_SELECT = `
 `;
 const AVATAR_BUCKET = "shelter_photos";
 
-export async function fetchShelterById(id: string): Promise<Shelters | null> {
+export async function fetchShelterById(id: string): Promise<ShelterProfile | null> {
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
@@ -46,7 +42,7 @@ export async function fetchShelterById(id: string): Promise<Shelters | null> {
 
   if (error) throw new Error(error.message);
 
-  return data as Shelters | null;
+  return data;
 }
 
 /** Adds available/adopted pet counts to each shelter row. */
@@ -71,8 +67,8 @@ async function withPetStats(
 
     if (error) throw new Error(error.message);
 
-    for (const pet of (pets ?? []) as PetStatusRow[]) {
-      const current = stats.get(pet.shelter_id);
+    for (const pet of pets ?? []) {
+      const current = pet.shelter_id ? stats.get(pet.shelter_id) : undefined;
       if (!current) continue;
 
       const status = (pet.status ?? "").trim().toLowerCase();
@@ -97,7 +93,7 @@ export async function getSheltersWithStats(): Promise<ShelterListItem[]> {
 
   if (error) throw new Error(error.message);
 
-  const shelterRows = (data ?? []) as ShelterRow[];
+  const shelterRows = (data ?? []);
   shelterRows.sort(() => Math.random() - 0.5);
 
   return withPetStats(shelterRows);
@@ -118,7 +114,7 @@ export async function getSheltersByIds(
 
   if (error) throw new Error(error.message);
 
-  return withPetStats((data ?? []) as ShelterRow[]);
+  return withPetStats((data ?? []));
 }
 
 /** Name, location and logo only; no pet stats. */
@@ -272,7 +268,7 @@ export async function getMyShelterProfile(
 
   if (!shelter) throw new ApiError(404, "Shelter profile not found");
 
-  return shelter as ShelterProfile;
+  return shelter;
 }
 
 export async function updateMyShelterProfile(
@@ -302,7 +298,7 @@ export async function updateMyShelterProfile(
   if (error) throw new Error(error.message);
   if (!data) throw new ApiError(404, "Shelter profile not found");
 
-  return data as ShelterProfile;
+  return data;
 }
 
 export async function uploadShelterAvatar(

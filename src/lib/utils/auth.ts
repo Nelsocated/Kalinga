@@ -68,10 +68,6 @@ export async function requireRole(allowed: Role[]): Promise<AuthUser> {
   return user;
 }
 
-export async function requireUser(): Promise<AuthUser> {
-  return requireRole(["user"]);
-}
-
 export async function requireShelter(): Promise<AuthUser> {
   return requireRole(["shelter"]);
 }

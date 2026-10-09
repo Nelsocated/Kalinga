@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Funnel, MagnifyingGlass, WarningCircle } from "@phosphor-icons/react";
 
 import type { Pets, SearchPetCardItem } from "@/src/lib/types/pets";
-import { fetchSearchPets } from "@/src/lib/services/petClient";
+import { fetchJson } from "@/src/lib/fetchJson";
 
 import PetCard from "../cards/PetCard";
 import Button from "../ui/Button";
@@ -59,7 +59,12 @@ export default function FilterModal({ variant = "sidebar" }: { variant?: "sideba
     setActiveView("results");
     setLoading(true);
     try {
-      setPets(await fetchSearchPets(filters));
+      const json = await fetchJson<{ data: SearchPetCardItem[] }>("/api/pets/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(filters),
+      });
+      setPets(json.data);
     } catch (error: unknown) {
       console.error("Failed to fetch pets:", error);
       setPets([]);

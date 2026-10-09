@@ -57,7 +57,7 @@ export async function getPetPhotosByPetId(petId: string): Promise<Pet_Media[]> {
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []) as Pet_Media[];
+  return data ?? [];
 }
 
 export async function getVideosByPetIds(
@@ -77,6 +77,7 @@ export async function getVideosByPetIds(
 
   if (error) throw new Error(error.message);
 
+  // The embedded pets join is typed loosely; VideoRow is its real shape
   return ((data ?? []) as VideoRow[]).map(toVideoWithPet);
 }
 
@@ -97,6 +98,7 @@ export async function getVideosByIds(
 
   if (error) throw new Error(error.message);
 
+  // The embedded pets join is typed loosely; VideoRow is its real shape
   return ((data ?? []) as VideoRow[]).map(toVideoWithPet);
 }
 
@@ -140,7 +142,7 @@ export async function getPetVideosByShelterId(
   }));
 }
 
-export async function createVideo(input: CreateVideoInput): Promise<VideoRow> {
+export async function createVideo(input: CreateVideoInput): Promise<Pet_Media> {
   const { petId, caption, file } = input;
 
   if (!file.type.startsWith("video/")) {
@@ -186,7 +188,7 @@ export async function createVideo(input: CreateVideoInput): Promise<VideoRow> {
     throw new Error(insertError.message);
   }
 
-  return data as VideoRow;
+  return data;
 }
 
 export async function uploadPetPhoto(

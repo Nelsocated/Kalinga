@@ -30,7 +30,7 @@ export async function getUserById(userId: string): Promise<Users | null> {
 
   if (error) throw new Error(error.message);
 
-  return (data as Users | null) ?? null;
+  return data;
 }
 
 export async function getUsersByIds(ids: string[]): Promise<Users[]> {
@@ -46,7 +46,7 @@ export async function getUsersByIds(ids: string[]): Promise<Users[]> {
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []) as Users[];
+  return data ?? [];
 }
 
 /** Returns the caller's profile row. Signup always creates it. */
@@ -75,7 +75,7 @@ export async function updateMyUser(
 
   if (error) throw new Error(error.message);
 
-  return data as Users;
+  return data;
 }
 
 export async function uploadMyAvatar(

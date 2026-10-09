@@ -20,7 +20,7 @@ export async function getShelterDonations(
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []) as Donations[];
+  return data ?? [];
 }
 
 export async function hasActiveDonations(shelterId: string): Promise<boolean> {
@@ -46,7 +46,7 @@ async function getAllShelterDonations(shelterId: string): Promise<Donations[]> {
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []) as Donations[];
+  return data ?? [];
 }
 
 /** Everything a shelter has set up, active or not, shaped for the edit form. */

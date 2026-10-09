@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-import ShelterProfileClient, {
-  type ShelterProfileUI,
-} from "./ShelterProfileClient";
+import ShelterProfileClient from "./ShelterProfileClient";
+import type { ShelterProfileUI } from "@/src/lib/types/shelters";
 import ProfileTabs from "@/src/components/tabs/ProfileTab";
 import { requireShelter } from "@/src/lib/utils/auth";
 import { getShelterPetProps } from "@/src/lib/services/shelterService";

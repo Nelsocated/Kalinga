@@ -45,12 +45,10 @@ export default async function PetProfilePage({ params }: PageProps) {
           owner_id: shelter.owner_id ?? null,
         }
       : null,
-    pet_media: petMedia.map((media) => ({
-      id: media.id,
-      type: media.type,
-      url: media.url,
-      caption: media.caption ?? null,
-    })),
+    // getPetPhotosByPetId only returns photos; a row without a file can't be shown
+    pet_media: petMedia.flatMap((media) =>
+      media.url ? [{ id: media.id, type: "photo" as const, url: media.url, caption: media.caption }] : [],
+    ),
   };
 
   return <PetProfileClient id={id} initialPet={mappedPet} />;

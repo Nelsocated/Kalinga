@@ -4,14 +4,14 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import EditProfileModalBase from "./EditProfileModal";
 import DonationsEditor, { fromDraft, toDraft, type DonationDraft } from "./DonationsEditor";
+import { fetchJson, uploadFile } from "@/src/lib/fetchJson";
+import { unwrap } from "@/src/lib/actionResult";
 import {
-  fetchMyDonationSettings,
-  fetchMyShelterProfile,
-  patchMyShelterProfile,
-  saveMyDonationSettings,
-  uploadMyDonationQr,
-  uploadMyShelterAvatar,
-} from "@/src/lib/services/shelterClient";
+  getMyDonationSettingsAction,
+  saveMyDonationSettingsAction,
+  updateMyShelterAction,
+} from "@/src/app/actions/profile";
+import type { ShelterProfile } from "@/src/lib/types/shelters";
 
 const FIELDS = [
   { key: "shelter_name", label: "Shelter name" },
@@ -31,9 +31,9 @@ export default function ShelterEditProfileModal() {
 
   // Stable so the modal doesn't reload while the donation fields change
   const loadProfile = useCallback(async () => {
-    const [shelter, donationSettings] = await Promise.all([
-      fetchMyShelterProfile(),
-      fetchMyDonationSettings(),
+    const [{ data: shelter }, donationSettings] = await Promise.all([
+      fetchJson<{ data: ShelterProfile }>("/api/shelters/me", { cache: "no-store" }),
+      getMyDonationSettingsAction().then(unwrap),
     ]);
     setDonations(toDraft(donationSettings));
     setUnnamed([]);
@@ -64,17 +64,17 @@ export default function ShelterEditProfileModal() {
           );
         }
 
-        await patchMyShelterProfile({
+        unwrap(await updateMyShelterAction({
           shelter_name: values.shelter_name?.trim(),
           about: values.about?.trim() || undefined,
           location: values.location?.trim() || undefined,
           contact_email: values.contact_email?.trim() || undefined,
           contact_phone: values.contact_phone?.trim() || undefined,
           logo_url: avatarUrl || undefined,
-        });
-        setDonations(toDraft(await saveMyDonationSettings(settings)));
+        }));
+        setDonations(toDraft(unwrap(await saveMyDonationSettingsAction(settings))));
       }}
-      uploadAvatar={uploadMyShelterAvatar}
+      uploadAvatar={(file) => uploadFile("/api/shelters/me/avatar", file)}
       onSaved={() => router.refresh()}
       busy={uploadingQr}
     >
@@ -84,7 +84,7 @@ export default function ShelterEditProfileModal() {
           setDonations(next);
           if (unnamed.length) setUnnamed(unnamed.filter((key) => next.monetary.some((m) => m.key === key && !m.method.trim())));
         }}
-        uploadQr={uploadMyDonationQr}
+        uploadQr={(file) => uploadFile("/api/shelters/me/donation-qr", file)}
         onBusyChange={setUploadingQr}
         unnamed={unnamed}
       />

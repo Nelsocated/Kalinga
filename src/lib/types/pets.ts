@@ -1,3 +1,5 @@
+import type { Tables } from "@/src/lib/supabase/database.types";
+
 export interface Pets {
   id: string;
   shelter_id: string;
@@ -26,26 +28,7 @@ export type SearchPetCardItem = Pets & {
 
 export type Multi<T extends string> = T | T[];
 
-export type PetRow = {
-  id: string | null;
-  shelter_id: string | null;
-  name?: string | null;
-  pet_name?: string | null;
-  description: string | null;
-  breed: string | null;
-  age: string | null;
-  status: string | null;
-  sex: string | null;
-  species: string | null;
-  size: string | null;
-  vaccinated: boolean | null;
-  spayed_neutered: boolean | null;
-  photo_url: string | null;
-  year_inShelter?: number | string | null;
-  yearInShelter?: number | string | null;
-  year_in_shelter?: number | string | null;
-  created_at: string | null;
-};
+export type PetRow = Tables<"pets">;
 
 export interface PetFilters {
   species?: Multi<Pets["species"]>;

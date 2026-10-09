@@ -6,10 +6,9 @@ import Input from "../ui/Input";
 import Textarea from "../ui/Textarea";
 import Button, { LinkButton } from "../ui/Button";
 import Modal from "../ui/Modal";
-import {
-  createPetAdoptionRequest,
-  fetchPetAdoptionStatus,
-} from "@/src/lib/services/adoptionClient";
+import { fetchJson } from "@/src/lib/fetchJson";
+import { unwrap } from "@/src/lib/actionResult";
+import { createAdoptionRequestAction } from "@/src/app/actions/social";
 import type { PetStatus } from "@/src/lib/types/adoptionRequests";
 
 type Props = {
@@ -89,7 +88,10 @@ export default function AdoptModal({ petId }: Props) {
     setCheckingStatus(true);
 
     try {
-      const data = await fetchPetAdoptionStatus(petId);
+      const { data } = await fetchJson<{ data: { id: string; status: PetStatus } }>(
+        `/api/pets/${encodeURIComponent(petId)}/adoption`,
+        { cache: "no-store" },
+      );
       setStatus(data.status);
       setView(data.status === "adopted" ? "adopted" : "form");
     } catch (error: unknown) {
@@ -110,7 +112,7 @@ export default function AdoptModal({ petId }: Props) {
     try {
       setLoading(true);
       setErrorMsg(null);
-      await createPetAdoptionRequest(petId, form);
+      unwrap(await createAdoptionRequestAction(petId, form));
       setView("submitted");
       setForm(initialForm);
     } catch (error: unknown) {

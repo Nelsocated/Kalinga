@@ -1,10 +1,6 @@
-export type VideoView = {
-  id: string;
-  media_id: string;
-  user_id: string | null;
-  session_id: string | null;
-  viewed_at: string;
-};
+import type { Tables } from "@/src/lib/supabase/database.types";
+
+export type VideoView = Tables<"video_views">;
 
 export type RecordVideoViewInput = {
   mediaId: string;

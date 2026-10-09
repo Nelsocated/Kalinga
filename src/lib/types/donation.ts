@@ -1,16 +1,6 @@
-export interface Donations {
-  id: string;
-  shelter_id: string;
-  type: "goods" | "monetary";
-  instruction_note: string | null;
-  item_name: string[] | null;
-  method: string | null;
-  account_name: string | null;
-  account_number: string | null;
-  qr_url: string | null;
-  is_active: boolean | null;
-  created_at: string;
-}
+import type { Tables } from "@/src/lib/supabase/database.types";
+
+export type Donations = Tables<"donation">;
 
 export interface MonetaryMethod {
   id?: string;

@@ -1,15 +1,6 @@
-export interface Shelters {
-  id: string;
-  owner_id: string;
-  shelter_name: string;
-  logo_url: string;
-  about: string;
-  location: string;
-  contact_email: string;
-  contact_phone: string;
-  photo_url: string;
-  created_at: string;
-}
+import type { Tables } from "@/src/lib/supabase/database.types";
+
+export type Shelters = Tables<"shelter">;
 
 export interface ShelterListItem {
   id: string;
@@ -43,21 +34,11 @@ export interface ShelterPetMini {
   shelterLogo?: string | null;
 }
 
-export interface ShelterRow {
-  id: string;
-  shelter_name: string | null;
-  logo_url: string | null;
-  location: string | null;
-}
-
-export interface PetStatusRow {
-  shelter_id: string;
-  status: string | null;
-}
+export type ShelterRow = Pick<Tables<"shelter">, "id" | "shelter_name" | "logo_url" | "location">;
 
 export type ShelterProfile = {
   id: string;
-  owner_id: string;
+  owner_id: string | null;
   shelter_name: string | null;
   logo_url: string | null;
   photo_url?: string | null;
@@ -84,4 +65,24 @@ export type PetCardProps = ShelterPetMini & {
   sex: "male" | "female";
   species: "dog" | "cat";
   size: "small" | "medium" | "large";
+};
+
+/** The signed-in shelter's own profile page. */
+export type ShelterPetUI = {
+  id: string;
+  name: string;
+  sex: string;
+  photo_url: string | null;
+};
+
+export type ShelterProfileUI = {
+  id: string;
+  shelter_name: string;
+  location?: string | null;
+  logo_url?: string | null;
+  about?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  created_at?: string | null;
+  pets: ShelterPetUI[];
 };

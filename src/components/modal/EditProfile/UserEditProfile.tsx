@@ -2,11 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import EditProfileModal from "./EditProfileModal";
-import {
-  fetchMyUserProfile,
-  patchMyUserProfile,
-  uploadMyUserAvatar,
-} from "@/src/lib/services/userClient";
+import { fetchJson, uploadFile } from "@/src/lib/fetchJson";
+import { unwrap } from "@/src/lib/actionResult";
+import { updateMyUserAction } from "@/src/app/actions/profile";
+import type { Users } from "@/src/lib/types/users";
 
 export default function UserEditProfileModal() {
   const router = useRouter();
@@ -21,7 +20,7 @@ export default function UserEditProfileModal() {
         { key: "contact_email", label: "Email", type: "email" },
       ]}
       loadProfile={async () => {
-        const profile = await fetchMyUserProfile();
+        const { data: profile } = await fetchJson<{ data: Users }>("/api/users", { cache: "no-store" });
 
         return {
           avatarUrl: profile.photo_url ?? "",
@@ -32,15 +31,15 @@ export default function UserEditProfileModal() {
         };
       }}
       saveProfile={async ({ values, avatarUrl }) => {
-        await patchMyUserProfile({
+        unwrap(await updateMyUserAction({
           full_name: values.full_name?.trim(),
           username: values.username?.trim(),
           bio: values.bio?.trim() || undefined,
           contact_email: values.contact_email?.trim() || undefined,
           photo_url: avatarUrl || undefined,
-        });
+        }));
       }}
-      uploadAvatar={uploadMyUserAvatar}
+      uploadAvatar={(file) => uploadFile("/api/users/avatar", file)}
       onSaved={() => router.refresh()}
     />
   );

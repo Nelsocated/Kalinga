@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle, XCircle } from "@phosphor-icons/react";
 import Button from "../ui/Button";
 import Modal from "../ui/Modal";
-import { fetchAdoptionAnswer } from "@/src/lib/services/adoptionClient";
+import { fetchJson } from "@/src/lib/fetchJson";
 import type { answer } from "@/src/lib/types/adoptionRequests";
 
 type Props = {
@@ -30,8 +30,11 @@ export default function AnswerModal({ isOpen, onClose, answerId }: Props) {
     if (!isOpen || !answerId?.trim()) return;
     let alive = true;
 
-    fetchAdoptionAnswer(answerId)
-      .then((data) => {
+    // answerId is the adoption request id
+    fetchJson<{ data: answer }>(`/api/users/${encodeURIComponent(answerId)}/adoption/answer`, {
+      cache: "no-store",
+    })
+      .then(({ data }) => {
         if (!alive) return;
         setAnswer(data);
         setErrorMsg(null);

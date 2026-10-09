@@ -89,7 +89,7 @@ export async function createAdoptionRequest(
 
   if (error) throw new Error(error.message);
 
-  return data as AdoptionRequestRow;
+  return data;
 }
 
 export type UserAdoptionFeedItem = Adoption_Requests & {
@@ -200,7 +200,7 @@ export async function getAdoptionAnswerForViewer(
     if (!shelter) throw new ApiError(404, "Answer not found.");
   }
 
-  return data as answer;
+  return data;
 }
 
 export async function getAdoptionMetaMap(

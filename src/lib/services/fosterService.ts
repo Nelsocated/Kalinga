@@ -17,8 +17,8 @@ const FOSTER_SELECT = `
 
 function normalizeFoster(row: FosterRow): Fosters {
   return {
-    id: String(row.id),
-    pet_id: String(row.pet_id),
+    id: row.id,
+    pet_id: row.pet_id,
     title: row.title ?? "",
     description: row.description ?? "",
     created_at: row.created_at ?? undefined,

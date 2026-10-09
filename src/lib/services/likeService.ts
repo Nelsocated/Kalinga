@@ -6,7 +6,7 @@ import type {
   PetLikeCount,
   LikedIdsGrouped,
 } from "@/src/lib/types/likes";
-import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assests";
+import { DEFAULT_AVATAR_URL } from "@/src/lib/constants/assets";
 import { getPetsByIds } from "./petService";
 import { getSheltersByIds } from "./shelterService";
 import { getVideosByIds } from "./petMediaService";

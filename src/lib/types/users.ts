@@ -1,15 +1,6 @@
-export interface Users {
-  id: string;
-  full_name: string;
-  username: string;
-  role: "user" | "shelter" | "admin";
-  photo_url: string;
-  bio: string;
-  contact_email: string;
-  contact_phone: string;
-  updated_at: string;
-  created_at: string;
-}
+import type { Tables } from "@/src/lib/supabase/database.types";
+
+export type Users = Tables<"users">;
 
 export type UserUpdatePayload = Partial<
   Pick<

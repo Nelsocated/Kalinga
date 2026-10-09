@@ -9,5 +9,5 @@ export const POST = handle(async (req: Request) => {
 
   if (!(file instanceof File)) throw new ApiError(400, "No file provided");
 
-  return ok({ publicUrl: await uploadDonationQr(user.id, file) });
+  return ok({ url: await uploadDonationQr(user.id, file) });
 });

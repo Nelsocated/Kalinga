@@ -4,16 +4,7 @@ type MessageThreadType = "general" | "adoption";
 
 export type MessageThread = Tables<"message_threads">;
 
-export type Message = {
-  id: string;
-  thread_id: string;
-  sender_user_id: string | null;
-  sender_shelter_id: string | null;
-  body: string;
-  created_at: string;
-  read_by_user: boolean;
-  read_by_shelter: boolean;
-};
+export type Message = Tables<"messages">;
 
 export type PersonCard = {
   id: string;

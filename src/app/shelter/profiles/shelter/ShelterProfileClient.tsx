@@ -9,25 +9,7 @@ import WebTemplate from "@/src/components/template/WebTemplate";
 import ContactRows from "@/src/components/template/ContactRows";
 import ShelterEditProfileModal from "@/src/components/modal/EditProfile/ShelterEditProfile";
 import { LinkButton } from "@/src/components/ui/Button";
-
-export type ShelterPetUI = {
-  id: string;
-  name: string;
-  sex: string;
-  photo_url: string | null;
-};
-
-export type ShelterProfileUI = {
-  id: string;
-  shelter_name: string;
-  location?: string | null;
-  logo_url?: string | null;
-  about?: string | null;
-  contact_email?: string | null;
-  contact_phone?: string | null;
-  created_at?: string | null;
-  pets: ShelterPetUI[];
-};
+import type { ShelterProfileUI } from "@/src/lib/types/shelters";
 
 type ShelterProfileClientProps = {
   shelter: ShelterProfileUI;
