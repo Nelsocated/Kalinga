@@ -1,66 +1,53 @@
+import { notFound } from "next/navigation";
 import FosterProfilePage from "./FosterProfilePage";
+import { getFosterStoryById } from "@/src/lib/services/fosterService";
 import { getPetPhotosByPetId } from "@/src/lib/services/petMediaService";
-import { PetGender } from "@/src/lib/types/shelters";
+import type { PetGender } from "@/src/lib/types/shelters";
 
 type PageProps = {
-  params: Promise<{
-    id: string;
-  }>;
-  searchParams: Promise<{
-    petId?: string;
-    name?: string;
-    sex?: PetGender;
-    shelter_name?: string;
-    logo_url?: string;
-    location?: string;
-    url?: string;
-    title?: string;
-    description?: string;
-  }>;
+  params: Promise<{ id: string }>;
 };
 
-type PetMediaPhoto = {
-  id: string;
-  type: "photo" | "video";
-  url: string;
-  caption: string | null;
-};
+// The story is read from the database by id, so a link can't change what it says
+export default async function Page({ params }: PageProps) {
+  const { id } = await params;
+  const story = await getFosterStoryById(id);
 
-export default async function Page({ searchParams }: PageProps) {
-  const data = await searchParams;
+  if (!story) return notFound();
 
-  const petId = data.petId ?? "";
+  const pet = story.pets;
+  const shelter = pet?.shelter;
 
-  let extraPhotos: PetMediaPhoto[] = [];
-
+  let photos: string[] = [];
   try {
-    if (petId) {
-      const photos = await getPetPhotosByPetId(petId);
-
-      extraPhotos = (photos ?? []).map((item) => ({
-        id: String(item.id),
-        type:
-          item.type === "photo" || item.type === "video" ? item.type : "photo",
-        url: item.url ?? "",
-        caption: item.caption ?? null,
-      }));
-    }
+    const media = await getPetPhotosByPetId(story.pet_id);
+    photos = media.flatMap((item) => (item.url ? [item.url] : []));
   } catch (error) {
     console.error("[FosterProfile/Page] getPetPhotosByPetId failed:", error);
   }
 
+  const sex: PetGender = pet?.sex === "male" || pet?.sex === "female" ? pet.sex : "unknown";
+
   return (
     <FosterProfilePage
-      petId={petId}
-      name={data.name ?? "Unknown pet"}
-      sex={data.sex ?? "unknown"}
-      shelter_name={data.shelter_name ?? null}
-      logo_url={data.logo_url ?? null}
-      location={data.location ?? null}
-      photo_url={data.url ?? ""}
-      title={data.title ?? ""}
-      description={data.description ?? ""}
-      pet_media={extraPhotos}
+      petId={story.pet_id}
+      name={pet?.name?.trim() || "Unnamed pet"}
+      sex={sex}
+      photo_url={pet?.photo_url ?? ""}
+      photos={photos}
+      title={story.title?.trim() ?? ""}
+      description={story.description?.trim() ?? ""}
+      createdAt={story.created_at}
+      shelter={
+        shelter
+          ? {
+              id: shelter.id,
+              name: shelter.shelter_name?.trim() || "Kalinga shelter",
+              logo_url: shelter.logo_url,
+              location: shelter.location,
+            }
+          : null
+      }
     />
   );
 }

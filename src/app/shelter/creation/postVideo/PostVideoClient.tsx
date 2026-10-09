@@ -188,7 +188,7 @@ export default function PostVideoClient({ pets, initialError, initialPetId }: Pr
               {previewUrl ? (
                 <video
                   src={previewUrl}
-                  className="aspect-9/16 w-full rounded-lg bg-ink object-cover"
+                  className="aspect-9/16 w-full rounded-lg bg-sunshine-soft object-cover"
                   autoPlay
                   loop
                   muted

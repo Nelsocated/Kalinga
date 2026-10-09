@@ -37,6 +37,34 @@ export const getFosterStories = unstable_cache(
   },
 );
 
+/** One story with its pet and the pet's shelter, or null when it doesn't exist. Cached like the list. */
+export const getFosterStoryById = unstable_cache(
+  async (id: string) => {
+    const supabase = createPublicSupabase();
+
+    const { data, error } = await supabase
+      .from("foster")
+      .select(
+        "id, pet_id, title, description, created_at, pets ( name, sex, photo_url, shelter ( id, shelter_name, logo_url, location ) )",
+      )
+      .eq("id", id)
+      .maybeSingle();
+
+    // A malformed id is a missing story, not a server error
+    if (error) {
+      if (error.code === "22P02") return null;
+      throw new Error(error.message);
+    }
+
+    return data;
+  },
+  ["foster-story"],
+  {
+    revalidate: PUBLIC_LIST_SECONDS,
+    tags: [CACHE_TAGS.fosters, CACHE_TAGS.pets, CACHE_TAGS.shelters],
+  },
+);
+
 export async function createFoster(
   input: CreateFosterInput,
 ): Promise<FosterItem> {

@@ -22,7 +22,7 @@ export default function VideoCard({ href, thumbnailUrl, subtitle, petName, class
       href={href}
       aria-label={`Watch ${petName}`}
       className={cn(
-        "group relative block aspect-[4/5] w-full overflow-hidden rounded-lg bg-ink transition-[box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift",
+        "group relative block aspect-[4/5] w-full overflow-hidden rounded-lg bg-sunshine-soft transition-[box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift",
         className,
       )}
     >

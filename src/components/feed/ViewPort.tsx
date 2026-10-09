@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Play, SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
+import { PawPrint, Play, SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import { PawHeartFilled } from "../ui/PawHeart";
 import Caption from "./Caption";
 import type { FeedItem } from "@/src/lib/services/feedService";
@@ -27,7 +27,14 @@ export default function ViewPort({ item, isActive, preload, muted, onMutedChange
   const viewRecorded = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
   const [hearts, setHearts] = useState(0);
+  // Until the first frame arrives the frame shows a soft sunshine field instead of a dark box
+  const [hasFrame, setHasFrame] = useState(false);
   const reduce = useReducedMotion();
+
+  // A video already decoded before hydration won't fire loadeddata again
+  useEffect(() => {
+    if ((videoRef.current?.readyState ?? 0) >= 2) setHasFrame(true);
+  }, []);
 
   // React doesn't keep the muted attribute in sync, so set the property directly
   useEffect(() => {
@@ -110,7 +117,7 @@ export default function ViewPort({ item, isActive, preload, muted, onMutedChange
   }
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-ink">
+    <div className="relative h-full w-full overflow-hidden bg-sunshine-soft">
       {item.url ? (
         <video
           ref={videoRef}
@@ -120,15 +127,25 @@ export default function ViewPort({ item, isActive, preload, muted, onMutedChange
           playsInline
           loop
           muted={muted}
+          onLoadedData={() => setHasFrame(true)}
           onClick={handleTap}
         />
       ) : (
-        <div className="flex h-full items-center justify-center text-sm text-card/70">
+        <div className="flex h-full items-center justify-center text-sm text-ink-soft">
           This video isn&apos;t available.
         </div>
       )}
 
-      {item.url && isActive ? (
+      {item.url ? (
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-sunshine-soft transition-opacity duration-300 ease-out-expo ${hasFrame ? "opacity-0" : "opacity-100"}`}
+        >
+          {isPaused ? null : <PawPrint weight="fill" className="size-16 animate-pulse text-sunshine" />}
+        </div>
+      ) : null}
+
+      {item.url && isActive && hasFrame ? (
         <button
           type="button"
           onClick={() => onMutedChange(!muted)}
@@ -146,7 +163,7 @@ export default function ViewPort({ item, isActive, preload, muted, onMutedChange
 
       {isPaused ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <Play size={72} weight="fill" className="text-card/90 drop-shadow-lg" aria-hidden="true" />
+          <Play size={72} weight="fill" className={hasFrame ? "text-card/90 drop-shadow-lg" : "text-ink/80"} aria-hidden="true" />
         </div>
       ) : null}
 

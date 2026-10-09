@@ -184,7 +184,7 @@ export default function Feed({
         }
         if (e.key === "m") setMuted((m) => !m);
       }}
-      className="h-dvh w-full snap-y snap-mandatory overflow-y-scroll overscroll-contain bg-ink [scrollbar-width:none] md:h-[calc(100dvh-4rem)] md:w-[min(56dvh,480px)] md:rounded-xl"
+      className="h-dvh w-full snap-y snap-mandatory overflow-y-scroll overscroll-contain bg-sunshine-soft [scrollbar-width:none] md:h-[calc(100dvh-4rem)] md:w-[min(56dvh,480px)] md:rounded-xl"
     >
       {items.map((item, i) => (
         <div

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { PawPrint } from "@phosphor-icons/react";
 import { cn } from "@/src/lib/cn";
 import Avatar from "../ui/Avatar";
 import SexIcon from "../ui/SexIcon";
@@ -22,7 +23,7 @@ export type PetCardProps = {
   resize?: boolean;
 };
 
-/** Photo-led pet tile: 4:5 photo, name with sex, shelter below. */
+/** Sunshine pet tile: the photo in a thin yellow frame, name and shelter on the yellow below. */
 export default function PetCard({
   href,
   imageUrl,
@@ -50,28 +51,31 @@ export default function PetCard({
             alt=""
             fill
             sizes="(min-width: 1024px) 240px, (min-width: 640px) 30vw, 45vw"
-            className="object-cover transition-transform duration-300 ease-out-expo group-hover:scale-[1.03]"
+            className="object-cover transition-transform duration-500 ease-out-expo group-hover:scale-[1.04]"
           />
         ) : (
-          <span className="absolute inset-0 flex items-center justify-center text-3xl font-bold text-ink/40">
-            {petName.slice(0, 1).toUpperCase()}
-          </span>
+          <PawPrint
+            weight="fill"
+            className="absolute inset-0 m-auto size-1/3 text-sunshine"
+            aria-hidden="true"
+          />
         )}
         {label ? (
-          <span className="absolute top-2 left-2 max-w-[calc(100%-1rem)] truncate rounded-full bg-card/95 px-2.5 py-1 text-xs font-medium text-ink">
+          <span className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] truncate rounded-full bg-card/95 px-2.5 py-1 text-xs font-semibold text-ink">
             {label}
           </span>
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-1 px-1 pt-2.5 pb-1">
+      <div className="flex flex-col gap-1 px-2 pt-2 pb-2">
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className="truncate font-semibold text-ink">{petName}</span>
-          <SexIcon sex={sex} size={16} />
+          <span className="truncate text-lg leading-tight font-bold text-ink">{petName}</span>
+          {/* The sex colors are too pale to read on sunshine, so the icon takes the ink */}
+          <SexIcon sex={sex} size={18} className="text-ink" />
         </div>
         {!resize && shelterName ? (
-          <div className="flex min-w-0 items-center gap-1.5 text-sm text-muted">
-            <Avatar src={shelterLogo} name={shelterName} size={20} />
+          <div className="flex min-w-0 items-center gap-1.5 text-sm text-ink">
+            <Avatar src={shelterLogo} name={shelterName} size={20} className="ring-1 ring-ink/10" />
             <span className="truncate">{shelterName}</span>
           </div>
         ) : null}
@@ -80,9 +84,9 @@ export default function PetCard({
   );
 
   const classes = cn(
-    "group block w-full rounded-lg border border-line bg-card p-2 text-left",
+    "group block w-full rounded-lg bg-sunshine p-1 text-left",
     href &&
-      "transition-[box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift",
+      "transition-[background-color,box-shadow,transform] duration-200 ease-out-expo hover:-translate-y-0.5 hover:bg-sunshine-deep hover:shadow-lift active:scale-[0.98]",
     className,
   );
 

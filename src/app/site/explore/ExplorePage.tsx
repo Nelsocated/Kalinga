@@ -193,39 +193,17 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
   const fosterCards = useMemo(
     () =>
       foster.map((item) => {
-        const petId = String(item.pet_id);
-        const storyId = String(item.id);
         const petName = item.pet_name?.trim() || "Unnamed pet";
-        const shelterName = item.shelter_name?.trim() || "Kalinga shelter";
-        const imageUrl = item.pet_photo_url ?? "";
-        const title = item.title?.trim() || `${petName}'s story`;
-        const description = item.description?.trim() || "";
-        const location = item.shelter_location?.trim() || "";
-
-        const params = new URLSearchParams({
-          petId,
-          name: petName,
-          sex: item.pet_sex || "unknown",
-          shelter_name: shelterName,
-          logo_url: item.shelter_logo_url ?? "",
-          url: imageUrl,
-          type: "photo",
-          title,
-          description,
-          location,
-        });
-
         return {
-          key: storyId,
-          petId,
-          href: `/site/profiles/foster/${storyId}?${params.toString()}`,
-          imageUrl,
+          key: String(item.id),
+          href: `/site/profiles/foster/${item.id}`,
+          imageUrl: item.pet_photo_url,
           petName,
           sex: item.pet_sex,
-          shelterName,
+          shelterName: item.shelter_name?.trim() || "Kalinga shelter",
           shelterLogo: item.shelter_logo_url ?? undefined,
-          title,
-          description,
+          title: item.title?.trim() || `${petName}'s story`,
+          description: item.description?.trim() || "",
         };
       }),
     [foster],
@@ -288,35 +266,20 @@ export default function ExplorePage({ longest, foster }: ExplorePageProps) {
               >
                 {fosterCards.length === 0 ? (
                   <EmptyState icon={<BookOpen aria-hidden="true" />} title="No foster stories yet" />
-                ) : expanded === "foster" ? (
-                  <ul className="grid gap-4 md:grid-cols-2">
-                    {fosterCards.map((card) => (
-                      <li key={card.key}>
-                        <FosterCard href={card.href} title={card.title} description={card.description}>
-                          <PetCard
-                            href={`/site/profiles/pets/${card.petId}`}
-                            imageUrl={card.imageUrl}
-                            petName={card.petName}
-                            sex={card.sex}
-                            resize
-                          />
-                        </FosterCard>
-                      </li>
-                    ))}
-                  </ul>
                 ) : (
-                  <ul className={rowOrGrid(false)}>
-                    {fosterCards.slice(0, PREVIEW_COUNT).map((card) => (
-                      <li key={card.key} className={rowItem}>
-                        <PetCard
-                          href={card.href}
-                          title={card.title}
-                          imageUrl={card.imageUrl}
-                          petName={card.petName}
-                          sex={card.sex}
-                          shelterName={card.shelterName}
-                          shelterLogo={card.shelterLogo}
-                        />
+                  <ul
+                    className={
+                      expanded === "foster"
+                        ? "grid gap-4 md:grid-cols-2"
+                        : "-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:px-0 md:pb-0"
+                    }
+                  >
+                    {(expanded === "foster" ? fosterCards : fosterCards.slice(0, PREVIEW_COUNT)).map(({ key, ...card }) => (
+                      <li
+                        key={key}
+                        className={expanded === "foster" ? "" : "w-[78vw] max-w-80 shrink-0 snap-start md:w-auto md:max-w-none"}
+                      >
+                        <FosterCard {...card} />
                       </li>
                     ))}
                   </ul>
