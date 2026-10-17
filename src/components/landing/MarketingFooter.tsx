@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CONTACT_EMAIL } from "@/src/lib/constants/site";
 import FooterActions from "./FooterActions";
 
 const GROUPS = [
@@ -70,9 +69,17 @@ export default function MarketingFooter() {
 
         <div className="flex flex-col gap-2 border-t border-line py-6 text-sm text-ink-soft sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Kalinga</p>
-          <a href={`mailto:${CONTACT_EMAIL}`} className="inline-flex min-h-11 w-fit items-center [overflow-wrap:anywhere] underline-offset-4 hover:text-ink hover:underline">
-            {CONTACT_EMAIL}
-          </a>
+          <p>
+            Developed by{" "}
+            <a
+              href="https://nimbras.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4 decoration-sunshine decoration-2 hover:decoration-ink"
+            >
+              Nimbras
+            </a>
+          </p>
         </div>
       </div>
     </footer>
