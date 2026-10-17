@@ -11,10 +11,13 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 /** [x%, y%] of the section, or a selector for an element inside it (the trail meets its right edge). */
 type Point = readonly [number, number] | string;
 
-type Props = {
-  from: Point;
-  via?: Point;
-  to: Point;
+type Route = { from: Point; via?: Point; to: Point };
+
+type Props = Route & {
+  /** A route for narrow screens, where the wide one would run behind stacked content. Drawn smaller. */
+  narrow?: Route;
+  /** Width in px below which `narrow` is walked. */
+  narrowBelow?: number;
   /** Print size in px. */
   size?: number;
   /** Distance between prints in px. */
@@ -23,20 +26,18 @@ type Props = {
   mode?: "intro" | "scroll";
   /** End on one full-strength print, beside whatever `to` points at. */
   home?: boolean;
-  /** The ground it walks on: cream sections get a faint print, the yellow field a white print with a yellow outline. */
-  ground?: "cream" | "sunshine";
   className?: string;
 };
 
 type Print = { x: number; y: number; rotate: number; home: boolean };
 
-// The paw from public/brand/paw.svg, filled: four toes and the main pad, toes pointing up
-function Paw({ outlined }: { outlined: boolean }) {
+// The paw from public/brand/paw.svg, white with its yellow outline on every ground: four toes and the main pad, toes pointing up
+function Paw() {
   return (
     <svg
       viewBox="0 0 100 100"
-      fill="currentColor"
-      stroke={outlined ? "var(--color-sunshine-deep)" : "none"}
+      fill="var(--color-card)"
+      stroke="var(--color-sunshine-deep)"
       strokeWidth={6}
       strokeLinejoin="round"
       className="size-full overflow-visible"
@@ -98,12 +99,24 @@ function walk(p0: number[], p1: number[], p2: number[], size: number, stride: nu
  * Decorative only: hidden from assistive tech, absent without JS, shown at rest with reduced motion.
  * The parent section must be `relative`, with its content stacked above this layer.
  */
-export default function PawTrail({ from, via, to, size = 48, stride = 104, mode = "scroll", home = false, ground = "cream", className }: Props) {
+export default function PawTrail({
+  from,
+  via,
+  to,
+  narrow,
+  narrowBelow = 768,
+  size = 48,
+  stride = 104,
+  mode = "scroll",
+  home = false,
+  className,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [prints, setPrints] = useState<Print[]>([]);
+  const [printSize, setPrintSize] = useState(size);
   // Once a trail has walked in, re-measuring (images loading, a resize) redraws it at rest
   const walked = useRef(false);
-  const key = JSON.stringify([from, via, to]);
+  const key = JSON.stringify([from, via, to, narrow]);
 
   useEffect(() => {
     const layer = ref.current;
@@ -112,11 +125,20 @@ export default function PawTrail({ from, via, to, size = 48, stride = 104, mode 
     const measure = () => {
       const box = layer.getBoundingClientRect();
       if (!box.width || !box.height) return;
-      const gap = size * 1.1;
-      const p0 = resolve(from, box, root, gap);
-      const p2 = resolve(to, box, root, gap);
-      const p1 = via ? resolve(via, box, root, gap) : [(p0[0] + p2[0]) / 2, (p0[1] + p2[1]) / 2];
-      setPrints(walk(p0, p1, p2, size, stride, home));
+      const small = narrow && window.innerWidth < narrowBelow;
+      const route = small ? narrow : { from, via, to };
+      const s = small ? Math.round(size * 0.7) : size;
+      const gap = s * 1.1;
+      // Keep every print whole: the layer clips, so a print on the section's edge would be cut in half
+      const inside = ([x, y]: [number, number]) => [
+        Math.min(Math.max(x, s), box.width - s),
+        Math.min(Math.max(y, s), box.height - s),
+      ];
+      const p0 = inside(resolve(route.from, box, root, gap));
+      const p2 = inside(resolve(route.to, box, root, gap));
+      const p1 = route.via ? inside(resolve(route.via, box, root, gap)) : [(p0[0] + p2[0]) / 2, (p0[1] + p2[1]) / 2];
+      setPrintSize(s);
+      setPrints(walk(p0, p1, p2, s, small ? Math.round(stride * 0.7) : stride, home));
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -124,7 +146,7 @@ export default function PawTrail({ from, via, to, size = 48, stride = 104, mode 
     return () => observer.disconnect();
     // `key` stands in for the point arrays, which are new on every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, size, stride, home]);
+  }, [key, narrowBelow, size, stride, home]);
 
   useGSAP(
     () => {
@@ -159,13 +181,13 @@ export default function PawTrail({ from, via, to, size = 48, stride = 104, mode 
           style={{
             left: p.x,
             top: p.y,
-            width: p.home ? size * 1.35 : size,
-            height: p.home ? size * 1.35 : size,
+            width: p.home ? printSize * 1.35 : printSize,
+            height: p.home ? printSize * 1.35 : printSize,
             transform: `translate(-50%, -50%) rotate(${p.rotate}deg)`,
           }}
         >
-          <span data-print className={cn("block size-full", p.home ? "text-sunshine" : ground === "cream" ? "text-sunshine-deep/40" : "text-card")}>
-            <Paw outlined={ground === "sunshine" && !p.home} />
+          <span data-print className="block size-full">
+            <Paw />
           </span>
         </span>
       ))}

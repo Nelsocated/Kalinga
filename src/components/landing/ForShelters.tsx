@@ -12,7 +12,12 @@ const POINTS = [
 export default function ForShelters() {
   return (
     <section aria-labelledby="shelters-title" className="relative bg-sunshine">
-      <PawTrail ground="sunshine" from={[49, 0]} via={[44, 50]} to={[48, 100]} className="hidden md:block" />
+      <PawTrail
+        from={[49, 0]}
+        via={[44, 50]}
+        to={[48, 100]}
+        narrow={{ from: [80, 0], via: [98, 20], to: "[data-trail='shelter-apply']" }}
+      />
       <div className="relative mx-auto grid w-full max-w-7xl gap-12 px-4 py-24 sm:px-6 md:grid-cols-2 md:gap-16 md:py-32">
         <div className="flex flex-col items-start gap-6">
           <h2 id="shelters-title" className="max-w-[14ch] text-display text-ink">
@@ -21,9 +26,11 @@ export default function ForShelters() {
           <p className="max-w-[44ch] text-lg text-ink">
             Apply with your registration documents. Once a Kalinga admin approves your shelter, your pets can appear in the feed.
           </p>
-          <LinkButton href="/shelterSignup" variant="secondary" size="lg" className="border-ink/10">
-            Apply as a shelter
-          </LinkButton>
+          <span data-trail="shelter-apply" className="inline-flex">
+            <LinkButton href="/shelterSignup" variant="secondary" size="lg" className="border-ink/10">
+              Apply as a shelter
+            </LinkButton>
+          </span>
         </div>
 
         <ul className="flex flex-col justify-center divide-y divide-ink/15">
