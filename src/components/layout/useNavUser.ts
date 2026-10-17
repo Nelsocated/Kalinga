@@ -7,7 +7,7 @@ import type { AuthUser, Role } from "@/src/lib/utils/clientAuth";
 
 const supabase = createClientSupabase();
 
-async function readSessionUser(): Promise<AuthUser | null> {
+export async function readSessionUser(): Promise<AuthUser | null> {
   const {
     data: { session },
   } = await supabase.auth.getSession();
