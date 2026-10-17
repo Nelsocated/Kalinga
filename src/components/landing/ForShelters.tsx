@@ -1,5 +1,6 @@
 import { ChatsCircle, Eye, VideoCamera } from "@phosphor-icons/react/dist/ssr";
 import { LinkButton } from "@/src/components/ui/Button";
+import PawTrail from "./PawTrail";
 
 const POINTS = [
   { icon: VideoCamera, text: "Post pet profiles, short videos and foster stories." },
@@ -10,8 +11,9 @@ const POINTS = [
 /** The shelter pitch on a full field of the brand's yellow. */
 export default function ForShelters() {
   return (
-    <section aria-labelledby="shelters-title" className="bg-sunshine">
-      <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-24 sm:px-6 md:grid-cols-2 md:gap-16 md:py-32">
+    <section aria-labelledby="shelters-title" className="relative bg-sunshine">
+      <PawTrail ground="sunshine" from={[49, 0]} via={[44, 50]} to={[48, 100]} className="hidden md:block" />
+      <div className="relative mx-auto grid w-full max-w-7xl gap-12 px-4 py-24 sm:px-6 md:grid-cols-2 md:gap-16 md:py-32">
         <div className="flex flex-col items-start gap-6">
           <h2 id="shelters-title" className="max-w-[14ch] text-display text-ink">
             Run a shelter? Let more people meet your pets.

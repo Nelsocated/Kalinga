@@ -5,6 +5,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
+import PawTrail from "./PawTrail";
+
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const STEPS = [
@@ -60,31 +62,34 @@ export default function HowItWorks() {
   );
 
   return (
-    <section ref={scope} aria-labelledby="how-title" className="mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 md:py-36">
-      <h2 id="how-title" className="max-w-[20ch] text-display text-ink">
-        From a video to a home, in three steps
-      </h2>
-      <ol data-steps className="mt-12 flex flex-col gap-10 md:mt-20 md:gap-24">
-        {STEPS.map(({ verb, text }) => (
-          <li
-            key={verb}
-            data-step
-            className="grid gap-3 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:items-end md:gap-12"
-          >
-            <h3 className="text-hero text-ink">
-              <span className="relative isolate inline-block">
-                <span
-                  data-mark
-                  aria-hidden="true"
-                  className="absolute inset-x-[-0.06em] bottom-[0.08em] -z-10 h-[0.32em] origin-left rounded-sm bg-sunshine"
-                />
-                {verb}
-              </span>
-            </h3>
-            <p className="max-w-[36ch] text-lg text-ink-soft md:pb-[0.4em] md:text-xl">{text}</p>
-          </li>
-        ))}
-      </ol>
+    <section ref={scope} aria-labelledby="how-title" className="relative overflow-x-clip">
+      <PawTrail from={[70, 0]} via={[100, 30]} to={[94, 100]} className="hidden md:block" />
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 md:py-36">
+        <h2 id="how-title" className="max-w-[20ch] text-display text-ink">
+          From a video to a home, in three steps
+        </h2>
+        <ol data-steps className="mt-12 flex flex-col gap-10 md:mt-20 md:gap-24">
+          {STEPS.map(({ verb, text }) => (
+            <li
+              key={verb}
+              data-step
+              className="grid gap-3 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:items-end md:gap-12"
+            >
+              <h3 className="text-hero text-ink">
+                <span className="relative isolate inline-block">
+                  <span
+                    data-mark
+                    aria-hidden="true"
+                    className="absolute inset-x-[-0.06em] bottom-[0.08em] -z-10 h-[0.32em] origin-left rounded-sm bg-sunshine"
+                  />
+                  {verb}
+                </span>
+              </h3>
+              <p className="max-w-[36ch] text-lg text-ink-soft md:pb-[0.4em] md:text-xl">{text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   );
 }

@@ -9,6 +9,7 @@ import { Play } from "@phosphor-icons/react";
 import { LinkButton } from "@/src/components/ui/Button";
 import { cn } from "@/src/lib/cn";
 import PosterVideo from "./PosterVideo";
+import PawTrail from "./PawTrail";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -58,24 +59,30 @@ export default function FinalCta({ videos }: { videos: StripVideo[] }) {
     <section
       ref={scope}
       aria-labelledby="final-title"
-      className="mx-auto grid w-full max-w-7xl items-center gap-14 overflow-x-clip px-4 py-24 sm:px-6 md:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] md:py-36"
+      className="relative overflow-x-clip"
     >
-      <div className="flex flex-col items-start gap-8">
-        <h2 id="final-title" className="max-w-[14ch] text-hero text-ink">
-          Your next best friend might be one video away.
-        </h2>
-        <LinkButton href="/site/home" variant="primary" size="lg" icon={<Play weight="fill" aria-hidden="true" />}>
-          Start watching
-        </LinkButton>
-      </div>
+      {/* The trail that started in the hero arrives here, at the button */}
+      <PawTrail home from={[52, 0]} via={[58, 80]} to="[data-trail='home']" />
+      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-14 px-4 py-24 sm:px-6 md:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] md:py-36">
+        <div className="flex flex-col items-start gap-8">
+          <h2 id="final-title" className="max-w-[14ch] text-hero text-ink">
+            Your next best friend might be one video away.
+          </h2>
+          <span data-trail="home" className="inline-flex">
+            <LinkButton href="/site/home" variant="primary" size="lg" icon={<Play weight="fill" aria-hidden="true" />}>
+              Start watching
+            </LinkButton>
+          </span>
+        </div>
 
-      {hand.length ? (
-        <ul className="flex justify-center py-6" aria-label="A few pets in the feed">
-          {hand.map((video, i) => (
-            <HandCard key={video.mediaId} video={video} index={i} fanned={hand.length === 3} />
-          ))}
-        </ul>
-      ) : null}
+        {hand.length ? (
+          <ul className="flex justify-center py-6" aria-label="A few pets in the feed">
+            {hand.map((video, i) => (
+              <HandCard key={video.mediaId} video={video} index={i} fanned={hand.length === 3} />
+            ))}
+          </ul>
+        ) : null}
+      </div>
     </section>
   );
 }

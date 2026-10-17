@@ -6,6 +6,7 @@ import { useGSAP } from "@gsap/react";
 import { Play } from "@phosphor-icons/react";
 import { LinkButton } from "@/src/components/ui/Button";
 import TourVideo from "./TourVideo";
+import PawTrail from "./PawTrail";
 
 gsap.registerPlugin(useGSAP);
 
@@ -13,7 +14,7 @@ const LINES = ["Give Care. Give Love.", "A Home for Every Paw"];
 
 /**
  * The tagline set as large as the page allows, one line of what Kalinga is, two actions,
- * then a short tour of the app on a field of sunshine.
+ * then a short tour of the app, with a paw trail stepping from the buttons toward it.
  */
 export default function Hero() {
   const scope = useRef<HTMLElement>(null);
@@ -26,8 +27,7 @@ export default function Hero() {
           .timeline({ defaults: { ease: "expo.out", duration: 1.1 } })
           .from("[data-hero='line']", { yPercent: 110, stagger: 0.12 })
           .from("[data-hero='sub'] > *", { y: 20, opacity: 0, stagger: 0.08, duration: 0.9 }, "-=0.75")
-          .from("[data-hero='band']", { scaleY: 0, transformOrigin: "50% 100%", duration: 1.2 }, "-=0.9")
-          .from("[data-hero='tour']", { y: 60, opacity: 0, duration: 1.3 }, "<0.1");
+          .from("[data-hero='tour']", { y: 60, opacity: 0, duration: 1.3 }, "-=0.8");
       });
       return () => mm.revert();
     },
@@ -40,7 +40,8 @@ export default function Hero() {
       aria-labelledby="hero-title"
       className="relative flex min-h-[calc(100dvh-4.5rem)] flex-col overflow-x-clip pt-8 pb-12 md:pt-14"
     >
-      <div data-hero="band" aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[34%] bg-sunshine" />
+      {/* The trail steps out from the buttons toward the tour */}
+      <PawTrail mode="intro" from="[data-trail='start']" via={[47, 66]} to={[60, 42]} className="hidden lg:block" />
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 md:gap-10">
         <h1 id="hero-title" className="text-hero text-ink">
@@ -58,7 +59,7 @@ export default function Hero() {
             <p className="max-w-[40ch] text-lg text-ink-soft md:text-xl">
               Watch short videos of rescued dogs and cats from verified shelters, and apply to adopt the one you fall for.
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div data-trail="start" className="flex flex-wrap gap-3">
               <LinkButton href="/site/home" variant="primary" size="lg" icon={<Play weight="fill" aria-hidden="true" />}>
                 Start watching
               </LinkButton>
