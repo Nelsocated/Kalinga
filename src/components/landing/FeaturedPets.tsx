@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import PawTrail from "./PawTrail";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import type { Pets } from "@/src/lib/types/pets";
 import { cn } from "@/src/lib/cn";
@@ -17,13 +18,16 @@ export default function FeaturedPets({ pets }: { pets: Pets[] }) {
   if (!pets.length) return null;
 
   return (
-    <section aria-labelledby="residents-title" className="bg-sunshine-wash py-24 md:py-32">
-      <Reveal className="mx-auto flex w-full max-w-7xl flex-col gap-10 md:gap-14 px-4 sm:px-6">
+    <section aria-labelledby="residents-title" className="relative overflow-x-clip bg-sunshine-wash py-24 md:py-32">
+      {/* The trail from the three steps carries on down the right edge, past the pets */}
+      <PawTrail from={[94, 0]} via={[99, 50]} to={[96, 100]} narrow={{ from: [92, 0], via: [97, 4], to: "[data-trail='more']" }} />
+      <Reveal className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 md:gap-14 px-4 sm:px-6">
         <div data-reveal className="flex flex-wrap items-end justify-between gap-4">
           <h2 id="residents-title" className="max-w-[16ch] text-display text-ink">
             They have waited the longest
           </h2>
           <Link
+            data-trail="more"
             href="/site/explore"
             className="flex items-center gap-1.5 rounded-full py-2 font-semibold text-ink underline-offset-4 hover:underline"
           >

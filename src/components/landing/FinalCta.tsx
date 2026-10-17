@@ -62,7 +62,13 @@ export default function FinalCta({ videos }: { videos: StripVideo[] }) {
       className="relative overflow-x-clip"
     >
       {/* The trail that started in the hero arrives here, at the button */}
-      <PawTrail home from={[52, 0]} via={[58, 80]} to="[data-trail='home']" />
+      <PawTrail
+        home
+        from={[52, 0]}
+        via={[58, 80]}
+        to="[data-trail='home']"
+        narrow={{ from: [88, 0], via: [98, 30], to: "[data-trail='home']" }}
+      />
       <div className="relative mx-auto grid w-full max-w-7xl items-center gap-14 px-4 py-24 sm:px-6 md:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] md:py-36">
         <div className="flex flex-col items-start gap-8">
           <h2 id="final-title" className="max-w-[14ch] text-hero text-ink">

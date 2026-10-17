@@ -63,7 +63,7 @@ export default function HowItWorks() {
 
   return (
     <section ref={scope} aria-labelledby="how-title" className="relative overflow-x-clip">
-      <PawTrail from={[70, 0]} via={[100, 30]} to={[94, 100]} className="hidden md:block" />
+      <PawTrail from={[70, 0]} via={[100, 30]} to={[94, 100]} narrow={{ from: [88, 0], via: [99, 45], to: [92, 100] }} />
       <div className="relative mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 md:py-36">
         <h2 id="how-title" className="max-w-[20ch] text-display text-ink">
           From a video to a home, in three steps

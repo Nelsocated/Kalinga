@@ -41,7 +41,14 @@ export default function Hero() {
       className="relative flex min-h-[calc(100dvh-4.5rem)] flex-col overflow-x-clip py-8 md:py-12"
     >
       {/* The trail steps out from the buttons toward the tour */}
-      <PawTrail mode="intro" from="[data-trail='start']" via={[50, 92]} to={[60, 66]} className="hidden lg:block" />
+      <PawTrail
+        mode="intro"
+        from="[data-trail='start']"
+        via={[50, 92]}
+        to={[60, 66]}
+        narrow={{ from: "[data-trail='start-narrow']", via: [92, 40], to: [94, 50] }}
+        narrowBelow={1024}
+      />
 
       <div className="relative mx-auto grid w-full max-w-7xl flex-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-16">
         <div className="flex flex-col gap-8 md:gap-10">
@@ -63,9 +70,11 @@ export default function Hero() {
               <LinkButton href="/site/home" variant="primary" size="lg" icon={<Play weight="fill" aria-hidden="true" />}>
                 Start watching
               </LinkButton>
-              <LinkButton href="/shelterSignup" variant="secondary" size="lg">
-                Apply as a shelter
-              </LinkButton>
+              <span data-trail="start-narrow" className="inline-flex">
+                <LinkButton href="/shelterSignup" variant="secondary" size="lg">
+                  Apply as a shelter
+                </LinkButton>
+              </span>
             </div>
           </div>
         </div>
