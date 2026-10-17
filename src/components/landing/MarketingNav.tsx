@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LinkButton } from "@/src/components/ui/Button";
+import MarketingNavActions from "./MarketingNavActions";
 
 /** Top bar for the landing and content pages. */
 export default function MarketingNav() {
@@ -15,12 +15,7 @@ export default function MarketingNav() {
           <Link href="/about" className="hidden rounded-full px-3 py-2 text-sm font-medium text-ink hover:bg-sunshine-wash sm:block">
             About
           </Link>
-          <Link href="/login" className="whitespace-nowrap rounded-full px-2.5 py-2 text-sm font-medium text-ink hover:bg-sunshine-wash sm:px-3">
-            Log in
-          </Link>
-          <LinkButton href="/site/home" variant="primary" size="sm">
-            Start watching
-          </LinkButton>
+          <MarketingNavActions />
         </div>
       </nav>
     </header>

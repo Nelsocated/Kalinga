@@ -5,7 +5,7 @@ import { Reveal } from "@/src/components/landing/Reveal";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Why Kalinga exists, our mission and vision, and the team behind it.",
+  description: "Why Kalinga exists and what it sets out to do.",
 };
 
 const STATEMENTS = [
@@ -17,13 +17,6 @@ const STATEMENTS = [
     title: "Our vision",
     text: "To maximize visibility for every shelter and pet, making it easier for people everywhere to discover and adopt.",
   },
-];
-
-const TEAM = [
-  { given: "Chrisciel Joy A.", family: "Catedrilla" },
-  { given: "Nelson A.", family: "Lago III" },
-  { given: "Elijah Arian G.", family: "Mardoquio" },
-  { given: "Niño Kriebel C.", family: "Olmo" },
 ];
 
 export default function AboutPage() {
@@ -73,26 +66,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team: names only, set as type */}
-      <section aria-labelledby="team-title" className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 md:py-28">
-        <div className="flex flex-col gap-2">
-          <h2 id="team-title" className="text-display text-ink">The team</h2>
-          <p className="text-lg text-ink-soft">404NotFound, SE-4</p>
-        </div>
-        <Reveal>
-          <ul className="mt-10 grid grid-cols-1 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
-            {TEAM.map((member) => (
-              <li key={member.family} data-reveal className="flex flex-col gap-1 border-t-2 border-ink py-6">
-                <span className="text-2xl font-bold tracking-tight text-ink">{member.family}</span>
-                <span className="text-ink-soft">{member.given}</span>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-      </section>
-
       {/* Closing: one way in for each side */}
-      <section className="mx-auto flex w-full max-w-7xl flex-col items-start gap-6 border-t border-line px-4 py-16 sm:px-6 md:flex-row md:items-center md:justify-between">
+      <section className="mx-auto flex w-full max-w-7xl flex-col items-start gap-6 px-4 py-16 md:py-24 sm:px-6 md:flex-row md:items-center md:justify-between">
         <p className="max-w-[24ch] text-headline text-ink">Meet the pets waiting for you.</p>
         <div className="flex flex-wrap gap-3">
           <LinkButton href="/site/home" variant="primary" size="lg">
